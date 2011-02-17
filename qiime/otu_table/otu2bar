@@ -1,0 +1,3 @@
+#!/bin/sh
+
+exec awk '{s = 0; for (i=2; i < NF; i++) {s+=$i;} print $1, s;}' "$@"

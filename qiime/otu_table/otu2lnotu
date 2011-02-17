@@ -1,0 +1,11 @@
+#!/usr/bin/awk -f
+
+$1 ~ /^[0-9]*$/ {
+	printf "%s", $1;
+	for (i = 2; i < NF; i++) {
+		printf "\t%s", ($i == 0 ? 0 : int(log($i) + 0.5));
+	}
+	printf "\t%s\n", $NF;
+}
+
+$1 !~ /^[0-9]*$/
