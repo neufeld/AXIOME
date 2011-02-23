@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [ $# -ne 2 ]
+then
+	echo Keep top n taxa from an OTU table: $0 n otu_table.txt
+	exit 1
+fi
+
+awk '/^#/ { print 32767, $0;} !/^#/ {sum = 0; for (i=2; i < NF; i++){sum += $i} print sum,$0;}' "$2" | sort -nr | cut -f 2- -d " " | head -n $(($1+2))

@@ -1,0 +1,33 @@
+#!/usr/bin/env Rscript
+# Turn QIIME biplot data into something that looks pretty
+# Scaling factor for bubble diametre
+bubbleScale = 0.1
+# Load the mapping, the principle components, the biplot
+#   vectors, and the OTUs for the plot
+mapping <- read.table("mapping.txt", header = TRUE, 
+    comment.char = "", row.names = "X.SampleID", sep = "\t")
+pcoa <- read.table("beta_div_pcoa/pcoa_weighted_unifrac_otu_table.txt", 
+    comment.char = "", sep = "\t", header = T, row.names = 1)
+bipltvec <- read.table("biplot_coords.txt", row.names = 1)
+otutable <- read.table("otu_table_summarized.txt", 
+    row.names = 1, header = T)
+# Drop useless rows (eigenvalues, etc)
+pcoa <- pcoa[1:nrow(mapping), ]
+svg("bubbleplot.svg")
+# Plot with large points, using the colours determined
+#   previouslya
+plot(pcoa[, 1], pcoa[, 2], pch = 16, cex = 2, col = as.matrix(mapping["Colour"]), 
+    xaxt = "n", yaxt = "n", xlab = "PC1", ylab = "PC2", bty = "n")
+# Add a second solid white plotting point, offset slightly
+#   to mimic a light source
+points(pcoa[, 1] - 0.002, pcoa[, 2] + 0.003, pch = 16, 
+    cex = 0.2, col = "white")
+for (v in 1:nrow(pcoa)) {
+    text(pcoa[v, 1], pcoa[v, 2], mapping[v, "Description"])
+}
+box(bty = "l", lwd = 3)
+# Add arrows, using abundance data to determine linewidth
+par(new=T)
+plot(bipltvec[, 1], bipltvec[, 2], pch = 16,cex=rowSums(otutable) * bubbleScale,col="#DFDFDFDF", xlab="", ylab="")
+text(bipltvec[, 1:2], rownames(otutable))
+dev.off() 
