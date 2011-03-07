@@ -55,7 +55,7 @@ filter_alignment:remove_outliers False
 filter_alignment:threshold 3.0
 make_phylogeny:tree_method fasttree
 make_phylogeny:root_method tree_method_de
-alpha_diversity:metrics chao1,observed_species,PD_whole_tree
+alpha_diversity:metrics chao1,observed_species,PD_whole_tree,chao1_confidence
 beta_diversity:metrics weighted_unifrac,unweighted_unifrac
 make_prefs_file:background_color black
 make_prefs_file:mapping_headers_to_use Treatment
@@ -66,6 +66,8 @@ multiple_rarefactions:depth
 multiple_rarefactions:lineages_included False
 make_rarefaction_plots:imagetype svg
 EOI
+
+rm -rf alpha_div/ pynast_aligned/ rarefaction_tables/ rdp_assigned_taxonomy/ uclust_picked_otus/
 
 # Cluster, classify, and treeify
 pick_otus.py -i seq.fasta
