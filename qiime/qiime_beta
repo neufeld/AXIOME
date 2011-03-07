@@ -1,10 +1,11 @@
 #!/bin/sh
 
-beta_diversity.py -i otu_table.txt -m weighted_unifrac -o beta_div -t seq.fasta_rep_set_aligned_pfiltered.tre
-principal_coordinates.py -i beta_div -o beta_div_pcoa
-summarize_taxa.py -i otu_table.txt -L 4 -o otu_table_summarized_all.txt -a
+DEPTH=4
+[ "x$1" = x ] || DEPTH="$1"
+
+test -d beta_div || beta_diversity.py -i otu_table.txt -m weighted_unifrac,unweighted_unifrac -o beta_div -t seq.fasta_rep_set_aligned_pfiltered.tre
+test -d beta_div_pcoa || principal_coordinates.py -i beta_div -o beta_div_pcoa
+summarize_taxa.py -i otu_table.txt -L "$DEPTH" -o otu_table_summarized_all.txt -a
 otusumtop 10 otu_table_summarized_all.txt > otu_table_summarized.txt 
 make_prefs_file.py -i otu_table_summarized.txt  -m mapping.txt -k white -o prefs.txt
-make_3d_plots.py -i beta_div_pcoa/pcoa_weighted_unifrac_otu_table.txt -m mapping.txt -p prefs.txt -o biplot --biplot_output_file biplot_coords.txt
-
 make_3d_plots.py -t otu_table_summarized.txt -i beta_div_pcoa/pcoa_weighted_unifrac_otu_table.txt -m mapping.txt -p prefs.txt -o biplot --biplot_output_file biplot_coords.txt
