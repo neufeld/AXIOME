@@ -1,83 +1,89 @@
-#!/bin/bash
-
-if [ ! -f seq.fasta ]
-then
-	if [ $# -ne 3 ]
-	then
-		echo $0 output fasta mapping
-		exit 1
-	fi
-
-	# Make a nice sane directory layout so we don't step on anything else
-	mkdir "$1" || echo "Cannot create output directory $1" && exit 1
-
-	ln -s "$(realpath "$2")" "$1/seq.fasta"
-	ln -s "$(realpath "$3")" "$1/mapping.txt"
-	cd "$1"
-fi
-
+#!/usr/bin/make -f
 # TODO Sanity check mapping has SampleID column and values are unique
 # TODO Sanity check sequence names are ${SampleID}_${UID}
 
-# Dump a standard configuration
-test -f custom_parameters.txt || cat <<EOI > custom_parameters.txt
-pick_otus:otu_picking_method uclust
-pick_otus:clustering_algorithm furthest
-pick_otus:max_cdhit_memory 400
-pick_otus:refseqs_fp
-pick_otus:blast_db
-pick_otus:similarity 0.97
-pick_otus:max_e_value 1e-10
-pick_otus:prefix_prefilter_length
-pick_otus:trie_prefilter
-pick_otus:prefix_length
-pick_otus:suffix_length
-pick_otus:optimal_uclust
-pick_otus:exact_uclust
-pick_otus:user_sort
-pick_otus:suppress_presort_by_abundance_uclust
-pick_otus:suppress_new_clusters
-pick_rep_set:rep_set_picking_method most_abundant
-pick_rep_set:sort_by otu
-align_seqs:template_fp /opt/qiime_support/core_set_aligned.fasta.imputed
-align_seqs:alignment_method pynast
-align_seqs:pairwise_alignment_method uclust
-align_seqs:blast_db
-align_seqs:min_length 150
-align_seqs:min_percent_id 75.0
-assign_taxonomy:id_to_taxonomy_fp
-assign_taxonomy:reference_seqs_fp
-assign_taxonomy:assignment_method rdp
-assign_taxonomy:blast_db
-assign_taxonomy:confidence 0.8
-filter_alignment:allowed_gap_frac 0.999999
-filter_alignment:remove_outliers False
-filter_alignment:threshold 3.0
-make_phylogeny:tree_method fasttree
-make_phylogeny:root_method tree_method_de
-alpha_diversity:metrics chao1,observed_species,PD_whole_tree,chao1_confidence
-beta_diversity:metrics weighted_unifrac,unweighted_unifrac
-make_prefs_file:background_color black
-make_prefs_file:mapping_headers_to_use Treatment
-make_prefs_file:monte_carlo_dists 10
-make_3d_plots:custom_axes
-multiple_rarefactions:num-reps 100
-multiple_rarefactions:depth
-multiple_rarefactions:lineages_included False
-make_rarefaction_plots:imagetype svg
-EOI
+all: alpha
 
-rm -rf alpha_div/ pynast_aligned/ rarefaction_tables/ rdp_assigned_taxonomy/ uclust_picked_otus/
+custom_parameters.txt:
+	cat <<EOI > custom_parameters.txt
+	pick_otus:otu_picking_method uclust
+	pick_otus:clustering_algorithm furthest
+	pick_otus:max_cdhit_memory 400
+	pick_otus:refseqs_fp
+	pick_otus:blast_db
+	pick_otus:similarity 0.97
+	pick_otus:max_e_value 1e-10
+	pick_otus:prefix_prefilter_length
+	pick_otus:trie_prefilter
+	pick_otus:prefix_length
+	pick_otus:suffix_length
+	pick_otus:optimal_uclust
+	pick_otus:exact_uclust
+	pick_otus:user_sort
+	pick_otus:suppress_presort_by_abundance_uclust
+	pick_otus:suppress_new_clusters
+	pick_rep_set:rep_set_picking_method most_abundant
+	pick_rep_set:sort_by otu
+	align_seqs:template_fp /opt/qiime_support/core_set_aligned.fasta.imputed
+	align_seqs:alignment_method pynast
+	align_seqs:pairwise_alignment_method uclust
+	align_seqs:blast_db
+	align_seqs:min_length 150
+	align_seqs:min_percent_id 75.0
+	assign_taxonomy:id_to_taxonomy_fp
+	assign_taxonomy:reference_seqs_fp
+	assign_taxonomy:assignment_method rdp
+	assign_taxonomy:blast_db
+	assign_taxonomy:confidence 0.8
+	filter_alignment:allowed_gap_frac 0.999999
+	filter_alignment:remove_outliers False
+	filter_alignment:threshold 3.0
+	make_phylogeny:tree_method fasttree
+	make_phylogeny:root_method tree_method_de
+	alpha_diversity:metrics chao1,observed_species,PD_whole_tree,chao1_confidence
+	beta_diversity:metrics weighted_unifrac,unweighted_unifrac
+	make_prefs_file:background_color black
+	make_prefs_file:mapping_headers_to_use Treatment
+	make_prefs_file:monte_carlo_dists 10
+	make_3d_plots:custom_axes
+	multiple_rarefactions:num-reps 100
+	multiple_rarefactions:depth
+	multiple_rarefactions:lineages_included False
+	make_rarefaction_plots:imagetype svg
+	EOI
 
-# Cluster, classify, and treeify
-pick_otus.py -i seq.fasta
-pick_rep_set.py -i uclust_picked_otus/seq_otus.txt -f seq.fasta
-align_seqs.py -i seq.fasta_rep_set.fasta 
-assign_taxonomy.py -i seq.fasta_rep_set.fasta
-filter_alignment.py -i pynast_aligned/seq.fasta_rep_set_aligned.fasta -s
-make_phylogeny.py  -i seq.fasta_rep_set_aligned_pfiltered.fasta
-make_otu_table.py -i uclust_picked_otus/seq_otus.txt -t rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt -o otu_table.txt
-summarize_taxa.py -i otu_table.txt -L 4 -o otu_table_summarized.txt -a
+clean:
+	rm -rf alpha_div/ pynast_aligned/ rarefaction_tables/ rdp_assigned_taxonomy/ uclust_picked_otus/
+
+# Build basic data from sequences
+uclust_picked_otus/seq_otus.txt: seq.fasta
+	pick_otus.py -i seq.fasta
+
+seq.fasta_rep_set.fasta: uclust_picked_otus/seq_otus.txt
+	pick_rep_set.py -i uclust_picked_otus/seq_otus.txt -f seq.fasta
+
+pynast_aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta 
+	align_seqs.py -i seq.fasta_rep_set.fasta 
+
+rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt: seq.fasta_rep_set.fasta
+	assign_taxonomy.py -i seq.fasta_rep_set.fasta
+
+seq.fasta_rep_set_aligned_pfiltered.fasta: pynast_aligned/seq.fasta_rep_set_aligned.fasta
+	filter_alignment.py -i pynast_aligned/seq.fasta_rep_set_aligned.fasta -s
+
+seq.fasta_rep_set_aligned_pfiltered.tre:seq.fasta_rep_set_aligned_pfiltered.fasta
+	make_phylogeny.py -i seq.fasta_rep_set_aligned_pfiltered.fasta
+
+otu_table.txt: uclust_picked_otus/seq_otus.txt rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt
+	make_otu_table.py -i uclust_picked_otus/seq_otus.txt -t rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt -o otu_table.txt
+
+otu_table_summarized.txt: otu_table.txt
+	summarize_taxa.py -i otu_table.txt -L 4 -o otu_table_summarized.txt -a
 
 # Alpha diversity (Chao1 curves)
-alpha_rarefaction.py -i otu_table.txt -m mapping.txt -p custom_parameters.txt -t seq.fasta_rep_set_aligned_pfiltered.tre  -o alpha_div
+alpha: alpha_div/alpha_rarefaction_plots/rarefaction_plots.html
+
+alpha_div/alpha_rarefaction_plots/rarefaction_plots.html: otu_table.txt mapping.txt custom_parameters.txt seq.fasta_rep_set_aligned_pfiltered.tre
+	alpha_rarefaction.py -i otu_table.txt -m mapping.txt -p custom_parameters.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div
+
+.PHONY: all clean alpha
