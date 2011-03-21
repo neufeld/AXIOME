@@ -20,7 +20,6 @@ void *(*fileopen) (char *, char *) = (void *(*)(char *, char *))gzopen;
 int (*fileread) (void *, void *, int) = (int (*)(void *, void *, int))gzread;
 int (*fileclose) (void *) = (int (*)(void *))gzclose;
 
-
 /* Compatibility function to make BZ2_bzRead look like gzread. */
 int bzread(BZFILE * file, void *buf, int len)
 {
