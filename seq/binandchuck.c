@@ -57,8 +57,8 @@ int main(int argc, char **argv)
 	kseq_t *seq;
 	int len;
 	int n = 0;
-	Trie known_hashes = trie_create(NULL, 4);
-	Trie files = trie_create(fclose, 4);
+	Trie known_hashes = trie_create(NULL, 3);
+	Trie files = trie_create(fclose, 3);
 
 	/* Process command line arguments. */
 	while ((c = getopt(argc, argv, "jf:")) != -1) {
@@ -105,10 +105,27 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	seq = kseq_init(file);
+
+	for (c = optind; c < argc; c++){
+				FILE *f;
+				char buffer[FILENAME_MAX];
+				snprintf(buffer, FILENAME_MAX, "%s.%s",
+					 filename, argv[c]);
+				f = fopen(buffer, "w");
+				if (f == NULL) {
+					perror(buffer);
+					return 1;
+				}
+				trie_add(files, argv[c], f, true);
+				fprintf(stderr, "FOPN %s\n", buffer);
+	}
 	while ((len = kseq_read(seq)) >= 0) {
 		unsigned long hash;
 		int index;
 		int ncount = 0;
+		FILE *f;
+		char *indextag;
+
 		n++;
 		for (index = 0; index < seq->seq.l; index++) {
 			if (seq->seq.s[index] == 'N') {
@@ -121,39 +138,31 @@ int main(int argc, char **argv)
 			continue;
 		}
 
-		hash = sdbm(seq->seq.s);
+/*		hash = sdbm(seq->seq.s);
 		if (trie_getf(known_hashes, &hash, sizeof(hash)) == NULL) {
-			FILE *f;
-			int indextag;
 			trie_addf(known_hashes, &hash, sizeof(hash), &main,
-				  true);
+				  true);*/
 
 			for (index = 0; index < seq->name.l; index++) {
 				if (seq->name.s[index] == '#') {
 					break;
 				}
 			}
-			if (index + 6 < seq->name.l)
+			indextag = seq->name.s + index + 1;
+			if (index + 7 >= seq->name.l) {
 				continue;
-			seq->name.s[index + 6] = '\0';
-			f = trie_get(files, seq->name.s + index);
-			if (f == NULL) {
-				char buffer[FILENAME_MAX];
-				snprintf(buffer, FILENAME_MAX, "%s.%s",
-					 filename, seq->name.s + index);
-				f = fopen(buffer, "w");
-				if (f == NULL) {
-					perror(buffer);
-					return 1;
-				}
-				trie_add(files, seq->name.s + index, f, true);
-				fprintf(stderr, "FOPN %s\n", buffer);
 			}
-			fprintf(f, ">%s_%d\n%s\n", seq->name.s + index, n,
+			indextag[6] = '\0';
+			f = trie_get(files, indextag);
+			if (f == NULL) {
+				fprintf(stderr, "EBADF %s\n", indextag);
+			} else {
+			fprintf(f, ">%s_%d\n%s\n", indextag, n,
 				seq->seq.s);
+			}/*
 		} else {
 			fprintf(stderr, "DUPL %s\n", seq->name.s);
-		}
+		}*/
 	}
 	kseq_destroy(seq);
 	trie_destroy(files);
