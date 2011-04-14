@@ -48,6 +48,7 @@ int main(int argc, char **argv)
 	kseq_t *seq;
 	int len;
 	int i;
+	int maxn;
 
 	/* Process command line arguments. */
 	while ((c = getopt(argc, argv, "jf:")) != -1) {
@@ -101,20 +102,58 @@ int main(int argc, char **argv)
 		m2[i] = 0;
 	}
 
+	printf("#x	y	n	len	qbar	qsd	bcliff\n");
 	while ((len = kseq_read(seq)) >= 0) {
-		for (i = 0; i < seq->qual.l && i < MAXNT; i++) {
+		int ncnt = 0;
+		double seqmean = 0;
+		double seqm2 = 0;
+		char *x;
+		char *y;
+		int colons = 0;
+		int bclifflen = 0;
+
+		for (i = 0; i < seq->name.l; i++) {
+			if (seq->name.s[i] == ':' || seq->name.s[i] == '#') {
+				colons++;
+				if (colons ==  3) {
+					x = seq->name.s + i + 1;
+				} else if (colons == 4) {
+					y = seq->name.s + i + 1;
+				}
+
+				if (colons == 4 || colons == 5) {
+					seq->name.s[i] = '\0';
+				}
+			}
+		}
+
+		if (colons != 5) continue;
+
+		for (i = 0; i < seq->seq.l; i++) {
+			if (seq->seq.s[i] == 'N') ncnt++;
+		}
+
+		for (i = (seq->qual.l > MAXNT ? MAXNT : seq->qual.l) - 1; i > 0 && seq->qual.s[i] == 'B'; i--) bclifflen++;
+		for (; i > 0; i--) {
 			double delta;
+			double seqdelta;
 			n[i]++;
 			delta = seq->qual.s[i] - '@' - mean[i];
+			seqdelta = seq->qual.s[i] - '@' - seqmean;
 			mean[i] += delta / n[i];
+			seqmean += seqdelta / (i + 1);
 			m2[i] += delta * (seq->qual.s[i] - '@' - mean[i]);
+			seqm2 += seqdelta * (seq->qual.s[i] - '@' - seqmean);
 		}
+		printf("%s\t%s\t%d\t%d\t%f\t%f\t%d\n", x, y, ncnt, (int)seq->seq.l, seqmean, seqm2 / (seq->seq.l - 1), bclifflen);
 	}
 	kseq_destroy(seq);
 
-	for (i = 0; i < MAXNT && n[i] > 0; i++) {
+	for (maxn = MAXNT; maxn > 0 && n[maxn-1] == 0; maxn--);
+
+	for (i = 0; i < maxn; i++) {
 		double variance_n = m2[i] / n[i];
-		printf("%d	%f	%f\n", i, mean[i], m2[i] / (n[i] - 1));
+		fprintf(stderr, "%d	%f	%f\n", i, mean[i], m2[i] / (n[i] - 1));
 	}
 	if (fileclose(file) != Z_OK && bzip == 0) {
 		perror(filename);

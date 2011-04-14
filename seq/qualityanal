@@ -1,0 +1,39 @@
+#!/usr/bin/make -f
+FILES = $(basename $(basename $(wildcard *.fastq.bz2)))
+TARGETS = $(addsuffix .b.pdf, $(FILES)) $(addsuffix .n.pdf, $(FILES)) $(addsuffix .cnt.pdf, $(FILES)) $(addsuffix .q.pdf, $(FILES)) $(addsuffix .nhist.pdf, $(FILES))
+BASETARGETS = $(addsuffix .posnhist, $(FILES)) $(addsuffix .xystat, $(FILES))
+
+all: $(TARGETS) $(BASETARGETS)
+base: $(BASETARGETS)
+
+%.xystat %.posnhist: %.fastq.bz2
+	qualhisto -j -f $< > $*.xystat 2> $*.posnhist
+
+%.nmatrix: %.xystat
+	awk '{c[int($$1/100),int($$2/100)]++; n[int($$1/100), int($$2/100)] += $$3; if (maxx < int($$1/100)) {maxx = int($$1/100);} if (maxy < int($$2/100)) {maxy = int($$2/100);}} END {for (x = 0;x<maxx;x++) { for (y = 0; y < maxy; y++) { printf (" %f", c[x,y] == 0 ? 0 : n[x,y]/c[x,y]);} printf("\n");}}' $< > $@
+
+%.bmatrix: %.xystat
+	awk '{c[int($$1/100),int($$2/100)]++; b[int($$1/100), int($$2/100)] += $$7; if (maxx < int($$1/100)) {maxx = int($$1/100);} if (maxy < int($$2/100)) {maxy = int($$2/100);}} END {for (x = 0;x<maxx;x++) { for (y = 0; y < maxy; y++) { printf (" %f", c[x,y] == 0 ? 0 : b[x,y]/c[x,y]);} printf("\n");}}' $< > $@
+
+%.qmatrix: %.xystat
+	awk '{c[int($$1/100),int($$2/100)]++; q[int($$1/100), int($$2/100)] +=$$5; if (maxx < int($$1/100)) {maxx = int($$1/100);} if (maxy < int($$2/100)) {maxy = int($$2/100);}} END {for (x = 0;x<maxx;x++) { for (y = 0; y < maxy; y++) { printf (" %f", c[x,y] == 0 ? 0 : q[x,y]/c[x,y]);} printf("\n");}}' $< > $@
+
+%.cntmatrix: %.xystat
+	awk '{c[int($$1/100),int($$2/100)]++; if (maxx < int($$1/100)) {maxx = int($$1/100);} if (maxy < int($$2/100)) {maxy = int($$2/100);}} END {for (x = 0;x<maxx;x++) { for (y = 0; y < maxy; y++) { printf (" %d", c[x,y]);} printf("\n");}}' $< > $@
+
+%.n.pdf: %.nmatrix
+	@echo 'library(gplots); pdf("$@"); heatmap.2(as.matrix(read.table("$<")),Rowv=NA,Colv=NA, trace="none", density.info="none", col=topo.colors, labRow="", labCol=""); dev.off();' | R --no-save
+%.b.pdf: %.bmatrix
+	@echo 'library(gplots); pdf("$@"); heatmap.2(as.matrix(read.table("$<")),Rowv=NA,Colv=NA, trace="none", density.info="none", col=topo.colors, labRow="", labCol=""); dev.off();' | R --no-save
+%.q.pdf: %.qmatrix
+	@echo 'library(gplots); pdf("$@"); heatmap.2(as.matrix(read.table("$<")),Rowv=NA,Colv=NA, trace="none", density.info="none", col=topo.colors, labRow="", labCol=""); dev.off();' | R --no-save
+%.cnt.pdf: %.cntmatrix
+	@echo 'library(gplots); pdf("$@"); heatmap.2(as.matrix(read.table("$<")),Rowv=NA,Colv=NA, trace="none", density.info="none", col=topo.colors, labRow="", labCol=""); dev.off();' | R --no-save
+
+%.nhist.pdf: %.posnhist
+	@echo 'library(gplots); pdf("$@"); d <- read.table("$<"); plotCI(d$$V1, d$$V2, uiw = d$$V3, xlab = "Position (nt)", ylab="Quality Score"); dev.off();' | R --no-save
+
+clean:
+	rm -f $(TARGETS) $(BASETARGETS) 
+
+.PHONY: all clean base
