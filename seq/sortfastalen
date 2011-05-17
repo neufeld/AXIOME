@@ -1,0 +1,3 @@
+#!/bin/bash
+
+awk '/^>/ { if (seq && seq !~ /N/) {print length(seq) name ">" seq} name = $0; seq = ""; } $0!~/^>/ { seq = seq $0; } END { if (seq && seq !~ /N/) { print length(seq) name ">" seq; }}' "$@" | sort -nr | awk -F ">" '{ printf(">%s\n%s\n", $2, $3); }'
