@@ -2,70 +2,73 @@
 # TODO Sanity check mapping has SampleID column and values are unique
 # TODO Sanity check sequence names are ${SampleID}_${UID}
 
-all: alpha
+# Alpha diversity (Chao1 curves)
+alpha: alpha_div/alpha_rarefaction_plots/rarefaction_plots.html
 
+define CUSTOM_PARAMETERS
+pick_otus:otu_picking_method uclust
+pick_otus:clustering_algorithm furthest
+pick_otus:max_cdhit_memory 400
+pick_otus:refseqs_fp
+pick_otus:blast_db
+pick_otus:similarity 0.97
+pick_otus:max_e_value 1e-10
+pick_otus:prefix_prefilter_length
+pick_otus:trie_prefilter
+pick_otus:prefix_length
+pick_otus:suffix_length
+pick_otus:optimal_uclust
+pick_otus:exact_uclust
+pick_otus:user_sort
+pick_otus:suppress_presort_by_abundance_uclust
+pick_otus:suppress_new_clusters
+pick_rep_set:rep_set_picking_method most_abundant
+pick_rep_set:sort_by otu
+align_seqs:template_fp /opt/qiime_support/core_set_aligned.fasta.imputed
+align_seqs:alignment_method pynast
+align_seqs:pairwise_alignment_method uclust
+align_seqs:blast_db
+align_seqs:min_length 150
+align_seqs:min_percent_id 75.0
+assign_taxonomy:id_to_taxonomy_fp
+assign_taxonomy:reference_seqs_fp
+assign_taxonomy:assignment_method rdp
+assign_taxonomy:blast_db
+assign_taxonomy:confidence 0.8
+filter_alignment:allowed_gap_frac 0.999999
+filter_alignment:remove_outliers False
+filter_alignment:threshold 3.0
+make_phylogeny:tree_method fasttree
+make_phylogeny:root_method tree_method_de
+alpha_diversity:metrics chao1,observed_species,PD_whole_tree,chao1_confidence
+beta_diversity:metrics weighted_unifrac,unweighted_unifrac
+make_prefs_file:background_color black
+make_prefs_file:mapping_headers_to_use Treatment
+make_prefs_file:monte_carlo_dists 10
+make_3d_plots:custom_axes
+multiple_rarefactions:num-reps 100
+multiple_rarefactions:depth
+multiple_rarefactions:lineages_included False
+make_rarefaction_plots:imagetype svg
+endef
+export CUSTOM_PARAMETERS
 custom_parameters.txt:
-	cat <<EOI > custom_parameters.txt
-	pick_otus:otu_picking_method uclust
-	pick_otus:clustering_algorithm furthest
-	pick_otus:max_cdhit_memory 400
-	pick_otus:refseqs_fp
-	pick_otus:blast_db
-	pick_otus:similarity 0.97
-	pick_otus:max_e_value 1e-10
-	pick_otus:prefix_prefilter_length
-	pick_otus:trie_prefilter
-	pick_otus:prefix_length
-	pick_otus:suffix_length
-	pick_otus:optimal_uclust
-	pick_otus:exact_uclust
-	pick_otus:user_sort
-	pick_otus:suppress_presort_by_abundance_uclust
-	pick_otus:suppress_new_clusters
-	pick_rep_set:rep_set_picking_method most_abundant
-	pick_rep_set:sort_by otu
-	align_seqs:template_fp /opt/qiime_support/core_set_aligned.fasta.imputed
-	align_seqs:alignment_method pynast
-	align_seqs:pairwise_alignment_method uclust
-	align_seqs:blast_db
-	align_seqs:min_length 150
-	align_seqs:min_percent_id 75.0
-	assign_taxonomy:id_to_taxonomy_fp
-	assign_taxonomy:reference_seqs_fp
-	assign_taxonomy:assignment_method rdp
-	assign_taxonomy:blast_db
-	assign_taxonomy:confidence 0.8
-	filter_alignment:allowed_gap_frac 0.999999
-	filter_alignment:remove_outliers False
-	filter_alignment:threshold 3.0
-	make_phylogeny:tree_method fasttree
-	make_phylogeny:root_method tree_method_de
-	alpha_diversity:metrics chao1,observed_species,PD_whole_tree,chao1_confidence
-	beta_diversity:metrics weighted_unifrac,unweighted_unifrac
-	make_prefs_file:background_color black
-	make_prefs_file:mapping_headers_to_use Treatment
-	make_prefs_file:monte_carlo_dists 10
-	make_3d_plots:custom_axes
-	multiple_rarefactions:num-reps 100
-	multiple_rarefactions:depth
-	multiple_rarefactions:lineages_included False
-	make_rarefaction_plots:imagetype svg
-	EOI
-
-clean:
-	rm -rf alpha_div/ pynast_aligned/ rarefaction_tables/ rdp_assigned_taxonomy/ uclust_picked_otus/
+	@echo "$$CUSTOM_PARAMETERS" > custom_parameters.txt
 
 # Build basic data from sequences
 uclust_picked_otus/seq_otus.txt: seq.fasta
+	test ! -d uclust_picked_otus || rm -r uclust_picked_otus
 	pick_otus.py -i seq.fasta
 
 seq.fasta_rep_set.fasta: uclust_picked_otus/seq_otus.txt
 	pick_rep_set.py -i uclust_picked_otus/seq_otus.txt -f seq.fasta
 
 pynast_aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta 
+	test ! -d pynast_aligned || rm -r pynast_aligned
 	align_seqs.py -i seq.fasta_rep_set.fasta 
 
 rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt: seq.fasta_rep_set.fasta
+	test ! -d rdp_assigned_taxonomy || rm -r rdp_assigned_taxonomy
 	assign_taxonomy.py -i seq.fasta_rep_set.fasta
 
 seq.fasta_rep_set_aligned_pfiltered.fasta: pynast_aligned/seq.fasta_rep_set_aligned.fasta
@@ -80,10 +83,15 @@ otu_table.txt: uclust_picked_otus/seq_otus.txt rdp_assigned_taxonomy/seq.fasta_r
 otu_table_summarized.txt: otu_table.txt
 	summarize_taxa.py -i otu_table.txt -L 4 -o otu_table_summarized.txt -a
 
-# Alpha diversity (Chao1 curves)
-alpha: alpha_div/alpha_rarefaction_plots/rarefaction_plots.html
-
 alpha_div/alpha_rarefaction_plots/rarefaction_plots.html: otu_table.txt mapping.txt custom_parameters.txt seq.fasta_rep_set_aligned_pfiltered.tre
+	test ! -d rarefaction_tables || rm -r rarefaction_tables
+	test ! -d alpha_div || rm -r alpha_div
 	alpha_rarefaction.py -i otu_table.txt -m mapping.txt -p custom_parameters.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div
 
-.PHONY: all clean alpha
+beta_div/unweighted_unifrac_otu_table.txt beta_div/weighted_unifrac_otu_table.txt: seq.fasta_rep_set_aligned_pfiltered.tre otu_table.txt
+	beta_diversity.py -i otu_table.txt -m weighted_unifrac,unweighted_unifrac -o beta_div -t seq.fasta_rep_set_aligned_pfiltered.tre
+
+beta_div_pcoa/pcoa_unweighted_unifrac_otu_table.txt beta_div_pcoa/pcoa_weighted_unifrac_otu_table.txt: beta_div/unweighted_unifrac_otu_table.txt beta_div/weighted_unifrac_otu_table.txt
+	principal_coordinates.py -i beta_div -o beta_div_pcoa
+
+.PHONY: all alpha

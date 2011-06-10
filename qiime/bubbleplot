@@ -4,16 +4,17 @@
 bubbleScale = 0.1
 # Load the mapping, the principle components, the biplot
 #   vectors, and the OTUs for the plot
+levelname <- tail(commandArgs(), 1);
 mapping <- read.table("mapping.txt", header = TRUE, 
     comment.char = "", row.names = "X.SampleID", sep = "\t")
 pcoa <- read.table("beta_div_pcoa/pcoa_weighted_unifrac_otu_table.txt", 
     comment.char = "", sep = "\t", header = T, row.names = 1)
-bipltvec <- read.table("biplot_coords.txt", row.names = 1)
-otutable <- read.table("otu_table_summarized.txt", 
+bipltvec <- read.table(paste("biplot_coords_", levelname, ".txt", sep=""), row.names = 1)
+otutable <- read.table(paste("otu_table_summarized_", levelname, ".txt", sep=""), 
     row.names = 1, header = T)
 # Drop useless rows (eigenvalues, etc)
 pcoa <- pcoa[1:nrow(mapping), ]
-svg("bubbleplot.svg")
+svg(paste("biplot_", levelname, ".svg", sep=""))
 # Plot with large points, using the colours determined
 #   previouslya
 plot(pcoa[, 1], pcoa[, 2], pch = 16, cex = 2, col = as.matrix(mapping["Colour"]), 

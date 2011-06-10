@@ -3,8 +3,8 @@ FILES = $(basename $(basename $(wildcard *.fastq.bz2)))
 TARGETS = $(addsuffix .b.pdf, $(FILES)) $(addsuffix .n.pdf, $(FILES)) $(addsuffix .cnt.pdf, $(FILES)) $(addsuffix .q.pdf, $(FILES)) $(addsuffix .nhist.pdf, $(FILES))
 BASETARGETS = $(addsuffix .posnhist, $(FILES)) $(addsuffix .xystat, $(FILES))
 
-all: $(TARGETS) $(BASETARGETS)
-base: $(BASETARGETS)
+qualitygraphs: $(TARGETS) $(BASETARGETS)
+qualityanal: $(BASETARGETS)
 
 %.xystat %.posnhist: %.fastq.bz2
 	qualhisto -j -f $< > $*.xystat 2> $*.posnhist
@@ -36,4 +36,4 @@ base: $(BASETARGETS)
 clean:
 	rm -f $(TARGETS) $(BASETARGETS) 
 
-.PHONY: all clean base
+.PHONY: qualitygraphs qualityanal clean
