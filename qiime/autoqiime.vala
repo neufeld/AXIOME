@@ -246,7 +246,7 @@ static int main(string[] args) {
 			} else {
 				if (entry.value == "s") {
 						/* For strings, we are going to side step the Variant stuff because we want the XML to look like foo="bar" rather than foo="'bar'" as Variants would have it. */
-						mapping.printf("\t%s", entry.value);
+						mapping.printf("\t%s", prop);
 				} else {
 					try {
 						var value = Variant.parse(new VariantType(entry.value), prop);
