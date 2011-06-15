@@ -1,10 +1,10 @@
 #!/usr/bin/make -f
-FILES = $(basename $(basename $(wildcard *.fastq.bz2)))
-TARGETS = $(addsuffix .b.pdf, $(FILES)) $(addsuffix .n.pdf, $(FILES)) $(addsuffix .cnt.pdf, $(FILES)) $(addsuffix .q.pdf, $(FILES)) $(addsuffix .nhist.pdf, $(FILES))
-BASETARGETS = $(addsuffix .posnhist, $(FILES)) $(addsuffix .xystat, $(FILES))
+FASTQFILES ?= $(basename $(basename $(wildcard *.fastq.bz2)))
+QATARGETS = $(addsuffix .b.pdf, $(FASTQFILES)) $(addsuffix .n.pdf, $(FASTQFILES)) $(addsuffix .cnt.pdf, $(FASTQFILES)) $(addsuffix .q.pdf, $(FASTQFILES)) $(addsuffix .nhist.pdf, $(FASTQFILES))
+QABASETARGETS = $(addsuffix .posnhist, $(FASTQFILES)) $(addsuffix .xystat, $(FASTQFILES))
 
-qualitygraphs: $(TARGETS) $(BASETARGETS)
-qualityanal: $(BASETARGETS)
+qualitygraphs: $(QATARGETS) $(QABASETARGETS)
+qualityanal: $(QABASETARGETS)
 
 %.xystat %.posnhist: %.fastq.bz2
 	qualhisto -j -f $< > $*.xystat 2> $*.posnhist
