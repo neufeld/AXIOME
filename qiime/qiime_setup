@@ -88,10 +88,13 @@ alpha_div/alpha_rarefaction_plots/rarefaction_plots.html: otu_table.txt mapping.
 	test ! -d alpha_div || rm -r alpha_div
 	alpha_rarefaction.py -i otu_table.txt -m mapping.txt -p custom_parameters.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div
 
-beta_div/unweighted_unifrac_otu_table.txt beta_div/weighted_unifrac_otu_table.txt: seq.fasta_rep_set_aligned_pfiltered.tre otu_table.txt
-	beta_diversity.py -i otu_table.txt -m weighted_unifrac,unweighted_unifrac -o beta_div -t seq.fasta_rep_set_aligned_pfiltered.tre
+beta_div%/unweighted_unifrac_otu_table.txt beta_div%/weighted_unifrac_otu_table.txt: seq.fasta_rep_set_aligned_pfiltered.tre otu_table%.txt
+	beta_diversity.py -i otu_table$*.txt -m weighted_unifrac,unweighted_unifrac -o beta_div$* -t seq.fasta_rep_set_aligned_pfiltered.tre
 
-beta_div_pcoa/pcoa_unweighted_unifrac_otu_table.txt beta_div_pcoa/pcoa_weighted_unifrac_otu_table.txt: beta_div/unweighted_unifrac_otu_table.txt beta_div/weighted_unifrac_otu_table.txt
+beta_div_pcoa%/pcoa_unweighted_unifrac_otu_table.txt beta_div_pcoa%/pcoa_weighted_unifrac_otu_table.txt: beta_div%/unweighted_unifrac_otu_table.txt beta_div%/weighted_unifrac_otu_table.txt
 	principal_coordinates.py -i beta_div -o beta_div_pcoa
+
+otu_table_auto.txt: otu_table.txt
+	single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt --lineages_included -d $$(awk -F '\t' 'NR == 1 {} NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; }}} NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; }} END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest;}' otu_table.txt)
 
 .PHONY: all alpha

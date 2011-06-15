@@ -180,7 +180,7 @@ static int main(string[] args) {
 				stderr.printf("%s: %d: Biplots require there to be a \"Description\" associated with each sample.\n", args[1], iter->line);
 			}
 
-			if (taxlevel == null) {
+			if (taxlevel == null || taxlevel == "") {
 				taxlevel = "phylum";
 				taxindex = 3;
 				stderr.printf("%s: %d: Using phylum level for beta diversity analysis.\n", args[1], iter->line);
@@ -202,9 +202,29 @@ static int main(string[] args) {
 				return 1;
 			}
 
-			makerules.append_printf("otu_table_summarized_%s.txt: otu_table.txt\n\tsummarize_taxa.py -i otu_table.txt -L %d -o otu_table_summarized_%s.txt -a\n\nprefs_%s.txt: otu_table_summarized_%s.txt\n\tmake_prefs_file.py -i otu_table_summarized_%s.txt  -m mapping.txt -k white -o prefs_%s.txt\n\nbiplot_coords_%s.txt: otu_table_summarized_%s.txt\n\tmake_3d_plots.py -t otu_table_summarized_%s.txt -i beta_div_pcoa/pcoa_weighted_unifrac_otu_table.txt -m mapping.txt -p prefs.txt -o biplot --biplot_output_file biplot_coords_%s.txt\n\nbiplot_%s.svg: biplot_coords_%s.txt\n\tbiplot %s\n\nbubbleplot_%s.svg: biplot_coords_%s.txt\n\tbubbleplot %s\n\n", taxlevel, taxindex, taxlevel, taxlevel, taxlevel, taxlevel, taxlevel, taxlevel, taxlevel, taxlevel, taxlevel, taxlevel, taxlevel, taxlevel, taxlevel, taxlevel, taxlevel);
+			string flavour;
+			var size = iter->get_prop("size");
+			if (size == null) {
+				flavour = "";
+			} else if (size == "auto") {
+				flavour = "_auto";
+			} else {
+				int v = int.parse(size);
+				if (v < 1) {
+					stderr.printf("%s: %d: Cannot rareify to a size of `%s'. Use a positive number or `auto'.\n", args[1], iter->line, size);
+					continue;
+				}
+				flavour = "_%d".printf(v);
+				makerules.append_printf("otu_table_%d.txt: otu_table.txt\n\tsingle_rarefaction.py -i otu_table.txt -o otu_table_auto.txt --lineages_included -d %d\n\n", v, v);
+			}
 
-			targets.append_printf(" biplot_coords_%s.txt", taxlevel);
+			makerules.append_printf("otu_table_summarized_%s%s.txt: otu_table%s.txt\n\tsummarize_taxa.py -i otu_table%s.txt -L %d -o otu_table_summarized_%s%s.txt -a\n\n", taxlevel, flavour, flavour, flavour, taxindex, taxlevel, flavour);
+			makerules.append_printf("prefs_%s%s.txt: otu_table_summarized_%s%s.txt\n\tmake_prefs_file.py -i otu_table_summarized_%s%s.txt  -m mapping.txt -k white -o prefs_%s%s.txt\n\n", taxlevel, flavour, taxlevel, flavour, taxlevel, flavour, taxlevel, flavour);
+			makerules.append_printf("biplot_coords_%s%s.txt: otu_table_summarized_%s%s.txt\n\tmake_3d_plots.py -t otu_table_summarized_%s%s.txt -i beta_div_pcoa%s/pcoa_weighted_unifrac_otu_table.txt -m mapping.txt -p prefs_%s%s.txt -o biplot%s%s --biplot_output_file biplot_coords_%s%s.txt\n\n", taxlevel, flavour, taxlevel, flavour, taxlevel, flavour, flavour, taxlevel, flavour, taxlevel, flavour, taxlevel, flavour);
+			makerules.append_printf("biplot_%s%s.svg: biplot_coords_%s%s.txt\n\tbiplot %s%s\n\n", taxlevel, flavour, taxlevel, flavour, taxlevel, flavour);
+			makerules.append_printf("bubblelot_%s%s.svg: biplot_coords_%s%s.txt\n\tbubbleplot %s%s\n\n", taxlevel, flavour, taxlevel, flavour, taxlevel, flavour);
+
+			targets.append_printf(" biplot_coords_%s%s.txt", taxlevel, flavour);
 			continue;
 		}
 
