@@ -90,14 +90,20 @@ static int main(string[] args) {
 					return 1;
 				}
 
+				bool dashj;
+
 				var old = iter->get_prop("old");
 				if (old != null && old == "true") {
 					var oldsuffix = "_sequence.txt.gz";
 					var oldforward = forward;
 					var oldreverse = reverse;
-					forward = (forward.has_suffix(oldsuffix) ? forward.substring(1, forward.length - oldsuffix.length) : forward).concat(".fastq.bz2");
-					reverse = (reverse.has_suffix(oldsuffix) ? reverse.substring(1, reverse.length - oldsuffix.length) : reverse).concat(".fastq.bz2");
-					makerules.append_printf("%s: %s\n\tgzcat %s | oldillumina2fastq > %s\n\n%s: %s\n\tgzcat %s | oldillumina2fastq > %s\n\n", forward, oldforward, oldforward, forward, reverse, oldreverse, oldreverse, reverse);
+					forward = (forward.has_suffix(oldsuffix) ? forward.substring(0, forward.length - oldsuffix.length) : forward).concat(".fastq.bz2");
+					reverse = (reverse.has_suffix(oldsuffix) ? reverse.substring(0, reverse.length - oldsuffix.length) : reverse).concat(".fastq.bz2");
+					makerules.append_printf("%s: %s\n\tzcat %s | oldillumina2fastq > %s\n\n%s: %s\n\tzcat %s | oldillumina2fastq > %s\n\n", forward, oldforward, oldforward, forward, reverse, oldreverse, oldreverse, reverse);
+					dashj = true;
+				} else {
+					var mime = magic.file(forward);
+					dashj = (mime != null && mime.has_prefix("application/x-bzip2"));
 				}
 
 				var subst = new HashMap<string, int>(str_hash, str_equal);
@@ -115,8 +121,7 @@ static int main(string[] args) {
 				seqsources.append_printf(" %s %s", forward, reverse);
 				seqrule.append_printf("\t(pandaseq -f %s -r %s", Shell.quote(forward), Shell.quote(reverse));
 
-				var mime = magic.file(forward);
-				if (mime != null && mime.has_prefix("application/x-bzip2")) {
+				if (dashj) {
 					seqrule.append_printf(" -j");
 				}
 				var fprimer = iter->get_prop("fprimer");
