@@ -235,7 +235,7 @@ static int main(string[] args) {
 	}
 
 	stdout.printf("Creating directory...\n");
-	var dirname = (args[1].has_suffix(".aq")?args[1].substring(0, args[1].length - 3):args[1]).concat(".qiime");
+	var dirname = (args[1].has_suffix(".aq") ? args[1].substring(0, args[1].length - 3) : args[1]).concat(".qiime");
 	if (DirUtils.create_with_parents(dirname, 0755) == -1) {
 		stderr.printf("%s: %s\n", dirname, strerror(errno));
 		delete doc;
@@ -265,8 +265,8 @@ static int main(string[] args) {
 				mapping.printf("\t");
 			} else {
 				if (entry.value == "s") {
-						/* For strings, we are going to side step the Variant stuff because we want the XML to look like foo="bar" rather than foo="'bar'" as Variants would have it. */
-						mapping.printf("\t%s", prop);
+					/* For strings, we are going to side step the Variant stuff because we want the XML to look like foo="bar" rather than foo="'bar'" as Variants would have it. */
+					mapping.printf("\t%s", prop);
 				} else {
 					try {
 						var value = Variant.parse(new VariantType(entry.value), prop);
