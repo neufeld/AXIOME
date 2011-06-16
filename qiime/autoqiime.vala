@@ -126,7 +126,7 @@ static int main(string[] args) {
 				}
 				var fprimer = iter->get_prop("fprimer");
 				if (fprimer != null) {
-					if (Regex.match_simple(fprimer, "^[ACGTacgt]*$")) {
+					if (Regex.match_simple("^[ACGTacgt]*$", fprimer)) {
 						seqrule.append_printf(" -p %s", Shell.quote(fprimer));
 					} else {
 						stderr.printf("%s: %d: Invalid primer %s. Ignorning, mumble, mumble.\n", args[1], iter->line, fprimer);
@@ -134,7 +134,7 @@ static int main(string[] args) {
 				}
 				var rprimer = iter->get_prop("rprimer");
 				if (rprimer != null) {
-					if (Regex.match_simple(rprimer, "^[ACGTacgt]*$")) {
+					if (Regex.match_simple("^[ACGTacgt]*$", rprimer)) {
 						seqrule.append_printf(" -q %s", Shell.quote(rprimer));
 					} else {
 						stderr.printf("%s: %d: Invalid primer %s. Ignorning, mumble, mumble.\n", args[1], iter->line, rprimer);
