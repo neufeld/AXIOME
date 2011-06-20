@@ -90,18 +90,48 @@ static int main(string[] args) {
 					return 1;
 				}
 
-				bool dashj;
+				bool dashj = false;
+				bool dashsix;
+				bool domagic;
+				bool convert;
 
-				var old = iter->get_prop("old");
-				if (old != null && old == "true") {
+				var version = iter->get_prop("version");
+				if (version == null) {
+					stderr.printf("%s: %d: No version specified. I'm going to assume you have the latest version.\n", args[1], iter->line);
+					domagic = true;
+					convert = false;
+					dashsix = false;
+				} else if (version == "1.3") {
+					domagic = false;
+					convert = true;
+					dashsix = true;
+				} else if (version == "1.4" || version == "1.5" || version == "1.6" || version == "1.7") {
+					domagic = true;
+					convert = false;
+					dashsix = true;
+				} else if (version == "1.8") {
+					domagic = true;
+					convert = false;
+					dashsix = false;
+				} else {
+					stderr.printf("%s: %d: The version `%s' is not one that I recognise. You should probably do something about that. Until then, I'm going to make some assumptions.\n", args[1], iter->line, version);
+					domagic = true;
+					convert = false;
+					dashsix = false;
+				}
+
+				if (convert) {
 					var oldsuffix = "_sequence.txt.gz";
 					var oldforward = forward;
 					var oldreverse = reverse;
 					forward = (forward.has_suffix(oldsuffix) ? forward.substring(0, forward.length - oldsuffix.length) : forward).concat(".fastq.bz2");
 					reverse = (reverse.has_suffix(oldsuffix) ? reverse.substring(0, reverse.length - oldsuffix.length) : reverse).concat(".fastq.bz2");
 					makerules.append_printf("%s: %s\n\tzcat %s | oldillumina2fastq > %s\n\n%s: %s\n\tzcat %s | oldillumina2fastq > %s\n\n", forward, oldforward, oldforward, forward, reverse, oldreverse, oldreverse, reverse);
+					domagic = false;
 					dashj = true;
-				} else {
+				}
+
+				if (domagic) {
 					var mime = magic.file(forward);
 					dashj = (mime != null && mime.has_prefix("application/x-bzip2"));
 				}
@@ -123,6 +153,9 @@ static int main(string[] args) {
 
 				if (dashj) {
 					seqrule.append_printf(" -j");
+				}
+				if (dashsix) {
+					seqrule.append_printf(" -6");
 				}
 				var fprimer = iter->get_prop("fprimer");
 				if (fprimer != null) {
