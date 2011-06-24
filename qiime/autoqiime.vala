@@ -194,6 +194,13 @@ static int main(string[] args) {
 			continue;
 		}
 
+		if (iter->name == "rankabundance") {
+			state = ParsingState.ANALYSES;
+			targets.append_printf(" rank_abundance/rank_abundance.pdf");
+			continue;
+		}
+
+
 		if (iter->name == "qualityanal") {
 			state = ParsingState.ANALYSES;
 			targets.append_printf(" qualityanal");
