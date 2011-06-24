@@ -14,6 +14,7 @@
 #include<unistd.h>
 #include<zlib.h>
 #include "kseq.h"
+#include "parser.h"
 
 /* Function pointers for file I/O such that we can deal with compressed files. */
 void *(*fileopen) (char *, char *) = (void *(*)(char *, char *))gzopen;
@@ -35,6 +36,8 @@ int bzread(BZFILE * file, void *buf, int len)
 
 KSEQ_INIT(void *, fileread)
 #define MAXNT 512
+int degen_c[MAXNT];
+int degen_n[MAXNT];
 int n[MAXNT];
 double mean[MAXNT];
 double m2[MAXNT];
@@ -97,6 +100,8 @@ int main(int argc, char **argv)
 	seq = kseq_init(file);
 
 	for (i = 0; i < MAXNT; i++) {
+		degen_n[i] = 0;
+		degen_c[i] = 0;
 		n[i] = 0;
 		mean[i] = 0;
 		m2[i] = 0;
@@ -107,37 +112,26 @@ int main(int argc, char **argv)
 		int ncnt = 0;
 		double seqmean = 0;
 		double seqm2 = 0;
-		char *x;
-		char *y;
-		int colons = 0;
 		int bclifflen = 0;
+		seqidentifier id;
 
-		for (i = 0; i < seq->name.l; i++) {
-			if (seq->name.s[i] == ':' || seq->name.s[i] == '#') {
-				colons++;
-				if (colons ==  3) {
-					x = seq->name.s + i + 1;
-				} else if (colons == 4) {
-					y = seq->name.s + i + 1;
-				}
+		if (seqid_parse(&id, seq->name.s) == 0)
+			continue;
 
-				if (colons == 4 || colons == 5) {
-					seq->name.s[i] = '\0';
-				}
+		for (i = 0; i < seq->seq.l; i++) {
+			degen_n[i]++;
+			if (seq->seq.s[i] == 'N') {
+				ncnt++;
+				degen_c[i]++;
 			}
 		}
 
-		if (colons != 5) continue;
-
-		for (i = 0; i < seq->seq.l; i++) {
-			if (seq->seq.s[i] == 'N') ncnt++;
-		}
-
-		for (i = (seq->qual.l > MAXNT ? MAXNT : seq->qual.l) - 1; i > 0 && seq->qual.s[i] == 'B'; i--) bclifflen++;
+		for (i = (seq->qual.l > MAXNT ? MAXNT : seq->qual.l) - 1; i > 0 && (seq->qual.s[i] == 'B' || seq->qual.s[i] == '#'); i--) bclifflen++;
 		for (; i > 0; i--) {
 			double delta;
 			double seqdelta;
 			n[i]++;
+
 			delta = seq->qual.s[i] - '@' - mean[i];
 			seqdelta = seq->qual.s[i] - '@' - seqmean;
 			mean[i] += delta / n[i];
@@ -145,7 +139,7 @@ int main(int argc, char **argv)
 			m2[i] += delta * (seq->qual.s[i] - '@' - mean[i]);
 			seqm2 += seqdelta * (seq->qual.s[i] - '@' - seqmean);
 		}
-		printf("%s\t%s\t%d\t%d\t%f\t%f\t%d\n", x, y, ncnt, (int)seq->seq.l, seqmean, seqm2 / (seq->seq.l - 1), bclifflen);
+		printf("%d\t%d\t%d\t%d\t%f\t%f\t%d\n", id.x, id.y, ncnt, (int)seq->seq.l, seqmean, seqm2 / (seq->seq.l - 1), bclifflen);
 	}
 	kseq_destroy(seq);
 
@@ -153,7 +147,7 @@ int main(int argc, char **argv)
 
 	for (i = 0; i < maxn; i++) {
 		double variance_n = m2[i] / n[i];
-		fprintf(stderr, "%d	%f	%f\n", i, mean[i], m2[i] / (n[i] - 1));
+		fprintf(stderr, "%d\t%f\t%f\t%f\n", i, mean[i], m2[i] / (n[i] - 1), degen_c[i]*1.0 / degen_n[i]);
 	}
 	if (fileclose(file) != Z_OK && bzip == 0) {
 		perror(filename);
