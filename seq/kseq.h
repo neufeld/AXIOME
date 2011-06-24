@@ -178,7 +178,7 @@ typedef struct __kstring_t {
 			seq->last_char = c;											\
 		} /* the first header char has been read */						\
 		seq->comment.l = seq->seq.l = seq->qual.l = 0;					\
-		if (ks_getuntil(ks, 0, &seq->name, &c) < 0) return -1;			\
+		if (ks_getuntil(ks, KS_SEP_TAB, &seq->name, &c) < 0) return -1;			\
 		if (c != '\n') ks_getuntil(ks, '\n', &seq->comment, 0);			\
 		while ((c = ks_getc(ks)) != -1 && c != '>' && c != '+' && c != '@') { \
 			if (isgraph(c)) { /* printable non-space character */		\
