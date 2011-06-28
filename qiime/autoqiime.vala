@@ -5,7 +5,34 @@ using Xml;
 
 enum ParsingState { DEFS, FILES, ANALYSES }
 
-static int main(string[] args) {
+enum TaxonomicLevel { LIFE = 1, DOMAIN = 2, PHYLUM = 3, CLASS = 4, ORDER = 5, FAMILY = 6, GENUS = 7, SPECIES = 8, STRAIN = 9;
+	              public static TaxonomicLevel ? parse(string name) {
+			      var enum_class = (EnumClass) typeof(TaxonomicLevel).class_ref ();
+			      var nick = name.down().replace ("_", "-");
+			      unowned GLib.EnumValue ? enum_value = enum_class.get_value_by_nick (nick);
+			      if (enum_value != null) {
+				      TaxonomicLevel value = (TaxonomicLevel) enum_value.value;
+				      return value;
+			      }
+			      return null;
+		      }
+	              public string to_string() {
+			      return ((EnumClass)typeof (TaxonomicLevel).class_ref ()).get_value(this).value_nick;
+		      }
+}
+
+HashSet<string> summarized_otus;
+void make_summarized_otu (StringBuilder makerules, TaxonomicLevel level, string flavour) {
+	var taxname = level.to_string();
+	var taxindex = (int) level;
+	var type = "%s%s".printf(taxname, flavour);
+	if (summarized_otus.contains(type)) {
+		summarized_otus.add(type);
+		makerules.append_printf("otu_table_summarized_%s%s.txt: otu_table%s.txt\n\tsummarize_taxa.py -i otu_table%s.txt -L %d -o otu_table_summarized_%s%s.txt -a\n\n", taxname, flavour, flavour, flavour, taxindex, taxname, flavour);
+	}
+}
+
+int main(string[] args) {
 	if (args.length != 2) {
 		stderr.printf("Usage: %s config.aq\n", args[0]);
 		return 1;
@@ -22,7 +49,7 @@ static int main(string[] args) {
 		stderr.printf("%s: no data in file\n", args[1]);
 		return 1;
 	}
-
+	summarized_otus = new HashSet<string>();
 	var state = ParsingState.DEFS;
 	var vars = new HashMap<string, string>(str_hash, str_equal);
 	var samples = new ArrayList<Xml.Node*>();
@@ -211,36 +238,12 @@ static int main(string[] args) {
 
 		if (iter->name == "beta") {
 			state = ParsingState.ANALYSES;
-			var taxlevel = iter->get_prop("level").down();
-			var taxindex = 0;
 
 			if (!vars.has_key("Colour") || vars["Colour"] != "s") {
 				stderr.printf("%s: %d: Biplots require there to be a \"Colour\" associated with each sample.\n", args[1], iter->line);
 			}
 			if (!vars.has_key("Description") || vars["Description"] != "s") {
 				stderr.printf("%s: %d: Biplots require there to be a \"Description\" associated with each sample.\n", args[1], iter->line);
-			}
-
-			if (taxlevel == null || taxlevel == "") {
-				taxlevel = "phylum";
-				taxindex = 3;
-				stderr.printf("%s: %d: Using phylum level for beta diversity analysis.\n", args[1], iter->line);
-			} else if (taxlevel == "domain") {
-				taxindex = 2;
-			} else if (taxlevel == "phylum") {
-				taxindex = 3;
-			} else if (taxlevel == "class") {
-				taxindex = 4;
-			} else if (taxlevel == "order") {
-				taxindex = 6;
-			} else if (taxlevel == "family") {
-				taxindex = 6;
-			} else if (taxlevel == "genus") {
-				taxindex = 7;
-			} else {
-				stderr.printf("%s: %d: Unknown taxonomic level \"%s\" in beta diversity analysis.\n", args[1], iter->line, taxlevel);
-				delete doc;
-				return 1;
 			}
 
 			string flavour;
@@ -259,13 +262,21 @@ static int main(string[] args) {
 				makerules.append_printf("otu_table_%d.txt: otu_table.txt\n\tsingle_rarefaction.py -i otu_table.txt -o otu_table_auto.txt --lineages_included -d %d\n\n", v, v);
 			}
 
-			makerules.append_printf("otu_table_summarized_%s%s.txt: otu_table%s.txt\n\tsummarize_taxa.py -i otu_table%s.txt -L %d -o otu_table_summarized_%s%s.txt -a\n\n", taxlevel, flavour, flavour, flavour, taxindex, taxlevel, flavour);
-			makerules.append_printf("prefs_%s%s.txt: otu_table_summarized_%s%s.txt\n\tmake_prefs_file.py -i otu_table_summarized_%s%s.txt  -m mapping.txt -k white -o prefs_%s%s.txt\n\n", taxlevel, flavour, taxlevel, flavour, taxlevel, flavour, taxlevel, flavour);
-			makerules.append_printf("biplot_coords_%s%s.txt: otu_table_summarized_%s%s.txt\n\tmake_3d_plots.py -t otu_table_summarized_%s%s.txt -i beta_div_pcoa%s/pcoa_weighted_unifrac_otu_table.txt -m mapping.txt -p prefs_%s%s.txt -o biplot%s%s --biplot_output_file biplot_coords_%s%s.txt\n\n", taxlevel, flavour, taxlevel, flavour, taxlevel, flavour, flavour, taxlevel, flavour, taxlevel, flavour, taxlevel, flavour);
-			makerules.append_printf("biplot_%s%s.svg: biplot_coords_%s%s.txt\n\tbiplot %s%s\n\n", taxlevel, flavour, taxlevel, flavour, taxlevel, flavour);
-			makerules.append_printf("bubblelot_%s%s.svg: biplot_coords_%s%s.txt\n\tbubbleplot %s%s\n\n", taxlevel, flavour, taxlevel, flavour, taxlevel, flavour);
+			var taxlevel = TaxonomicLevel.parse(iter->get_prop("level"));
+			if (taxlevel == null) {
+				stderr.printf("%s: %d: Unknown taxonomic level \"%s\" in beta diversity analysis.\n", args[1], iter->line, iter->get_prop("level"));
+				delete doc;
+				return 1;
+			}
+			var taxname = taxlevel.to_string();
 
-			targets.append_printf(" biplot_coords_%s%s.txt", taxlevel, flavour);
+			make_summarized_otu(makerules, taxlevel, flavour);
+			makerules.append_printf("prefs_%s%s.txt: otu_table_summarized_%s%s.txt\n\tmake_prefs_file.py -i otu_table_summarized_%s%s.txt  -m mapping.txt -k white -o prefs_%s%s.txt\n\n", taxname, flavour, taxname, flavour, taxname, flavour, taxname, flavour);
+			makerules.append_printf("biplot_coords_%s%s.txt: otu_table_summarized_%s%s.txt\n\tmake_3d_plots.py -t otu_table_summarized_%s%s.txt -i beta_div_pcoa%s/pcoa_weighted_unifrac_otu_table.txt -m mapping.txt -p prefs_%s%s.txt -o biplot%s%s --biplot_output_file biplot_coords_%s%s.txt\n\n", taxname, flavour, taxname, flavour, taxname, flavour, flavour, taxname, flavour, taxname, flavour, taxname, flavour);
+			makerules.append_printf("biplot_%s%s.svg: biplot_coords_%s%s.txt\n\tbiplot %s%s\n\n", taxname, flavour, taxname, flavour, taxname, flavour);
+			makerules.append_printf("bubblelot_%s%s.svg: biplot_coords_%s%s.txt\n\tbubbleplot %s%s\n\n", taxname, flavour, taxname, flavour, taxname, flavour);
+
+			targets.append_printf(" biplot_coords_%s%s.txt", taxname, flavour);
 			continue;
 		}
 
