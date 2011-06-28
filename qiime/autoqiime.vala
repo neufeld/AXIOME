@@ -236,6 +236,20 @@ int main(string[] args) {
 			continue;
 		}
 
+		if (iter->name == "compare") {
+			state = ParsingState.ANALYSES;
+			var taxlevel = TaxonomicLevel.parse(iter->get_prop("level"));
+			if (taxlevel == null) {
+				stderr.printf("%s: %d: Unknown taxonomic level \"%s\" in library abundance comparison analysis.\n", args[1], iter->line, iter->get_prop("level"));
+				delete doc;
+				return 1;
+			}
+			var taxname = taxlevel.to_string();
+			make_summarized_otu(makerules, taxlevel, "");
+			targets.append_printf(" correlation_%s.pdf", taxname);
+			makerules.append_printf("correlation_%s.pdf: otu_table_summarized_%s.txt mapping.txt\n\tqiime_cmplibs %s", taxname, taxname, taxname);
+			continue;
+		}
 		if (iter->name == "beta") {
 			state = ParsingState.ANALYSES;
 
