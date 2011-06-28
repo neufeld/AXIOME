@@ -11,7 +11,7 @@ pcoa <- read.table("beta_div_pcoa/pcoa_weighted_unifrac_otu_table.txt",
     comment.char = "", sep = "\t", header = T, row.names = 1)
 bipltvec <- read.table(paste("biplot_coords_", levelname, ".txt", sep=""), row.names = 1)
 otutable <- read.table(paste("otu_table_summarized_", levelname, ".txt", sep=""), 
-    row.names = 1, header = T)
+    row.names = 1, header = T, sep = "\t")
 # Drop useless rows (eigenvalues, etc)
 pcoa <- pcoa[1:nrow(mapping), ]
 svg(paste("biplot_", levelname, ".svg", sep=""))
