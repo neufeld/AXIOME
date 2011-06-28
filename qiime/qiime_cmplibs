@@ -1,0 +1,15 @@
+#!/usr/bin/env Rscript
+levelname <- tail(commandArgs(), 1);
+otutable <- read.table(paste("otu_table_summarized_", levelname, ".txt", sep=""), 
+    header = T, sep = "\t")
+mapping <- read.table("mapping.txt", header = TRUE, 
+    comment.char = "", row.names = "X.SampleID", sep = "\t")
+pdf(paste("correlation_", levelname, ".pdf", sep = ""));
+for (i in 2:(ncol(otutable) - 1)) {
+	for (j in (i + 1):ncol(otutable)) {
+		print(paste(i, j, ncol(otutable)));
+		print(otutable[,i]);
+		print(otutable[,j]);
+		plot(log(1 + otutable[,i]), log(1 + otutable[,j]), xlab = paste("Library", mapping[i - 1, "Description"]), ylab = paste("Library", mapping[j - 1, "Description"]));
+	}
+}
