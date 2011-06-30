@@ -21,12 +21,12 @@ enum TaxonomicLevel { LIFE = 1, DOMAIN = 2, PHYLUM = 3, CLASS = 4, ORDER = 5, FA
 		      }
 }
 
-HashSet<string> summarized_otus;
+Set<string> summarized_otus;
 void make_summarized_otu (StringBuilder makerules, TaxonomicLevel level, string flavour) {
 	var taxname = level.to_string();
 	var taxindex = (int) level;
 	var type = "%s%s".printf(taxname, flavour);
-	if (summarized_otus.contains(type)) {
+	if (!(type in summarized_otus)) {
 		summarized_otus.add(type);
 		makerules.append_printf("otu_table_summarized_%s%s.txt: otu_table%s.txt\n\tsummarize_taxa.py -i otu_table%s.txt -L %d -o otu_table_summarized_%s%s.txt -a\n\n", taxname, flavour, flavour, flavour, taxindex, taxname, flavour);
 	}
@@ -49,7 +49,7 @@ int main(string[] args) {
 		stderr.printf("%s: no data in file\n", args[1]);
 		return 1;
 	}
-	summarized_otus = new HashSet<string>();
+	summarized_otus = new TreeSet<string>(strcmp);
 	var state = ParsingState.DEFS;
 	var vars = new HashMap<string, string>(str_hash, str_equal);
 	var samples = new ArrayList<Xml.Node*>();
@@ -247,7 +247,7 @@ int main(string[] args) {
 			var taxname = taxlevel.to_string();
 			make_summarized_otu(makerules, taxlevel, "");
 			targets.append_printf(" correlation_%s.pdf", taxname);
-			makerules.append_printf("correlation_%s.pdf: otu_table_summarized_%s.txt mapping.txt\n\tqiime_cmplibs %s", taxname, taxname, taxname);
+			makerules.append_printf("correlation_%s.pdf: otu_table_summarized_%s.txt mapping.txt\n\tqiime_cmplibs %s\n\n", taxname, taxname, taxname);
 			continue;
 		}
 		if (iter->name == "beta") {
