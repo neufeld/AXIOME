@@ -7,9 +7,6 @@ mapping <- read.table("mapping.txt", header = TRUE,
 pdf(paste("correlation_", levelname, ".pdf", sep = ""));
 for (i in 2:(ncol(otutable) - 1)) {
 	for (j in (i + 1):ncol(otutable)) {
-		print(paste(i, j, ncol(otutable)));
-		print(otutable[,i]);
-		print(otutable[,j]);
 		plot(log(1 + otutable[,i]), log(1 + otutable[,j]), xlab = paste("Library", mapping[i - 1, "Description"]), ylab = paste("Library", mapping[j - 1, "Description"]));
 	}
 }
