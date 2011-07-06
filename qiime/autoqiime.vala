@@ -168,12 +168,17 @@ int main(string[] args) {
 				for (Xml.Node* sample = iter->children; sample != null; sample = sample->next) {
 					if (sample->type != ElementType.ELEMENT_NODE)
 						continue;
-					if (sample->name != "sample" || sample->get_prop("tag") == null) {
+					var tag = sample->get_prop("tag");
+					if (sample->name != "sample" || tag == null || tag == "") {
 						stderr.printf("%s: %d: Invalid element %s. Ignorning, mumble, mumble.\n", args[1], iter->line, sample->name);
 						continue;
 					}
+					if (tag in subst) {
+						stderr.printf("%s: %d: Duplicated tag %s. Skipping.\n", args[1], iter->line, tag);
+						continue;
+					}
 					samples.add(sample);
-					subst[sample->get_prop("tag")] = samples.size - 1;
+					subst[tag] = samples.size - 1;
 				}
 
 				seqsources.append_printf(" %s %s", forward, reverse);
