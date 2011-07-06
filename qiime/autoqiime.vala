@@ -49,7 +49,7 @@ int main(string[] args) {
 		stderr.printf("%s: no data in file\n", args[1]);
 		return 1;
 	}
-	summarized_otus = new TreeSet<string>(strcmp);
+	summarized_otus = new HashSet<string>(str_hash, str_equal);
 	var state = ParsingState.DEFS;
 	var vars = new HashMap<string, string>(str_hash, str_equal);
 	var samples = new ArrayList<Xml.Node*>();
