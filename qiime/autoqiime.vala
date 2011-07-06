@@ -93,6 +93,64 @@ int main(string[] args) {
 			}
 		}
 		if (state == ParsingState.FILES || state == ParsingState.DEFS) {
+			if (iter->name == "fasta") {
+				state = ParsingState.FILES;
+				var file = iter->get_prop("file");
+				if (file == null) {
+					stderr.printf("%s: %d: FASTA file not specified.\n", args[1], iter->line);
+					delete doc;
+					return 1;
+				}
+				if (!FileUtils.test(file, FileTest.EXISTS)) {
+					stderr.printf("%s: File does not exist.\n", file);
+					delete doc;
+					return 1;
+				}
+				var mime = magic.file(file);
+				string cat;
+				if (mime == null) {
+					cat = "cat";
+				} else if (mime.has_prefix("application/x-bzip2")) {
+					cat = "bzcat";
+				} else if (mime.has_prefix("application/x-gzip")) {
+					cat = "zcat";
+				} else {
+					cat = "cat";
+				}
+
+				var subst = new HashMap<string, int>(str_hash, str_equal);
+				for (Xml.Node* sample = iter->children; sample != null; sample = sample->next) {
+					if (sample->type != ElementType.ELEMENT_NODE)
+						continue;
+					var regexstr = sample->get_prop("regex");
+					if (sample->name != "sample" || regexstr == null || regexstr == "") {
+						stderr.printf("%s: %d: Invalid element %s. Ignorning, mumble, mumble.\n", args[1], iter->line, sample->name);
+						try {
+							new Regex(regexstr);
+						} catch (RegexError e) {
+							stderr.printf("%s: %d: Invalid regex %s. If you want everything, just make regex=\".\" or go read about the joy of POSIX regexs.\n", args[1], iter->line, regexstr);
+							delete doc;
+							return 1;
+						}
+						continue;
+					}
+					if (regexstr in subst) {
+						stderr.printf("%s: %d: Duplicated regex %s. Skipping.\n", args[1], iter->line, regexstr);
+						continue;
+					}
+					samples.add(sample);
+					subst[regexstr] = samples.size - 1;
+				}
+
+				seqsources.append_printf(" %s", file);
+				var awkprint = new StringBuilder();
+				foreach (var entry in subst.entries) {
+					awkprint.append_printf("if (name ~ /%s/) { print \">%d_\" NR \"\\n\" seq; }", entry.key, entry.value);
+				}
+				seqrule.append_printf("\t%s %s | awk '/^>/ { if (seq) {%s } name = substr($$0, 2); seq = \"\"; } $$0 !~ /^>/ {seq = seq $$0; } END { if (seq) {%s }}' >> seq.fasta\n", cat, Shell.quote(file), awkprint.str, awkprint.str);
+				continue;
+
+			}
 			if (iter->name == "panda") {
 				state = ParsingState.FILES;
 				var forward = iter->get_prop("forward");
