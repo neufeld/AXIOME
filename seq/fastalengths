@@ -1,0 +1,16 @@
+#!/usr/bin/env awk -f
+/^>/ {
+	if (seq) {
+		print name, length(seq);
+	}
+	seq = "";
+	name = substr($1, 2);
+}
+
+$0 !~ /^>/ {
+	seq = seq $0;
+}
+
+END {
+	print name, length(seq);
+}
