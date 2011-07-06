@@ -59,6 +59,7 @@ int main(string[] args) {
 	var seqrule = new StringBuilder();
 	var targets = new StringBuilder();
 	var makerules = new StringBuilder();
+	var pandacount = 0;
 	seqrule.printf("\ttest ! -f seq.fasta || rm seq.fasta\n");
 
 	for (Xml.Node* iter = root->children; iter != null; iter = iter->next) {
@@ -211,7 +212,7 @@ int main(string[] args) {
 					seqrule.append_printf(":%s", entry.key);
 					awkprint.append_printf("if (name ~ /%s/) { print \">%d_\" NR \"\\n\" seq; }", entry.key, entry.value);
 				}
-				seqrule.append_printf(" | awk '/^>/ { if (seq) {%s } name = $$0; seq = \"\"; } $$0 !~ /^>/ {seq = seq $$0; } END { if (seq) {%s }}' >> seq.fasta ) 2>&1 | bzip2 > pandaseq_%d.log.bz2\n", awkprint.str, awkprint.str, iter->line);
+				seqrule.append_printf(" | awk '/^>/ { if (seq) {%s } name = $$0; seq = \"\"; } $$0 !~ /^>/ {seq = seq $$0; } END { if (seq) {%s }}' >> seq.fasta ) 2>&1 | bzip2 > pandaseq_%d.log.bz2\n", awkprint.str, awkprint.str, pandacount++);
 				continue;
 			}
 		}
