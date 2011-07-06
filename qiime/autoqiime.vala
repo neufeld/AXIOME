@@ -150,11 +150,10 @@ int main(string[] args) {
 				}
 
 				if (convert) {
-					var oldsuffix = "_sequence.txt.gz";
 					var oldforward = forward;
 					var oldreverse = reverse;
-					forward = (forward.has_suffix(oldsuffix) ? forward.substring(0, forward.length - oldsuffix.length) : forward).concat(".fastq.bz2");
-					reverse = (reverse.has_suffix(oldsuffix) ? reverse.substring(0, reverse.length - oldsuffix.length) : reverse).concat(".fastq.bz2");
+					forward = "converted%x_1.fastq.bz2".printf(oldforward.hash());
+					reverse = "converted%x_2.fastq.bz2".printf(oldreverse.hash());
 					makerules.append_printf("%s: %s\n\tzcat %s | oldillumina2fastq > %s\n\n%s: %s\n\tzcat %s | oldillumina2fastq > %s\n\n", forward, oldforward, oldforward, forward, reverse, oldreverse, oldreverse, reverse);
 					domagic = false;
 					dashj = true;
