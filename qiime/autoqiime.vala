@@ -252,7 +252,7 @@ namespace AutoQIIME {
 				return true;
 			}
 		}
-		class LibrarComparison : RuleProcessor {
+		class LibraryComparison : RuleProcessor {
 			public override RuleType get_ruletype() {
 				return RuleType.ANALYSIS;
 			}
@@ -651,7 +651,7 @@ namespace AutoQIIME {
 		lookup.add(new Definition());
 		lookup.add(new Analyses.AlphaDiversity());
 		lookup.add(new Analyses.BetaDiversity());
-		lookup.add(new Analyses.LibrarComparison());
+		lookup.add(new Analyses.LibraryComparison());
 		lookup.add(new Analyses.QualityAnalysis());
 		lookup.add(new Analyses.RankAbundance());
 		lookup.add(new Sources.FastaSource());
