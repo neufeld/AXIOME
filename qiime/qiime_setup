@@ -6,7 +6,7 @@
 alpha: alpha_div/alpha_rarefaction_plots/rarefaction_plots.html
 
 define CUSTOM_PARAMETERS
-pick_otus:otu_picking_method uclust
+pick_otus:otu_picking_method cdhit
 pick_otus:clustering_algorithm furthest
 pick_otus:max_cdhit_memory 400
 pick_otus:refseqs_fp
@@ -56,9 +56,9 @@ custom_parameters.txt:
 	@echo "$$CUSTOM_PARAMETERS" > custom_parameters.txt
 
 # Build basic data from sequences
-picked_otus/seq_otus.txt: seq.fasta
+picked_otus/seq_otus.txt: seq.fasta custom_parameters.txt
 	test ! -d picked_otus || rm -r picked_otus
-	pick_otus.py -i seq.fasta -o picked_otus
+	pick_otus.py -i seq.fasta -m $$(grep 'pick_otus:otu_picking_method' custom_parameters.txt | cut -f 2 -d " ") -o picked_otus -M 4096
 
 seq.fasta_rep_set.fasta: picked_otus/seq_otus.txt
 	pick_rep_set.py -i picked_otus/seq_otus.txt -f seq.fasta
