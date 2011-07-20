@@ -1,4 +1,6 @@
 #!/usr/bin/make -f
+# Make pretty heat maps about quality statistics in Illumina runs
+
 FASTQFILES ?= $(basename $(basename $(wildcard *.fastq.bz2) $(wildcard *.fastq.gz)))
 QATARGETS = $(addsuffix .b.pdf, $(FASTQFILES)) $(addsuffix .n.pdf, $(FASTQFILES)) $(addsuffix .cnt.pdf, $(FASTQFILES)) $(addsuffix .q.pdf, $(FASTQFILES)) $(addsuffix .nposn.pdf, $(FASTQFILES)) $(addsuffix .qposn.pdf, $(FASTQFILES))
 QABASETARGETS = $(addsuffix .posnhist, $(FASTQFILES)) $(addsuffix .xystat, $(FASTQFILES))

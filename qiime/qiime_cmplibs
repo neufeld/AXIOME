@@ -1,4 +1,8 @@
 #!/usr/bin/env Rscript
+# Compare pairs of samples
+#
+# Basically, take an OTU table of a particular flavour and plot each OTU at a point determine by the abundance in the two libraries. All such plots are squished into one PDF.
+
 levelname <- tail(commandArgs(), 1);
 otutable <- read.table(paste("otu_table_summarized_", levelname, ".txt", sep=""), 
     header = T, sep = "\t")

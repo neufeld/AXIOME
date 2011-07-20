@@ -1,10 +1,17 @@
 #!/usr/bin/make -f
-# TODO Sanity check mapping has SampleID column and values are unique
-# TODO Sanity check sequence names are ${SampleID}_${UID}
+# Automation tool for QIIME
+#
+# Basic rules for doing QIIME analysis. It assumes you have a mapping.txt file with all your sequences and that your sequences are named in QIIME's ${SampleID::int}_${UID::int} format. AutoQIIME does this for you. ;-)
 
-# Alpha diversity (Chao1 curves)
+# Alpha diversity (Chao1 curves) -- This is here so that if you simply do qiime_setup from the terminal, it will attempt to do alpha diversity.
 alpha: alpha_div/alpha_rarefaction_plots/rarefaction_plots.html
 
+alpha_div/alpha_rarefaction_plots/rarefaction_plots.html: otu_table.txt mapping.txt custom_parameters.txt seq.fasta_rep_set_aligned_pfiltered.tre
+	test ! -d rarefaction_tables || rm -r rarefaction_tables
+	test ! -d alpha_div || rm -r alpha_div
+	alpha_rarefaction.py -i otu_table.txt -m mapping.txt -p custom_parameters.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div
+
+# Default custom parameters file
 define CUSTOM_PARAMETERS
 pick_otus:otu_picking_method cdhit
 pick_otus:clustering_algorithm furthest
@@ -80,27 +87,23 @@ seq.fasta_rep_set_aligned_pfiltered.tre:seq.fasta_rep_set_aligned_pfiltered.fast
 otu_table.txt: picked_otus/seq_otus.txt rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt
 	make_otu_table.py -i picked_otus/seq_otus.txt -t rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt -o otu_table.txt
 
-otu_table_summarized.txt: otu_table.txt
-	summarize_taxa.py -i otu_table.txt -L 4 -o otu_table_summarized.txt -a
-
-alpha_div/alpha_rarefaction_plots/rarefaction_plots.html: otu_table.txt mapping.txt custom_parameters.txt seq.fasta_rep_set_aligned_pfiltered.tre
-	test ! -d rarefaction_tables || rm -r rarefaction_tables
-	test ! -d alpha_div || rm -r alpha_div
-	alpha_rarefaction.py -i otu_table.txt -m mapping.txt -p custom_parameters.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div
-
+# Beta diversity analysis -- We are assuming that you want to do multiple beta diversity analysis, so you need to have a properly mangled OTU table
 beta_div%/unweighted_unifrac_otu_table.txt beta_div%/weighted_unifrac_otu_table.txt: seq.fasta_rep_set_aligned_pfiltered.tre otu_table%.txt
 	beta_diversity.py -i otu_table$*.txt -m weighted_unifrac,unweighted_unifrac -o beta_div$* -t seq.fasta_rep_set_aligned_pfiltered.tre
 
 beta_div_pcoa%/pcoa_unweighted_unifrac_otu_table.txt beta_div_pcoa%/pcoa_weighted_unifrac_otu_table.txt: beta_div%/unweighted_unifrac_otu_table.txt beta_div%/weighted_unifrac_otu_table.txt
 	principal_coordinates.py -i beta_div -o beta_div_pcoa
 
+# Produce an OTU table which is rarefied buy not summarised
 otu_table_auto.txt: otu_table.txt
 	single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt --lineages_included -d $$(awk -F '\t' 'NR == 1 {} NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; }}} NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; }} END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest;}' otu_table.txt)
 
+# Produce a rank-abundance plot
 rank_abundance/rank_abundance.pdf: otu_table.txt
 	test ! -d rank_abundance || rm -r rank_abundance
 	plot_rank_abundance_graph.py -i otu_table.txt -s '*' -o rank_abundance
 
+# Produce a BLAST database
 nr.nhr nr.nin nr.nsq: seq.fasta
 	formatdb -i seq.fasta -n nr -p F
 

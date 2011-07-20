@@ -1,10 +1,12 @@
 using GLib;
 using Gee;
-using RealPath;
 using Xml;
 
 namespace AutoQIIME {
 
+	/**
+	 * Type of stanzas in the XML input document.
+	 */
 	enum RuleType { DEFINITON, SOURCE, ANALYSIS }
 
 	/**
@@ -37,6 +39,8 @@ namespace AutoQIIME {
 
 		/**
 		 * Copy data from existing FASTA files
+		 *
+		 * Read a FASTA file into seq.fasta and pull sequences with ids matching specific regular expressions.
 		 */
 		class FastaSource : RuleProcessor {
 			public override RuleType get_ruletype() {
@@ -94,6 +98,8 @@ namespace AutoQIIME {
 
 		/**
 		 * Assemble data using PANDAseq from Illumina files.
+		 *
+		 * Calls PANDAseq and pulls out specific indecies.
 		 */
 		class PandaSource : RuleProcessor {
 			public override RuleType get_ruletype() {
@@ -135,6 +141,7 @@ namespace AutoQIIME {
 				bool domagic;
 				bool convert;
 
+				/* How we process this file depends on what version of CASAVA created the FASTQ files. The old ones need to be converted. We also need to know if they are bzipped so we can give the -j option to PANDAseq. */
 				var version = definition-> get_prop("version");
 				if (version == null) {
 					definition_error(definition, "No version specified. I'm going to assume you have the latest version.\n");
@@ -232,7 +239,15 @@ namespace AutoQIIME {
 		}
 	}
 
+	/**
+	 * Those things what the user cares about.
+	 */
 	namespace Analyses {
+		/**
+		 * Perform quality analysis on the raw read data
+		 *
+		 * Quality analysis is done by a makefile, so it only needs to know the FASTQ files that are included. It can handle anything except the really old 1.3 files.
+		 */
 		class QualityAnalysis : RuleProcessor {
 			public override RuleType get_ruletype() {
 				return RuleType.ANALYSIS;
@@ -252,6 +267,12 @@ namespace AutoQIIME {
 				return true;
 			}
 		}
+
+		/**
+		 * Compare the distribution of taxa between pairs of libraries
+		 *
+		 * This relies on an R script to do the heavy lifting. A summarized OTU table is needed.
+		 */
 		class LibraryComparison : RuleProcessor {
 			public override RuleType get_ruletype() {
 				return RuleType.ANALYSIS;
@@ -279,6 +300,11 @@ namespace AutoQIIME {
 			}
 		}
 
+		/**
+		 * Produce alpha diversity statistics
+		 *
+		 * Do basic alpha diversity analysis using QIIME's script.
+		 */
 		class AlphaDiversity : RuleProcessor {
 			public override RuleType get_ruletype() {
 				return RuleType.ANALYSIS;
@@ -298,6 +324,11 @@ namespace AutoQIIME {
 			}
 		}
 
+		/**
+		 * Create a BLAST database for the sequence library
+		 *
+		 * Call formatdb to create a BLAST database and create a shell script to sensibly handle calling BLAST with decent options.
+		 */
 		class BlastDatabase : RuleProcessor {
 			public override RuleType get_ruletype() {
 				return RuleType.ANALYSIS;
@@ -323,6 +354,9 @@ namespace AutoQIIME {
 			}
 		}
 
+		/**
+		 * Make a rank-abundance curve using QIIME
+		 */
 		class RankAbundance : RuleProcessor {
 			public override RuleType get_ruletype() {
 				return RuleType.ANALYSIS;
@@ -342,6 +376,11 @@ namespace AutoQIIME {
 			}
 		}
 
+		/**
+		 * Produce beta-diversity (UniFrac) analysis using QIIME
+		 *
+		 * Calling UniFrac using QIIME requires rarefying the OTU table and summarising it to a particular taxonomic level.
+		 */
 		class BetaDiversity : RuleProcessor {
 			public override RuleType get_ruletype() {
 				return RuleType.ANALYSIS;
@@ -399,6 +438,9 @@ namespace AutoQIIME {
 		}
 	}
 
+	/**
+	 * Friendly names for taxnomic levels as used by QIIME/RDP
+	 */
 	enum TaxonomicLevel { LIFE = 1, DOMAIN = 2, PHYLUM = 3, CLASS = 4, ORDER = 5, FAMILY = 6, GENUS = 7, SPECIES = 8, STRAIN = 9;
 			      public static TaxonomicLevel ? parse(string name) {
 				      var enum_class = (EnumClass) typeof(TaxonomicLevel).class_ref();
@@ -415,6 +457,9 @@ namespace AutoQIIME {
 			      }
 	}
 
+	/**
+	 * Output processor responsible for collecting all information needed to generate the Makefile and mapping.txt
+	 */
 	class Output {
 		public string dirname { get; private set; }
 		StringBuilder makerules;
@@ -442,6 +487,9 @@ namespace AutoQIIME {
 			vars = new HashMap<string, string>();
 		}
 
+		/**
+		 * Output the mapping.txt file in the appropriate directory.
+		 */
 		public bool generate_mapping() {
 			var mapping = FileStream.open(Path.build_path(Path.DIR_SEPARATOR_S, dirname, "mapping.txt"), "w");
 			if (mapping == null) {
@@ -482,6 +530,9 @@ namespace AutoQIIME {
 			return true;
 		}
 
+		/**
+		 * Output the Makefile file in the appropriate directory.
+		 */
 		public bool generate_makefile(RuleLookup lookup) {
 			var now = Time.local(time_t());
 			var makefile = FileStream.open(Path.build_path(Path.DIR_SEPARATOR_S, dirname, "Makefile"), "w");
@@ -498,6 +549,13 @@ namespace AutoQIIME {
 			makefile = null;
 			return true;
 		}
+
+		/**
+		 * Generate a summarized OTU table
+		 *
+		 * @param level the taxonomic level at which to summarise.
+		 * @param flavour an optional part of the filename if you have some extra information to convey (e.g., rarefication depth).
+		 */
 		public void make_summarized_otu(TaxonomicLevel level, string flavour) {
 			var taxname = level.to_string();
 			var taxindex = (int) level;
@@ -508,21 +566,47 @@ namespace AutoQIIME {
 			}
 		}
 
+		/**
+		 * Add a file to the targets to be built by make.
+		 */
 		public void add_target(string file) {
 			targets.append_printf(" %s", file);
 		}
+
+		/**
+		 * Add a file to the list of sources needed to build seq.fasta.
+		 */
 		public void add_sequence_source(string file) {
 			seqsources.append_printf(" %s", file);
 		}
+
+		/**
+		 * Add a rule to the Makefile.
+		 *
+		 * In reality, this allows you to append arbitrary content to the innards of the makefile. Obviously, you must output valid make rules and definitions which do not conflict with other definitions.
+		 */
 		public void add_rule([PrintfFormat] string format, ...) {
 			var va = va_list();
 			makerules.append_vprintf(format, va);
 		}
 
+		/**
+		 * Register an XML “sample” element containing attributes satisfying the metadata requirements of the “defs”.
+		 *
+		 * @return the unique identifier for a sample. This must be associated with the map used in {@link prepare_sequences}.
+		 */
 		public int add_sample(Xml.Node *sample) {
 			samples.add(sample);
 			return samples.size-1;
 		}
+
+		/**
+		 * Create a rule to extract sequence data from a command.
+		 *
+		 * It is assumed the supplied command will output FASTA data. The FASTA sequences will be binned into samples and the error output will be saved to a file.
+		 * @param prep the command to prepare the sequence
+		 * @param samplelookup a mapping between regular expressions and sample identifiers. The regular expressions are used by AWK to convert the sequence names to QIIME-friendly format. Any sequences not matched by a regular expression in this dictionary will be discarded.
+		 */
 		public void prepare_sequences(string prep, HashMap<string, int> samplelookup) {
 			var awkprint = new StringBuilder();
 			foreach (var entry in samplelookup.entries) {
@@ -532,15 +616,24 @@ namespace AutoQIIME {
 		}
 	}
 
+	/**
+	 * Complain about something in an XML tag with some context for the user.
+	 */
 	public void definition_error(Xml.Node *node, [PrintfFormat] string format, ...) {
 		stderr.printf("%s: %d: ", node-> doc-> url, node-> line);
 		var va = va_list();
 		stderr.printf(format, va);
 	}
 
+	/**
+	 * Determine how compressed files are processed.
+	 */
 	enum FileCompression {
 		PLAIN, GZIP, BZIP;
 
+		/**
+		 * Get the tool that one would use to render the file to plain text.
+		 */
 		public string get_cat() {
 			switch (this) {
 			case FileCompression.GZIP :
@@ -552,6 +645,9 @@ namespace AutoQIIME {
 			}
 		}
 
+		/**
+		 * Use magic to determine the compression format of the supplied file.
+		 */
 		public static FileCompression for_file(string file) {
 			var magic = new LibMagic.Magic(LibMagic.Flags.SYMLINK|LibMagic.Flags.MIME_TYPE);
 			magic.load();
@@ -569,6 +665,9 @@ namespace AutoQIIME {
 		}
 	}
 
+	/**
+	 * Class to provide access to {@link RuleProcessor}s in the correct parsing order.
+	 */
 	class RuleLookup {
 		RuleType state;
 		HashMap<string, RuleProcessor> table;
@@ -578,10 +677,14 @@ namespace AutoQIIME {
 			table = new HashMap<string, RuleProcessor>();
 			seen = new HashSet<string>();
 		}
+
 		public void reset() {
 			state = RuleType.DEFINITON;
 		}
 
+		/**
+		 * Write the list of files the processors need to be included to the Makefile.
+		 */
 		public void print_include(FileStream stream) {
 			foreach (var rule in table.values) {
 				var file = rule.get_include();
@@ -590,6 +693,10 @@ namespace AutoQIIME {
 				}
 			}
 		}
+
+		/**
+		 * Get the appropriate processor and update state so that the file is ensured to be in the correct order.
+		 */
 		public RuleProcessor ? @get(string name) {
 			if (!table.has_key(name)) {
 				return null;
@@ -609,12 +716,18 @@ namespace AutoQIIME {
 			return processor;
 		}
 
+		/**
+		 * Register a new file processor.
+		 */
 		public void add(owned RuleProcessor processor) {
 			var name = processor.get_name();
 			table[name] = (owned) processor;
 		}
 	}
 
+	/**
+	 * Processor for definitions (aka “def” tags) in the input file.
+	 */
 	class Definition : RuleProcessor {
 		public override RuleType get_ruletype() {
 			return RuleType.DEFINITON;
@@ -651,6 +764,12 @@ namespace AutoQIIME {
 		}
 	}
 
+	/**
+	 * POSIX realpath function to caonicalise a path. Sadly, this is not in GLib anywhere.
+	 */
+	[CCode(cname="realpath",cheader_filename="stdlib.h")]
+	extern string realpath(string path, [CCode (array_length = false, null_terminated = true)] char[]? buffer = null);
+
 	int main(string[] args) {
 		if (args.length != 2) {
 			stderr.printf("Usage: %s config.aq\n", args[0]);
@@ -679,6 +798,7 @@ namespace AutoQIIME {
 			return 1;
 		}
 
+		/* Build a lookup for all the rules we know about. If you need to add a new one, add it here, alphabetically please. */
 		var lookup = new RuleLookup();
 		lookup.add(new Definition());
 		lookup.add(new Analyses.AlphaDiversity());
@@ -690,6 +810,7 @@ namespace AutoQIIME {
 		lookup.add(new Sources.FastaSource());
 		lookup.add(new Sources.PandaSource());
 
+		/* Iterate over the XML document and call all the appropriate rules. */
 		for (Xml.Node *iter = root-> children; iter != null; iter = iter-> next) {
 			if (iter-> type != ElementType.ELEMENT_NODE) {
 				continue;
@@ -707,6 +828,7 @@ namespace AutoQIIME {
 			}
 		}
 
+		/* Generate the Makefile and mapping.txt. */
 		stdout.printf("Generating mapping file...\n");
 		var state = output.generate_mapping();
 		if (state) {
