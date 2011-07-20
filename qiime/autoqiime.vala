@@ -317,7 +317,7 @@ namespace AutoQIIME {
 				output.add_target("nr.nin");
 				output.add_target("nr.nsq");
 				output.add_target("blast");
-				output.add_rule("blast: Makefile\n\t@echo '#!/bin/sh' > blast\n\t@echo blastall -p blastp -d \\'%s/nr\\' '\"$$@\"' >> blast\n\tchmod a+x blast\n\n", Shell.quote(output.dirname));
+				output.add_rule("blast: Makefile\n\t@echo '#!/bin/sh' > blast\n\t@echo blastall -p blastp -d \\'%s/nr\\' '\"$$@\"' >> blast\n\tchmod a+x blast\n\n", Shell.quote(realpath(output.dirname)));
 
 				return true;
 			}
@@ -672,6 +672,13 @@ namespace AutoQIIME {
 		var dirname = (args[1].has_suffix(".aq") ? args[1].substring(0, args[1].length-3) : args[1]).concat(".qiime");
 		var output = new Output(dirname, args[1]);
 
+		stdout.printf("Creating directory...\n");
+		if (DirUtils.create_with_parents(dirname, 0755) == -1) {
+			stderr.printf("%s: %s\n", dirname, strerror(errno));
+			delete doc;
+			return 1;
+		}
+
 		var lookup = new RuleLookup();
 		lookup.add(new Definition());
 		lookup.add(new Analyses.AlphaDiversity());
@@ -698,12 +705,6 @@ namespace AutoQIIME {
 				delete doc;
 				return 1;
 			}
-		}
-		stdout.printf("Creating directory...\n");
-		if (DirUtils.create_with_parents(dirname, 0755) == -1) {
-			stderr.printf("%s: %s\n", dirname, strerror(errno));
-			delete doc;
-			return 1;
 		}
 
 		stdout.printf("Generating mapping file...\n");
