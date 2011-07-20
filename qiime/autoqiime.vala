@@ -298,6 +298,31 @@ namespace AutoQIIME {
 			}
 		}
 
+		class BlastDatabase : RuleProcessor {
+			public override RuleType get_ruletype() {
+				return RuleType.ANALYSIS;
+			}
+			public override unowned string get_name() {
+				return "blast";
+			}
+			public override unowned string ? get_include() {
+				return null;
+			}
+			public override bool is_only_once() {
+				return true;
+			}
+			public override bool process(Xml.Node *definition, Output output) {
+
+				output.add_target("nr.nhr");
+				output.add_target("nr.nin");
+				output.add_target("nr.nsq");
+				output.add_target("blast");
+				output.add_rule("blast: Makefile\n\t@echo '#!/bin/sh' > blast\n\t@echo blastall -p blastp -d \\'%s/nr\\' '\"$$@\"' >> blast\n\tchmod a+x blast\n\n", Shell.quote(output.dirname));
+
+				return true;
+			}
+		}
+
 		class RankAbundance : RuleProcessor {
 			public override RuleType get_ruletype() {
 				return RuleType.ANALYSIS;
@@ -391,7 +416,7 @@ namespace AutoQIIME {
 	}
 
 	class Output {
-		string dirname;
+		public string dirname { get; private set; }
 		StringBuilder makerules;
 		ArrayList<Xml.Node*> samples;
 		StringBuilder seqrule;
@@ -651,6 +676,7 @@ namespace AutoQIIME {
 		lookup.add(new Definition());
 		lookup.add(new Analyses.AlphaDiversity());
 		lookup.add(new Analyses.BetaDiversity());
+		lookup.add(new Analyses.BlastDatabase());
 		lookup.add(new Analyses.LibraryComparison());
 		lookup.add(new Analyses.QualityAnalysis());
 		lookup.add(new Analyses.RankAbundance());

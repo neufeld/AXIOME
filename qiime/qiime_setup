@@ -101,4 +101,7 @@ rank_abundance/rank_abundance.pdf: otu_table.txt
 	test ! -d rank_abundance || rm -r rank_abundance
 	plot_rank_abundance_graph.py -i otu_table.txt -s '*' -o rank_abundance
 
+nr.nhr nr.nin nr.nsq: seq.fasta
+	formatdb -i seq.fasta -n nr -p F
+
 .PHONY: all alpha
