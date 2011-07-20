@@ -21,6 +21,10 @@ namespace AutoQIIME {
 		 */
 		public abstract unowned string ? get_include();
 		/**
+		 * Can this directive be included multiple times in a configuration file?
+		 */
+		public abstract bool is_only_once();
+		/**
 		 * Create a processing stanza for the supplied definition.
 		 */
 		public abstract bool process(Xml.Node *definition, Output output);
@@ -43,6 +47,9 @@ namespace AutoQIIME {
 			}
 			public override unowned string ? get_include() {
 				return null;
+			}
+			public override bool is_only_once() {
+				return false;
 			}
 
 			public override bool process(Xml.Node *node, Output output) {
@@ -97,6 +104,9 @@ namespace AutoQIIME {
 			}
 			public override unowned string ? get_include() {
 				return null;
+			}
+			public override bool is_only_once() {
+				return false;
 			}
 			public override bool process(Xml.Node *definition, Output output) {
 
@@ -233,6 +243,9 @@ namespace AutoQIIME {
 			public override unowned string ? get_include() {
 				return "/Winnebago/apmasell/tools/bin-common/qualityanal";
 			}
+			public override bool is_only_once() {
+				return true;
+			}
 			public override bool process(Xml.Node *definition, Output output) {
 				output.add_target("qualityanal");
 				output.add_rule("FASTQFILES = $(SEQSOURCES)\n\n");
@@ -248,6 +261,9 @@ namespace AutoQIIME {
 			}
 			public override unowned string ? get_include() {
 				return null;
+			}
+			public override bool is_only_once() {
+				return true;
 			}
 			public override bool process(Xml.Node *definition, Output output) {
 				var taxlevel = TaxonomicLevel.parse(definition-> get_prop("level"));
@@ -273,6 +289,9 @@ namespace AutoQIIME {
 			public override unowned string ? get_include() {
 				return null;
 			}
+			public override bool is_only_once() {
+				return true;
+			}
 			public override bool process(Xml.Node *definition, Output output) {
 				output.add_target("alpha");
 				return true;
@@ -289,6 +308,9 @@ namespace AutoQIIME {
 			public override unowned string ? get_include() {
 				return null;
 			}
+			public override bool is_only_once() {
+				return true;
+			}
 			public override bool process(Xml.Node *definition, Output output) {
 				output.add_target("rank_abundance/rank_abundance.pdf");
 				return true;
@@ -304,6 +326,9 @@ namespace AutoQIIME {
 			}
 			public override unowned string ? get_include() {
 				return null;
+			}
+			public override bool is_only_once() {
+				return false;
 			}
 			public override bool process(Xml.Node *definition, Output output) {
 				if (!output.vars.has_key("Colour") || output.vars["Colour"] != "s") {
@@ -522,9 +547,11 @@ namespace AutoQIIME {
 	class RuleLookup {
 		RuleType state;
 		HashMap<string, RuleProcessor> table;
+		HashSet<string> seen;
 		public RuleLookup() {
 			state = RuleType.DEFINITON;
 			table = new HashMap<string, RuleProcessor>();
+			seen = new HashSet<string>();
 		}
 		public void reset() {
 			state = RuleType.DEFINITON;
@@ -542,10 +569,16 @@ namespace AutoQIIME {
 			if (!table.has_key(name)) {
 				return null;
 			}
+			if (name in seen) {
+				return null;
+			}
 			var processor = table[name];
 			var type = processor.get_ruletype();
 			if (type < state) {
 				return null;
+			}
+			if (processor.is_only_once()) {
+				seen.add(name);
 			}
 			state = type;
 			return processor;
@@ -566,6 +599,9 @@ namespace AutoQIIME {
 		}
 		public override unowned string ? get_include() {
 			return null;
+		}
+		public override bool is_only_once() {
+			return false;
 		}
 		public override bool process(Xml.Node *definition, Output output) {
 			var name = definition-> get_prop("name");
@@ -628,7 +664,7 @@ namespace AutoQIIME {
 
 			var rule = lookup[iter-> name];
 			if (rule == null) {
-				stderr.printf("%s: %d: Unrecognized `%s', or it is out of sequence.\n", args[1], iter-> line, iter-> name);
+				stderr.printf("%s: %d: The directive `%s' is either unknown, in the wrong place, or duplicated.\n", args[1], iter-> line, iter-> name);
 				delete doc;
 				return 1;
 			}
