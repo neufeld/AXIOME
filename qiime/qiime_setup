@@ -67,8 +67,10 @@ picked_otus/seq_otus.txt: seq.fasta custom_parameters.txt
 	test ! -d picked_otus || rm -r picked_otus
 	pick_otus.py -i seq.fasta -m $$(grep 'pick_otus:otu_picking_method' custom_parameters.txt | cut -f 2 -d " ") -o picked_otus -M 4096
 
-seq.fasta_rep_set.fasta: picked_otus/seq_otus.txt
-	pick_rep_set.py -i picked_otus/seq_otus.txt -f seq.fasta
+seq.fasta_rep_set.fasta: picked_otus/seq_otus.txt seq.fasta
+	mkrepset seq.fasta picked_otus/seq_otus.txt > seq.fasta_rep_set.fasta
+	# mkrepset replactes the QIIME algorithm which is stupid
+	#pick_rep_set.py -i picked_otus/seq_otus.txt -f seq.fasta
 
 pynast_aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta 
 	test ! -d pynast_aligned || rm -r pynast_aligned
