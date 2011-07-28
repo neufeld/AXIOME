@@ -5,10 +5,10 @@ enum IndexParsingState { MAYBE, ID, HEADER, SEQUENCE }
 
 class IndexedFasta {
 	FileStream file;
-	HashMap<string, long> index;
+	HashMap<string, int64?> index;
 	private IndexedFasta(owned FileStream file) {
 		this.file = (owned) file;
-		this.index = new HashMap<string, long>(Gee.Functions.get_hash_func_for(typeof(string)), Gee.Functions.get_equal_func_for(typeof(string)));
+		this.index = new HashMap<string, int64?>(Gee.Functions.get_hash_func_for(typeof(string)), Gee.Functions.get_equal_func_for(typeof(string)));
 
 		int v;
 		IndexParsingState state = IndexParsingState.MAYBE;
@@ -57,7 +57,10 @@ class IndexedFasta {
 			return null;
 		}
 		var buffer = new StringBuilder();
-		file.seek(index[id], FileSeek.SET);
+		if (file.seek((long)index[id], FileSeek.SET) != 0) {
+			stderr.printf("%s %ld: %s\n", id,(long) index[id], Posix.strerror(errno));
+			return null;
+		 }
 		int v;
 		while ((v = file.getc()) != FileStream.EOF) {
 			char c = (char) v;
@@ -87,23 +90,25 @@ int main(string[] args) {
 	while ((line = clusters.read_line()) != null) {
 		var members = line.split("\t");
 		if (members.length < 2) {
+			stderr.printf("Malformed line: %s\n", line);
 			continue;
 		}
-		var representatives = new HashMap<string, int>(Gee.Functions.get_hash_func_for(typeof(string)), Gee.Functions.get_equal_func_for(typeof(string)));
+		var representatives = new HashMap<string, int64?>(Gee.Functions.get_hash_func_for(typeof(string)), Gee.Functions.get_equal_func_for(typeof(string)));
 		for (var i = 1; i < members.length; i++) {
 			var sequence = sequences[members[i]];
 			if (sequence == null) {
+				stderr.printf("Missing sequence: %s\n", members[i]);
 				continue;
 			}
 
 			if (representatives.has_key(sequence)) {
-				representatives[sequence] = representatives[sequence]+1;
+				representatives[sequence] = representatives[sequence] + 1;
 			} else {
 				representatives[sequence] = 1;
 			}
 		}
 
-		var maxcount = 0;
+		int64 maxcount = 0;
 		string maxsequence = "";
 		foreach (var entry in representatives.entries) {
 			if (entry.value > maxcount) {
