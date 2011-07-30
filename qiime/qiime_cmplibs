@@ -2,6 +2,18 @@
 # Compare pairs of samples
 #
 # Basically, take an OTU table of a particular flavour and plot each OTU at a point determine by the abundance in the two libraries. All such plots are squished into one PDF.
+library(gplots)
+
+skipseq <- function(l) {
+	res <- rep("", l);
+	res[1] <- 0;
+	res[l] <- paste("1e", l - 1, sep = "");;
+	for (x in 1:20) {
+		i <- floor(x * l / 20);
+		res[i + 1] <- paste("1e", i, sep = "");
+	}
+	res;
+}
 
 levelname <- tail(commandArgs(), 1);
 otutable <- read.table(paste("otu_table_summarized_", levelname, ".txt", sep=""), 
@@ -11,6 +23,18 @@ mapping <- read.table("mapping.txt", header = TRUE,
 pdf(paste("correlation_", levelname, ".pdf", sep = ""));
 for (i in 2:(ncol(otutable) - 1)) {
 	for (j in (i + 1):ncol(otutable)) {
-		plot(log(1 + otutable[,i]), log(1 + otutable[,j]), xlab = paste("Library", mapping[i - 1, "Description"]), ylab = paste("Library", mapping[j - 1, "Description"]));
+		m <- max(otutable[,i], otutable[,j]);
+		if (m > 100) { scale <- m / 100; } else { scale <- 1; }
+		s <- (m) / scale + 1;
+		f <- matrix(0, nrow = s,ncol = s);
+		for (x in 1:nrow(otutable)) {
+        	f[floor(otutable[x, i] / scale), floor(otutable[x, j] / scale)] <- f[floor(otutable[x, i] / scale), floor(otutable[x, j] / scale)] + 1;
+		}
+		l <- skipseq(s);
+		heatmap.2(log(1+f), Rowv=NA, Colv=NA, dendrogram="none", labRow = l, labCol = l,
+			trace = "none", density.info = "none", col = topo.colors,
+			xlab = mapping[i - 1, "Description"], ylab = mapping[j - 1, "Description"]);
+
+		#plot(log(1 + otutable[,i]), log(1 + otutable[,j]), xlab = paste("Library", mapping[i - 1, "Description"]), ylab = paste("Library", mapping[j - 1, "Description"]));
 	}
 }
