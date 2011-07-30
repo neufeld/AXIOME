@@ -348,7 +348,7 @@ namespace AutoQIIME {
 				output.add_target("nr.nin");
 				output.add_target("nr.nsq");
 				output.add_target("blast");
-				output.add_rule("blast: Makefile\n\t@echo '#!/bin/sh' > blast\n\t@echo blastall -p blastp -d \\'%s/nr\\' '\"$$@\"' >> blast\n\tchmod a+x blast\n\n", Shell.quote(realpath(output.dirname)));
+				output.add_rule("blast: Makefile\n\t@echo '#!/bin/sh' > blast\n\t@echo blastall -p blastn -d \\'%s/nr\\' '\"$$@\"' >> blast\n\tchmod a+x blast\n\n", Shell.quote(realpath(output.dirname)));
 
 				return true;
 			}
