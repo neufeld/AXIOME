@@ -376,7 +376,6 @@ namespace AutoQIIME {
 			}
 		}
 
-
 		/**
 		 * Make a rank-abundance curve using QIIME
 		 */
@@ -806,8 +805,8 @@ namespace AutoQIIME {
 	/**
 	 * POSIX realpath function to caonicalise a path. Sadly, this is not in GLib anywhere.
 	 */
-	[CCode(cname="realpath",cheader_filename="stdlib.h")]
-	extern string realpath(string path, [CCode (array_length = false, null_terminated = true)] char[]? buffer = null);
+	[CCode(cname = "realpath", cheader_filename = "stdlib.h")]
+	extern string realpath(string path, [CCode(array_length = false, null_terminated = true)] char[] ? buffer = null);
 
 	int main(string[] args) {
 		if (args.length != 2) {
