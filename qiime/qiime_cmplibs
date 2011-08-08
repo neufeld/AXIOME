@@ -18,7 +18,7 @@ skipseq <- function(l) {
 levelname <- tail(commandArgs(), 1);
 otutable <- read.table(paste("otu_table_summarized_", levelname, ".txt", sep=""), 
     header = T, sep = "\t")
-mapping <- read.table("mapping.txt", header = TRUE, 
+mapping <- read.table("mapping.extra", header = TRUE, 
     comment.char = "", row.names = "X.SampleID", sep = "\t")
 pdf(paste("correlation_", levelname, ".pdf", sep = ""));
 for (i in 2:(ncol(otutable) - 1)) {

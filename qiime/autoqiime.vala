@@ -295,7 +295,7 @@ namespace AutoQIIME {
 				var taxname = taxlevel.to_string();
 				output.make_summarized_otu(taxlevel, "");
 				output.add_target("correlation_%s.pdf".printf(taxname));
-				output.add_rule("correlation_%s.pdf: otu_table_summarized_%s.txt mapping.txt\n\tqiime_cmplibs %s\n\n", taxname, taxname, taxname);
+				output.add_rule("correlation_%s.pdf: otu_table_summarized_%s.txt mapping.extra\n\tqiime_cmplibs %s\n\n", taxname, taxname, taxname);
 				return true;
 			}
 		}
@@ -451,8 +451,8 @@ namespace AutoQIIME {
 				output.make_summarized_otu(taxlevel, flavour);
 				output.add_rule("prefs_%s%s.txt: otu_table_summarized_%s%s.txt\n\tmake_prefs_file.py -i otu_table_summarized_%s%s.txt  -m mapping.txt -k white -o prefs_%s%s.txt\n\n", taxname, flavour, taxname, flavour, taxname, flavour, taxname, flavour);
 				output.add_rule("biplot_coords_%s%s.txt: otu_table_summarized_%s%s.txt\n\tmake_3d_plots.py -t otu_table_summarized_%s%s.txt -i beta_div_pcoa%s/pcoa_weighted_unifrac_otu_table.txt -m mapping.txt -p prefs_%s%s.txt -o biplot%s%s --biplot_output_file biplot_coords_%s%s.txt\n\n", taxname, flavour, taxname, flavour, taxname, flavour, flavour, taxname, flavour, taxname, flavour, taxname, flavour);
-				output.add_rule("biplot_%s%s.svg: biplot_coords_%s%s.txt\n\tbiplot %s%s\n\n", taxname, flavour, taxname, flavour, taxname, flavour);
-				output.add_rule("bubblelot_%s%s.svg: biplot_coords_%s%s.txt\n\tbubbleplot %s%s\n\n", taxname, flavour, taxname, flavour, taxname, flavour);
+				output.add_rule("biplot_%s%s.svg: biplot_coords_%s%s.txt mapping.extra\n\tbiplot %s%s\n\n", taxname, flavour, taxname, flavour, taxname, flavour);
+				output.add_rule("bubblelot_%s%s.svg: biplot_coords_%s%s.txt mapping.extra\n\tbubbleplot %s%s\n\n", taxname, flavour, taxname, flavour, taxname, flavour);
 
 				output.add_target("biplot_coords_%s%s.txt".printf(taxname, flavour));
 				return true;
@@ -514,25 +514,31 @@ namespace AutoQIIME {
 		 */
 		public bool generate_mapping() {
 			var mapping = new StringBuilder();
+			var extra = new StringBuilder();
 			if (mapping == null) {
 				stderr.printf("%s: Cannot create mapping file.\n", dirname);
 				return false;
 			}
 			mapping.append_printf("#SampleID");
+			extra.append_printf("#SampleID");
 			foreach (var label in vars.keys) {
-				mapping.append_printf("\t%s", label);
+				(label == "Colour" || label == "Description" ? extra : mapping).append_printf("\t%s", label);
 			}
 			mapping.append_printf("\n");
+			extra.append_printf("\n");
 			for (var it = 0; it < samples.size; it++) {
 				var sample = samples[it];
 				mapping.append_printf("%d", it);
+				extra.append_printf("%d", it);
 				foreach (var entry in vars.entries) {
 					var prop = sample-> get_prop(entry.key);
 					if (prop == null) {
 						stderr.printf("%s: %d: Missing attribute %s.\n", sample-> doc-> url, sample-> line, entry.key);
-						mapping.append_printf("\t");
+						(entry.key == "Colour" || entry.key == "Description" ? extra : mapping).append_printf("\t");
 					} else {
-						if (entry.value == "s") {
+						if (entry.key == "Colour" || entry.key == "Description") {
+							extra.append_printf("\t%s", prop);
+						} else if (entry.value == "s") {
 							/* For strings, we are going to side step the Variant stuff because we want the XML to look like foo="bar" rather than foo="'bar'" as Variants would have it. */
 							mapping.append_printf("\t%s", prop);
 						} else {
@@ -547,13 +553,17 @@ namespace AutoQIIME {
 					}
 				}
 				mapping.append_printf("\n");
+				extra.append_printf("\n");
 			}
-			var mappingfile = Path.build_path(Path.DIR_SEPARATOR_S, dirname, "mapping.txt");
-			var newcontents = mapping.str;
-			if (FileUtils.test(mappingfile, FileTest.IS_REGULAR)) {
+			return update_if_different("mapping.txt", mapping.str) && update_if_different("mapping.extra", extra.str);
+		}
+
+		bool update_if_different(string filename, string newcontents) {
+			var filepath = Path.build_path(Path.DIR_SEPARATOR_S, dirname, filename);
+			if (FileUtils.test(filepath, FileTest.IS_REGULAR)) {
 				string current;
 				try {
-					if (FileUtils.get_contents(mappingfile, out current) && current == newcontents) {
+					if (FileUtils.get_contents(filepath, out current) && current == newcontents) {
 						return true;
 					}
 				} catch(FileError e) {
@@ -561,9 +571,9 @@ namespace AutoQIIME {
 				}
 			}
 			try {
-				return FileUtils.set_contents(mappingfile, newcontents);
+				return FileUtils.set_contents(filepath, newcontents);
 			} catch(FileError e) {
-				stderr.printf("mapping.txt: %s\n", e.message);
+				stderr.printf("%s: %s\n", filepath, e.message);
 			}
 			return false;
 		}
