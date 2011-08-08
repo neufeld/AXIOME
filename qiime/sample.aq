@@ -34,6 +34,8 @@
 	<qualityanal/>
 	<!-- Build a BLAST database over the sequences -->
 	<blast/>
+	<!-- Produce an OTU table with the representatives sequences -->
+	<withseqs/>
 
 	<!-- TODO: NMF -->
 	<!-- TODO: Mike's rare lineage finder -->

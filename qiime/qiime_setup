@@ -109,4 +109,8 @@ rank_abundance/rank_abundance.pdf: otu_table.txt
 nr.nhr nr.nin nr.nsq: seq.fasta
 	formatdb -i seq.fasta -n nr -p F
 
+# Decorate OTU table with representative sequences
+otu_table_with_sequences.txt: seq.fasta_rep_set.fasta otu_table.txt
+	otuwithseqs seq.fasta_rep_set.fasta otu_table.txt > otu_table_with_sequences.txt
+
 .PHONY: all alpha

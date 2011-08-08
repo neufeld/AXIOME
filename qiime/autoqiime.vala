@@ -355,6 +355,29 @@ namespace AutoQIIME {
 		}
 
 		/**
+		 * Decorate the OTU table with the representative sequences
+		 */
+		class TableWithSeqs : RuleProcessor {
+			public override RuleType get_ruletype() {
+				return RuleType.ANALYSIS;
+			}
+			public override unowned string get_name() {
+				return "withseqs";
+			}
+			public override unowned string ? get_include() {
+				return null;
+			}
+			public override bool is_only_once() {
+				return true;
+			}
+			public override bool process(Xml.Node *definition, Output output) {
+				output.add_target("otu_table_with_sequences.txt");
+				return true;
+			}
+		}
+
+
+		/**
 		 * Make a rank-abundance curve using QIIME
 		 */
 		class RankAbundance : RuleProcessor {
@@ -807,6 +830,7 @@ namespace AutoQIIME {
 		lookup.add(new Analyses.LibraryComparison());
 		lookup.add(new Analyses.QualityAnalysis());
 		lookup.add(new Analyses.RankAbundance());
+		lookup.add(new Analyses.TableWithSeqs());
 		lookup.add(new Sources.FastaSource());
 		lookup.add(new Sources.PandaSource());
 
