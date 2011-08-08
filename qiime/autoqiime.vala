@@ -514,43 +514,59 @@ namespace AutoQIIME {
 		 * Output the mapping.txt file in the appropriate directory.
 		 */
 		public bool generate_mapping() {
-			var mapping = FileStream.open(Path.build_path(Path.DIR_SEPARATOR_S, dirname, "mapping.txt"), "w");
+			var mapping = new StringBuilder();
 			if (mapping == null) {
 				stderr.printf("%s: Cannot create mapping file.\n", dirname);
 				return false;
 			}
-			mapping.printf("#SampleID");
+			mapping.append_printf("#SampleID");
 			foreach (var label in vars.keys) {
-				mapping.printf("\t%s", label);
+				mapping.append_printf("\t%s", label);
 			}
-			mapping.printf("\n");
+			mapping.append_printf("\n");
 			for (var it = 0; it < samples.size; it++) {
 				var sample = samples[it];
-				mapping.printf("%d", it);
+				mapping.append_printf("%d", it);
 				foreach (var entry in vars.entries) {
 					var prop = sample-> get_prop(entry.key);
 					if (prop == null) {
 						stderr.printf("%s: %d: Missing attribute %s.\n", sample-> doc-> url, sample-> line, entry.key);
-						mapping.printf("\t");
+						mapping.append_printf("\t");
 					} else {
 						if (entry.value == "s") {
 							/* For strings, we are going to side step the Variant stuff because we want the XML to look like foo="bar" rather than foo="'bar'" as Variants would have it. */
-							mapping.printf("\t%s", prop);
+							mapping.append_printf("\t%s", prop);
 						} else {
 							try {
 								var value = Variant.parse(new VariantType(entry.value), prop);
-								mapping.printf("\t%s", value.print(false));
+								mapping.append_printf("\t%s", value.print(false));
 							} catch(GLib.VariantParseError e) {
 								stderr.printf("%s: %d: Attribute %s:%s = \"%s\" is not of the correct format.\n", sample-> doc-> url, sample-> line, entry.key, entry.value, prop);
-								mapping.printf("\t");
+								mapping.append_printf("\t");
 							}
 						}
 					}
 				}
-				mapping.printf("\n");
+				mapping.append_printf("\n");
 			}
-			mapping = null;
-			return true;
+			var mappingfile = Path.build_path(Path.DIR_SEPARATOR_S, dirname, "mapping.txt");
+			var newcontents = mapping.str;
+			if (FileUtils.test(mappingfile, FileTest.IS_REGULAR)) {
+				string current;
+				try {
+					if (FileUtils.get_contents(mappingfile, out current) && current == newcontents) {
+						return true;
+					}
+				} catch(FileError e) {
+					/* We probably don't care. We'll just attempt to write. */
+				}
+			}
+			try {
+				return FileUtils.set_contents(mappingfile, newcontents);
+			} catch(FileError e) {
+				stderr.printf("mapping.txt: %s\n", e.message);
+			}
+			return false;
 		}
 
 		/**
