@@ -816,6 +816,10 @@ namespace AutoQIIME {
 				definition_error(definition, "Definition missing name.\n");
 				return false;
 			}
+			if (name == "regex" || name == "tag" || name == "limit") {
+				definition_error(definition, "Reserved name used for definition.\n");
+				return false;
+			}
 			if (output.vars.has_key(name)) {
 				definition_error(definition, "Duplicate definition of %s.\n", name);
 				return false;
