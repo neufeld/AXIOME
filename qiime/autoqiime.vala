@@ -67,6 +67,7 @@ namespace AutoQIIME {
 					return false;
 				}
 				var subst = new HashMap<string, int>();
+				var limits = new HashMap<string, int>();
 				for (Xml.Node *sample = node-> children; sample != null; sample = sample-> next) {
 					if (sample-> type != ElementType.ELEMENT_NODE) {
 						continue;
@@ -87,11 +88,18 @@ namespace AutoQIIME {
 						continue;
 					}
 					subst[regexstr] = output.add_sample(sample);
+					var limit = sample-> get_prop("limit");
+					if (limit != null) {
+						var limitval = int.parse(limit);
+						if (limitval > 0) {
+							limits[regexstr] = limitval;
+						}
+					}
 				}
 
 				output.add_sequence_source(file);
 				var command = "%s %s".printf(FileCompression.for_file(file).get_cat(), Shell.quote(file));
-				output.prepare_sequences(command, subst);
+				output.prepare_sequences(command, subst, limits);
 				return true;
 			}
 		}
@@ -182,6 +190,7 @@ namespace AutoQIIME {
 				}
 
 				var subst = new HashMap<string, int>();
+				var limits = new HashMap<string, int>();
 				for (Xml.Node *sample = definition-> children; sample != null; sample = sample-> next) {
 					if (sample-> type != ElementType.ELEMENT_NODE) {
 						continue;
@@ -196,6 +205,13 @@ namespace AutoQIIME {
 						continue;
 					}
 					subst[tag] = output.add_sample(sample);
+					var limit = sample-> get_prop("limit");
+					if (limit != null) {
+						var limitval = int.parse(limit);
+						if (limitval > 0) {
+							limits[tag] = limitval;
+						}
+					}
 				}
 
 				output.add_sequence_source(forward);
@@ -233,7 +249,7 @@ namespace AutoQIIME {
 				foreach (var entry in subst.entries) {
 					command.append_printf(":%s", entry.key);
 				}
-				output.prepare_sequences(command.str, subst);
+				output.prepare_sequences(command.str, subst, limits);
 				return true;
 			}
 		}
@@ -654,11 +670,16 @@ namespace AutoQIIME {
 		 * It is assumed the supplied command will output FASTA data. The FASTA sequences will be binned into samples and the error output will be saved to a file.
 		 * @param prep the command to prepare the sequence
 		 * @param samplelookup a mapping between regular expressions and sample identifiers. The regular expressions are used by AWK to convert the sequence names to QIIME-friendly format. Any sequences not matched by a regular expression in this dictionary will be discarded.
+		 * @param samplelimits a list of the maximum number of sequences in this sample, or, missing or 0 if there is no limit.
 		 */
-		public void prepare_sequences(string prep, HashMap<string, int> samplelookup) {
+		public void prepare_sequences(string prep, HashMap<string, int> samplelookup, HashMap<string, int> samplelimits) {
 			var awkprint = new StringBuilder();
 			foreach (var entry in samplelookup.entries) {
-				awkprint.append_printf("if (name ~ /%s/) { print \">%d_\" NR \"\\n\" seq; }", entry.key, entry.value);
+				awkprint.append_printf("if (name ~ /%s/", entry.key);
+				if (samplelimits.has_key(entry.key) && samplelimits[entry.key] > 0) {
+					awkprint.append_printf(" && count%d < %d", entry.value, samplelimits[entry.key]);
+				}
+				awkprint.append_printf(") { print \">%d_\" NR \"\\n\" seq; count%d++; }", entry.value, entry.value);
 			}
 			seqrule.append_printf("\t(%s | awk '/^>/ { if (seq) {%s } name = substr($$0, 2); seq = \"\"; } $$0 !~ /^>/ {seq = seq $$0; } END { if (seq) {%s }}' >> seq.fasta) 2>&1 | bzip2 > seq_%d.log.bz2\n\n", prep, awkprint.str, awkprint.str, sequence_preparations++);
 		}
