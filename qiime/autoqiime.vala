@@ -217,7 +217,7 @@ namespace AutoQIIME {
 				output.add_sequence_source(forward);
 				output.add_sequence_source(reverse);
 				var command = new StringBuilder();
-				command.append_printf("\t(pandaseq -N -f %s -r %s", Shell.quote(forward), Shell.quote(reverse));
+				command.append_printf("pandaseq -N -f %s -r %s", Shell.quote(forward), Shell.quote(reverse));
 
 				if (dashj) {
 					command.append_printf(" -j");
