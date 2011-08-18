@@ -357,7 +357,9 @@ namespace AutoQIIME {
 				return true;
 			}
 			public override bool process(Xml.Node *definition, Output output) {
-				output.add_target("chimeras.uchime");
+				for (var i = 0; i < output.sequence_preparations; i++) {
+					output.add_target("chimeras%d.uchime".printf(i));
+				}
 				return true;
 			}
 		}
@@ -526,7 +528,7 @@ namespace AutoQIIME {
 		ArrayList<Xml.Node*> samples;
 		StringBuilder seqrule;
 		StringBuilder seqsources;
-		int sequence_preparations;
+		public int sequence_preparations {get; private set; }
 		string sourcefile;
 		public HashMap<string, string> vars { get; private set; }
 		Set<string> summarized_otus;
