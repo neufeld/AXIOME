@@ -341,6 +341,28 @@ namespace AutoQIIME {
 		}
 
 		/**
+		 * Perform a chimera check with uchime
+		 */
+		class UchimeCheck : RuleProcessor {
+			public override RuleType get_ruletype() {
+				return RuleType.ANALYSIS;
+			}
+			public override unowned string get_name() {
+				return "uchime";
+			}
+			public override unowned string ? get_include() {
+				return null;
+			}
+			public override bool is_only_once() {
+				return true;
+			}
+			public override bool process(Xml.Node *definition, Output output) {
+				output.add_target("chimeras.uchime");
+				return true;
+			}
+		}
+
+		/**
 		 * Create a BLAST database for the sequence library
 		 *
 		 * Call formatdb to create a BLAST database and create a shell script to sensibly handle calling BLAST with decent options.
@@ -881,6 +903,7 @@ namespace AutoQIIME {
 		lookup.add(new Analyses.QualityAnalysis());
 		lookup.add(new Analyses.RankAbundance());
 		lookup.add(new Analyses.TableWithSeqs());
+		lookup.add(new Analyses.UchimeCheck());
 		lookup.add(new Sources.FastaSource());
 		lookup.add(new Sources.PandaSource());
 

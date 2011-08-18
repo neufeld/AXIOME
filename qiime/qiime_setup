@@ -113,4 +113,20 @@ nr.nhr nr.nin nr.nsq: seq.fasta
 otu_table_with_sequences.txt: seq.fasta_rep_set.fasta otu_table.txt
 	otuwithseqs seq.fasta_rep_set.fasta otu_table.txt > otu_table_with_sequences.txt
 
+# Do chimera checking with UCHIME
+seq_sorted.fasta: seq.fasta
+	uclust --sort $< --output $@
+
+identities.uc: seq_sorted.fasta
+	uclust --input $< --uc $@ --id 1
+
+identities.awk: identities.uc
+	awk 'END {print "$$0 !~ /^>/"} $$1 == "C" {print "/^>"$$2"\\|/ { print \">"$$2";size="$$3"\"; }" }' $< > $@
+
+identities.fasta: identities.uc seq.fasta identities.awk
+	uclust --uc2fasta $< --input seq.fasta --output /dev/stdout | awk -f identities.awk > $@
+
+chimeras.uchime chimeras.aln chimeras.fasta: identities.fasta
+	usearch --uchime $< --uchimeout chimeras.uchime --uchimealns chimeras.aln --chimeras chimeras.fasta
+
 .PHONY: all alpha
