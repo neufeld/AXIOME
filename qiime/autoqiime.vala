@@ -36,6 +36,10 @@ namespace AutoQIIME {
 		public abstract bool process(Xml.Node *definition, Output output);
 	}
 
+	public bool is_sequence(string sequence) {
+		return Regex.match_simple("^([ACGTKMSWRYBDHV]*)|(\\d*)$", sequence);
+	}
+
 	/**
 	 * Source of sequence data
 	 */
@@ -132,7 +136,7 @@ namespace AutoQIIME {
 					primer = primer.up();
 					if (primer in primers) {
 						command.append_printf(" -%c %s", arg, Shell.quote(primers[primer]));
-					} else if (Regex.match_simple("^([ACGTKMSWRYBDHV]*)|(\\d*)$", primer)) {
+					} else if (is_sequence(primer)) {
 						command.append_printf(" -%c %s", arg, Shell.quote(primer));
 					} else {
 						definition_error(definition, "Invalid primer %s. Ignorning, mumble, mumble.\n", primer);
@@ -918,8 +922,8 @@ namespace AutoQIIME {
 		if (primerfile != null) {
 			string line;
 			while((line = primerfile.read_line()) != null) {
-				var parts = line.split("\t");
-				if (parts.length != 2)
+				var parts = line.up().split("\t");
+				if (parts.length != 2 || !is_sequence(parts[1]))
 					continue;
 				primers[parts[0]] = parts[1];
 			}
