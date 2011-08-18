@@ -4,6 +4,7 @@ using Xml;
 
 namespace AutoQIIME {
 
+	public HashMap<string, string> primers;
 	[CCode(cname = "DATADIR")]
 	extern const string DATADIR;
 
@@ -125,6 +126,19 @@ namespace AutoQIIME {
 			public override bool is_only_once() {
 				return false;
 			}
+			private void add_primer(StringBuilder command, Xml.Node* definition, string name, char arg) {
+				var primer = definition-> get_prop(name);
+				if (primer != null) {
+					primer = primer.up();
+					if (primer in primers) {
+						command.append_printf(" -%c %s", arg, Shell.quote(primers[primer]));
+					} else if (Regex.match_simple("^([ACGTKMSWRYBDHV]*)|(\\d*)$", primer)) {
+						command.append_printf(" -%c %s", arg, Shell.quote(primer));
+					} else {
+						definition_error(definition, "Invalid primer %s. Ignorning, mumble, mumble.\n", primer);
+					}
+				}
+			}
 			public override bool process(Xml.Node *definition, Output output) {
 
 				var forward = definition-> get_prop("forward");
@@ -228,22 +242,8 @@ namespace AutoQIIME {
 				if (dashsix) {
 					command.append_printf(" -6");
 				}
-				var fprimer = definition-> get_prop("fprimer");
-				if (fprimer != null) {
-					if (Regex.match_simple("^([ACGTacgt]*)|(\\d*)$", fprimer)) {
-						command.append_printf(" -p %s", Shell.quote(fprimer));
-					} else {
-						definition_error(definition, "Invalid primer %s. Ignorning, mumble, mumble.\n", fprimer);
-					}
-				}
-				var rprimer = definition-> get_prop("rprimer");
-				if (rprimer != null) {
-					if (Regex.match_simple("^([ACGTacgt]*)|(\\d*)$", rprimer)) {
-						command.append_printf(" -q %s", Shell.quote(rprimer));
-					} else {
-						definition_error(definition, "Invalid primer %s. Ignorning, mumble, mumble.\n", rprimer);
-					}
-				}
+				add_primer(command, definition, "fprimer", 'p');
+				add_primer(command, definition, "rprimer", 'q');
 				var threshold = definition-> get_prop("threshold");
 				if (threshold != null) {
 					command.append_printf(" -t %s", Shell.quote(threshold));
@@ -912,6 +912,20 @@ namespace AutoQIIME {
 		lookup.add(new Analyses.UchimeCheck());
 		lookup.add(new Sources.FastaSource());
 		lookup.add(new Sources.PandaSource());
+
+		primers = new HashMap<string, string>();
+		var primerfile = FileStream.open(Path.build_filename(DATADIR, "primers.lst"), "r");
+		if (primerfile != null) {
+			string line;
+			while((line = primerfile.read_line()) != null) {
+				var parts = line.split("\t");
+				if (parts.length != 2)
+					continue;
+				primers[parts[0]] = parts[1];
+			}
+		} else {
+			stderr.printf("Warning: Couldn't find the primers list in `%s'.\n", DATADIR);
+		}
 
 		/* Iterate over the XML document and call all the appropriate rules. */
 		for (Xml.Node *iter = root-> children; iter != null; iter = iter-> next) {
