@@ -37,7 +37,7 @@ namespace AutoQIIME {
 	}
 
 	public bool is_sequence(string sequence) {
-		return Regex.match_simple("^([ACGTKMSWRYBDHV]*)|(\\d*)$", sequence);
+		return Regex.match_simple("^[ACGTKMSWRYBDHV]*$", sequence);
 	}
 
 	/**
@@ -134,9 +134,16 @@ namespace AutoQIIME {
 				var primer = definition-> get_prop(name);
 				if (primer != null) {
 					primer = primer.up();
-					if (primer in primers) {
+					if (primer[0] == '#') {
+						primer = primer.substring(1);
+						if (primer in primers) {
+							command.append_printf(" -%c %d", arg, primers[primer].length);
+						} else {
+							definition_error(definition, "Unknown primer %s. Ignorning, mumble, mumble.\n", primer);
+						}
+					} else if (primer in primers) {
 						command.append_printf(" -%c %s", arg, Shell.quote(primers[primer]));
-					} else if (is_sequence(primer)) {
+					} else if (Regex.match_simple("^\\d+$", primer) || is_sequence(primer)) {
 						command.append_printf(" -%c %s", arg, Shell.quote(primer));
 					} else {
 						definition_error(definition, "Invalid primer %s. Ignorning, mumble, mumble.\n", primer);

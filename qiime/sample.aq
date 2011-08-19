@@ -7,7 +7,11 @@
 	<def name="Colour"/>
 
 	<!-- Assemblies -->
-	<!-- We then specify where we are getting our sequences. Sequences can be assembled using PANDAseq with a <panda> record. The locations of the forward and reverse reads must be specified. Optionally, the forward and reverse primers can be specified with fprimer="ACT..." and rprimer="TAG...". You must specify a version of the CASAVA pipeline that generated the sequences. If the sequences are in the “old” Illumina format (i.e., not FASTQ), specify version="1.3" and they will be converted. The newest sequences with PHRED+33-style quality scores are version="1.8". Most other versions are somewhere in te middle (and handled the same). If you look at the read file and every entry is one line, then it's 1.3. If the quality scores have a B-cliff at the end, it's 1.4. If they have a #-cliff, it's 1.8. -->
+	<!-- We then specify where we are getting our sequences. Sequences can be assembled using PANDAseq with a <panda> record.
+	     The locations of the forward and reverse reads must be specified. They must be in FASTQ format (or compressed FASTQ).
+	     Optionally, the forward and reverse primers can be specified with fprimer="ACT..." and rprimer="TAG...". The primers can be dengerate (i.e., contain W and friends) or, you can specify a number and that many of bases will be eliminated. If you have a primer database, you can also specify the primer by name or "#" followed by the name to use the length of that primer.
+	     You must specify a version of the CASAVA pipeline that generated the sequences. If the sequences are in the “old” Illumina format (i.e., not FASTQ), specify version="1.3" and they will be converted. The newest sequences with PHRED+33-style quality scores are version="1.8". Most other versions are somewhere in te middle (and handled the same). If you look at the read file and every entry is one line, then it's 1.3. If the quality scores have a B-cliff at the end, it's 1.4. If they have a #-cliff, it's 1.8.
+	-->
 	<panda forward="/Winnebago/apmasell/qualityanal/b2_1.fastq.bz2" reverse="/Winnebago/apmasell/qualityanal/b2_2.fastq.bz2" version="1.4">
 		<!-- When assembling this run, we can now describe our samples. First, we need to specify the index tag and then fill out all of the definitions from above. You can also specify limit="x" to only take the first x sequences. -->
 		<sample tag="ACTGGC" pH="7.0" year="2006" Colour="red"/>
