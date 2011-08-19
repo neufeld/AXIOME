@@ -681,7 +681,8 @@ namespace AutoQIIME {
 		 *
 		 * In reality, this allows you to append arbitrary content to the innards of the makefile. Obviously, you must output valid make rules and definitions which do not conflict with other definitions.
 		 */
-		public void add_rule([PrintfFormat] string format, ...) {
+		[PrintfFormat]
+		public void add_rule(string format, ...) {
 			var va = va_list();
 			makerules.append_vprintf(format, va);
 		}
@@ -720,10 +721,11 @@ namespace AutoQIIME {
 	/**
 	 * Complain about something in an XML tag with some context for the user.
 	 */
-	public void definition_error(Xml.Node *node, [PrintfFormat] string format, ...) {
-		stderr.printf("%s: %d: ", node-> doc-> url, node-> line);
+	[PrintfFormat]
+	public void definition_error(Xml.Node *node, string format, ...) {
 		var va = va_list();
-		stderr.printf(format, va);
+		stderr.printf("%s: %d: ", node-> doc-> url, node-> line);
+		stderr.vprintf(format, va);
 	}
 
 	/**
