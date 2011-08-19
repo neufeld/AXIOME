@@ -294,7 +294,7 @@ namespace AutoQIIME {
 			}
 			public override bool process(Xml.Node *definition, Output output) {
 				output.add_target("qualityanal");
-				output.add_rule("FASTQFILES = $(SEQSOURCES)\n\n");
+				output["FASTQFILES"] = "$(SEQSOURCES)";
 				return true;
 			}
 		}
@@ -692,6 +692,13 @@ namespace AutoQIIME {
 		public void add_rule(string format, ...) {
 			var va = va_list();
 			makerules.append_vprintf(format, va);
+		}
+
+		/**
+		 * Add declaration to the make Makefile.
+		 */
+		public void set(string key, string value) {
+			makerules.append_printf("%s = %s\n\n", key, value);
 		}
 
 		/**
