@@ -130,6 +130,6 @@ identities%.fasta: identities%.uc seq_sorted%.fasta identities%.awk
 	uclust --uc2fasta $< --input seq_sorted$*.fasta --output /dev/stdout | awk -f identities$*.awk > $@
 
 chimeras%.uchime chimeras%.aln chimeras%.fasta: identities%.fasta
-	usearch --uchime $< --uchimeout chimeras$*.uchime --uchimealns chimeras$*.aln --chimeras chimeras$*.fasta
+	usearch --uchime $< --uchimeout chimeras$*.uchime --uchimealns chimeras$*.aln --chimeras chimeras$*.fasta $(UCHIMEFLAGS)
 
 .PHONY: all alpha

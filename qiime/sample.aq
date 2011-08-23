@@ -40,7 +40,7 @@
 	<blast/>
 	<!-- Produce an OTU table with the representatives sequences -->
 	<withseqs/>
-	<!-- Do chimera checking with UCHIME -->
+	<!-- Do chimera checking with UCHIME. Since the parameters vary based on the type of DNA, you can specify profile="v3" to use different parameters -->
 	<uchime/>
 
 	<!-- TODO: NMF -->
