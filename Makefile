@@ -14,6 +14,6 @@ $(bindir)/qualhisto: qualhisto.c parser.c
 	gcc -lz -lbz2 -o $@ $^
 
 $(bindir)/%: %.c
-	gcc -lz -lbz2 -o $@ $<
+	gcc -lm -lz -lbz2 -o $@ $<
 
 .PHONY: all
