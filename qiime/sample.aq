@@ -32,8 +32,8 @@
 	<compare level="class"/>
 	<!-- Do a QIIME beta diversity analysis and produce biplots and bubble plots. You can specify the taxonomic level for the analysis. -->
 	<beta level="class"/>
-	<!-- The parameter "size" allows you to rarefy the library to a particular size, or "auto" to use the smallest sample size. -->
-	<beta level="class" size="auto"/>
+	<!-- The parameter "size" allows you to rarefy the library to a particular size, or "auto" to use the smallest sample size. Specifying taxa can limit the number of taxa the appear in the biplot. The default is 10. You can specify "all" if desired. -->
+	<beta level="class" size="auto" taxa="50"/>
 	<!-- Produce some data on the quality of the *raw* reads. -->
 	<qualityanal/>
 	<!-- Build a BLAST database over the sequences -->
