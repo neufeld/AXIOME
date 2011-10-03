@@ -130,7 +130,7 @@ namespace AutoQIIME {
 			public override bool is_only_once() {
 				return false;
 			}
-			private void add_primer(StringBuilder command, Xml.Node* definition, string name, char arg) {
+			private void add_primer(StringBuilder command, Xml.Node *definition, string name, char arg) {
 				var primer = definition-> get_prop(name);
 				if (primer != null) {
 					primer = primer.up();
@@ -372,18 +372,18 @@ namespace AutoQIIME {
 				return true;
 			}
 			public override bool process(Xml.Node *definition, Output output) {
-				var profile = definition->get_prop("profile");
+				var profile = definition-> get_prop("profile");
 				if (profile != null) {
 					switch (profile.down()) {
-						case "v3-stringent":
-							output["UCHIMEFLAGS"] = "--mindiv 1.5 --minh 5";
-							break;
-						case "v3-relaxed":
-							output["UCHIMEFLAGS"] = "--mindiv 1 --minh 2.5";
-							break;
-						default:
-							definition_error(definition, "Unknown profile `%s'.\n", profile);
-							return false;
+					case "v3-stringent" :
+						output["UCHIMEFLAGS"] = "--mindiv 1.5 --minh 5";
+						break;
+					case "v3-relaxed" :
+						output["UCHIMEFLAGS"] = "--mindiv 1 --minh 2.5";
+						break;
+					default :
+						definition_error(definition, "Unknown profile `%s'.\n", profile);
+						return false;
 					}
 				}
 				for (var i = 0; i < output.sequence_preparations; i++) {
@@ -556,7 +556,7 @@ namespace AutoQIIME {
 		ArrayList<Xml.Node*> samples;
 		StringBuilder seqrule;
 		StringBuilder seqsources;
-		public int sequence_preparations {get; private set; }
+		public int sequence_preparations { get; private set; }
 		string sourcefile;
 		public HashMap<string, string> vars { get; private set; }
 		Set<string> summarized_otus;
@@ -950,10 +950,11 @@ namespace AutoQIIME {
 		var primerfile = FileStream.open(Path.build_filename(DATADIR, "primers.lst"), "r");
 		if (primerfile != null) {
 			string line;
-			while((line = primerfile.read_line()) != null) {
+			while ((line = primerfile.read_line()) != null) {
 				var parts = line.up().split("\t");
-				if (parts.length != 2 || !is_sequence(parts[1]))
+				if (parts.length != 2 || !is_sequence(parts[1])) {
 					continue;
+				}
 				primers[parts[0]] = parts[1];
 			}
 		} else {
