@@ -23,6 +23,8 @@ class NumericFileIterator {
 			return false;
 		}
 		line = stream.read_line();
+		if (line == null)
+			return false;
 		num = long.parse(line);
 		return true;
 	}
