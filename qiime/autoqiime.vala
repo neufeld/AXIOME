@@ -509,12 +509,18 @@ namespace AutoQIIME {
 					output.add_rule("otu_table_%d.txt: otu_table.txt\n\tsingle_rarefaction.py -i otu_table.txt -o otu_table_auto.txt --lineages_included -d %d\n\n", v, v);
 				}
 
-				var taxlevel = TaxonomicLevel.parse(definition-> get_prop("level"));
-				if (taxlevel == null) {
-					definition_error(definition, "Unknown taxonomic level \"%s\" in beta diversity analysis.\n", definition-> get_prop("level"));
-					return false;
+				string taxname;
+				if (definition-> get_prop("level") == null) {
+					taxname = "otu";
+				} else {
+					var taxlevel = TaxonomicLevel.parse(definition-> get_prop("level"));
+					if (taxlevel == null) {
+						definition_error(definition, "Unknown taxonomic level \"%s\" in beta diversity analysis.\n", definition-> get_prop("level"));
+						return false;
+					}
+					taxname = taxlevel.to_string();
+					output.make_summarized_otu(taxlevel, flavour);
 				}
-				var taxname = taxlevel.to_string();
 				var numtaxa = definition-> get_prop("taxa");
 				int taxakeep;
 				if (numtaxa == null) {
@@ -528,7 +534,6 @@ namespace AutoQIIME {
 					}
 				}
 
-				output.make_summarized_otu(taxlevel, flavour);
 				output.add_rule("prefs_%s%s.txt: otu_table_summarized_%s%s.txt\n\tmake_prefs_file.py -i otu_table_summarized_%s%s.txt  -m mapping.txt -k white -o prefs_%s%s.txt\n\n", taxname, flavour, taxname, flavour, taxname, flavour, taxname, flavour);
 				output.add_rule("biplot_coords_%s%s.txt: beta_div_pcoa%s/pcoa_weighted_unifrac_otu_table.txt prefs_%s%s.txt otu_table_summarized_%s%s.txt\n\tmake_3d_plots.py -t otu_table_summarized_%s%s.txt -i beta_div_pcoa%s/pcoa_weighted_unifrac_otu_table%s.txt -m mapping.txt -p prefs_%s%s.txt -o biplot%s%s --biplot_output_file biplot_coords_%s%s.txt --n_taxa_keep=%d\n\n", taxname, flavour, flavour, taxname, flavour, taxname, flavour, taxname, flavour, flavour, flavour, taxname, flavour, taxname, flavour, taxname, flavour, taxakeep);
 				output.add_rule("biplot_%s%s.svg: biplot_coords_%s%s.txt mapping.extra\n\tbiplot %s%s\n\n", taxname, flavour, taxname, flavour, taxname, flavour);

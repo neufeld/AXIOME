@@ -1,0 +1,3 @@
+#!/bin/bash
+
+awk -F '\t' 'NR == 1 {} NR == 2 { printf("Taxon"); for (i = 2; i < NF; i++) { printf("\t%s", $i); } printf("\n"); } NR > 2 { printf("%s;%s", $NF, $1); for (i = 2; i < NF; i++) { printf("\t%s", $i); } printf("\n"); }' "$@"
