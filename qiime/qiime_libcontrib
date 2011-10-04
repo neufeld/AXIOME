@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [ $# -ne 1 ]
+then
+	echo $0 seq_otus.txt \< otu_ids
+	echo Determine the contribution of the various libraries to the specified OTUs
+	exit 1
+fi
+sort -n | joinn /dev/stdin "$1" | cut -f 3- | sed -e 's/_[0-9]*\t/\n/g; s/_[0-9]*$//g' | sort | uniq -c
