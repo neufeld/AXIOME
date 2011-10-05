@@ -468,6 +468,40 @@ namespace AutoQIIME {
 		}
 
 		/**
+		 * Produce principle component analysis using R
+		 *
+		 * Do prinicpal component analysis on the taxa and the other (numeric) variables specified.
+		 */
+		class PrincipalComponentAnalysis : RuleProcessor {
+			public override RuleType get_ruletype() {
+				return RuleType.ANALYSIS;
+			}
+			public override unowned string get_name() {
+				return "pca";
+			}
+			public override unowned string ? get_include() {
+				return null;
+			}
+			public override bool is_only_once() {
+				return true;
+			}
+			public override bool process(Xml.Node *definition, Output output) {
+				var hasnumeric = false;
+				foreach (var type in output.vars.values) {
+					if (type == "i" || type == "d") {
+						hasnumeric = true;
+						break;
+					}
+				}
+				if (!hasnumeric) {
+					definition_error(definition, "You should probably have at least one numeric variable over which to do PCA.");
+				}
+				output.add_target("biplot.pdf");
+				return true;
+			}
+		}
+
+		/**
 		 * Produce beta-diversity (UniFrac) analysis using QIIME
 		 *
 		 * Calling UniFrac using QIIME requires rarefying the OTU table and summarising it to a particular taxonomic level.
@@ -600,17 +634,28 @@ namespace AutoQIIME {
 		public bool generate_mapping() {
 			var mapping = new StringBuilder();
 			var extra = new StringBuilder();
+			var headers = new StringBuilder();
 			if (mapping == null) {
 				stderr.printf("%s: Cannot create mapping file.\n", dirname);
 				return false;
 			}
 			mapping.append_printf("#SampleID");
 			extra.append_printf("#SampleID");
-			foreach (var label in vars.keys) {
-				(label == "Colour" || label == "Description" ? extra : mapping).append_printf("\t%s", label);
+			var first = true;
+			foreach (var entry in vars.entries) {
+				var isextra = entry.key == "Colour" || entry.key == "Description";
+				(isextra ? extra : mapping).append_printf("\t%s", entry.key);
+				if (!isextra) {
+					if (!first) {
+						headers.append_c('\t');
+					}
+					headers.append(entry.value == "i" || entry.value == "d" ? "TRUE" : "FALSE");
+					first = false;
+				}
 			}
-			mapping.append_printf("\n");
-			extra.append_printf("\n");
+			mapping.append_c('\n');
+			extra.append_c('\n');
+			headers.append_c('\n');
 			for (var it = 0; it < samples.size; it++) {
 				var sample = samples[it];
 				mapping.append_printf("%d", it);
@@ -632,15 +677,15 @@ namespace AutoQIIME {
 								mapping.append_printf("\t%s", value.print(false));
 							} catch(GLib.VariantParseError e) {
 								stderr.printf("%s: %d: Attribute %s:%s = \"%s\" is not of the correct format.\n", sample-> doc-> url, sample-> line, entry.key, entry.value, prop);
-								mapping.append_printf("\t");
+								mapping.append_c('\t');
 							}
 						}
 					}
 				}
-				mapping.append_printf("\n");
-				extra.append_printf("\n");
+				mapping.append_c('\n');
+				extra.append_c('\n');
 			}
-			return update_if_different("mapping.txt", mapping.str) && update_if_different("mapping.extra", extra.str);
+			return update_if_different("mapping.txt", mapping.str) && update_if_different("mapping.extra", extra.str) && update_if_different("headers.txt", headers.str);
 		}
 
 		bool update_if_different(string filename, string newcontents) {
@@ -956,6 +1001,7 @@ namespace AutoQIIME {
 		lookup.add(new Analyses.BetaDiversity());
 		lookup.add(new Analyses.BlastDatabase());
 		lookup.add(new Analyses.LibraryComparison());
+		lookup.add(new Analyses.PrincipalComponentAnalysis());
 		lookup.add(new Analyses.QualityAnalysis());
 		lookup.add(new Analyses.RankAbundance());
 		lookup.add(new Analyses.TableWithSeqs());

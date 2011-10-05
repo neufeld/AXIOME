@@ -42,7 +42,8 @@
 	<withseqs/>
 	<!-- Do chimera checking with UCHIME. Since the parameters vary based on the type of DNA, you can specify profile="v3" to use different parameters -->
 	<uchime/>
-
+	<!-- Do principal components in R using the numeric variables supplied in the “def” entries -->
+	<pca/>
 	<!-- TODO: NMF -->
 	<!-- TODO: Mike's rare lineage finder -->
 </autoqiime>

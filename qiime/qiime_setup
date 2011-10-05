@@ -135,4 +135,8 @@ identities%.fasta: identities%.uc seq_sorted%.fasta identities%.awk
 chimeras%.uchime chimeras%.aln chimeras%.fasta: identities%.fasta
 	usearch --uchime $< --uchimeout chimeras$*.uchime --uchimealns chimeras$*.aln --chimeras chimeras$*.fasta $(UCHIMEFLAGS)
 
+# PCA with R
+biplot.pdf: mapping.txt otu_table.txt headers.txt
+	qiime_rbiplot
+
 .PHONY: all alpha

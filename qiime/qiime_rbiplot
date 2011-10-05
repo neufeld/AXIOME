@@ -1,0 +1,36 @@
+#!/usr/bin/env Rscript
+
+print("Reading OTU table");
+otutable <- read.table("otu_table.txt", skip = 1, comment.char = "", header = TRUE, row.names = 1, sep = "\t");
+print("Reading mapping");
+mapping <- read.table("mapping.txt", header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t")
+print("Reading header");
+interest <- read.table("headers.txt")[1,] == "TRUE";
+print("Computing PCA");
+
+newmapping <- t(mapping[,interest]);
+
+# For non-numeric sample names, comment out the following line
+colnames(newmapping) <- paste("X", colnames(newmapping), sep = "");
+
+d <- rbind(otutable[,seq(1,ncol(otutable)-1)], newmapping);
+p <- prcomp(t(d), scale = TRUE);
+
+pdf("biplot.pdf");
+
+print("Making Scree plot");
+plot(p);
+
+print("Making MDS plot");
+plot(p$x, asp = p$sdev[2]/p$sdev[1]);
+text(x = p$x[, "PC1"], y = p$x[, "PC2"], labels = rownames(p$x));
+
+print("Making biplot");
+contrib <- apply(p$rotation, 1, function(x) {sqrt(sum(x[1:2]^2));});
+
+# What variables (rows) do you want to display as arrows?
+#useful <- contrib > (mean(contrib) + 2*sd(contrib));
+useful <- rownames(newmapping);
+
+# This will fail if useful selects no rows
+biplot(p$x[, c("PC1", "PC2")], p$rotation[useful, c("PC1", "PC2")], asp = p$sdev[2]/p$sdev[1]);
