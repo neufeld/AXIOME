@@ -23,13 +23,15 @@ build-aux/missing
 ChangeLog
 config.*
 configure
+debian/files
+debian/*.log
+debian/*.substvars
 .deps/
 INSTALL
 joinn.c
 libtool
 m4/
 Makefile
-Makefile.am
 Makefile.in
 mkrepset.c
 *.o

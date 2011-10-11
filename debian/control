@@ -1,0 +1,15 @@
+Source: autoqiime
+Section: science
+Priority: extra
+Maintainer: Andre Masella <andre@masella.name>
+Build-Depends: debhelper (>= 7.0.50~), autotools-dev, valac, libgee-dev, libmagic-dev, zlib1g-dev, libbz2-dev, libxml2-dev
+Standards-Version: 3.9.1
+Homepage: http://github.com/neufeld/qiimetools
+
+Package: autoqiime
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, gawk, make, r-base, r-cran-gplots, bzip2, gzip, blast2, pandaseq
+Description: QIIME automation toolkit
+ AutoQIIME is a set of tools for making QIIME <http://qiime.sourceforge.net>
+ easier to manage by automating error-prone tasks and walking through
+ common analyses.
