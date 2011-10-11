@@ -68,7 +68,7 @@ picked_otus/seq_otus.txt: seq.fasta custom_parameters.txt
 	pick_otus.py -i seq.fasta -m $$(grep 'pick_otus:otu_picking_method' custom_parameters.txt | cut -f 2 -d " ") -o picked_otus -M 4096
 
 seq.fasta_rep_set.fasta: picked_otus/seq_otus.txt seq.fasta
-	mkrepset seq.fasta picked_otus/seq_otus.txt > seq.fasta_rep_set.fasta
+	aq-mkrepset seq.fasta picked_otus/seq_otus.txt > seq.fasta_rep_set.fasta
 	# mkrepset replactes the QIIME algorithm which is stupid
 	#pick_rep_set.py -i picked_otus/seq_otus.txt -f seq.fasta
 
@@ -101,7 +101,7 @@ otu_table_auto.txt: otu_table.txt
 	single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt --lineages_included -d $$(awk -F '\t' 'NR == 1 {} NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; }}} NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; }} END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest;}' otu_table.txt)
 
 otu_table_summarized_otu%.txt: otu_table%.txt
-	pretendsummarize $< > $@
+	aq-pretendsummarize $< > $@
 
 # Produce a rank-abundance plot
 rank_abundance/rank_abundance.pdf: otu_table.txt
@@ -114,7 +114,7 @@ nr.nhr nr.nin nr.nsq: seq.fasta
 
 # Decorate OTU table with representative sequences
 otu_table_with_sequences.txt: seq.fasta_rep_set.fasta otu_table.txt
-	otuwithseqs seq.fasta_rep_set.fasta otu_table.txt > otu_table_with_sequences.txt
+	aq-otuwithseqs seq.fasta_rep_set.fasta otu_table.txt > otu_table_with_sequences.txt
 
 # Do chimera checking with UCHIME
 sorted%.fasta: seq%.fasta
@@ -137,6 +137,6 @@ chimeras%.uchime chimeras%.aln chimeras%.fasta: identities%.fasta
 
 # PCA with R
 biplot.pdf: mapping.txt otu_table.txt headers.txt
-	qiime_rbiplot
+	aq-pca
 
 .PHONY: all alpha

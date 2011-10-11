@@ -1,4 +1,4 @@
-/* Separate Illumina FASTQ reads by index tag and discard any degenerate sequences */
+/* Estimate error probability from tags an Illumina FASTQ read */
 #include<bzlib.h>
 #include<ctype.h>
 #include<errno.h>
@@ -13,7 +13,6 @@
 #include<time.h>
 #include<unistd.h>
 #include<zlib.h>
-#include<trie.h>
 #include "kseq.h"
 
 /* Function pointers for file I/O such that we can deal with compressed files. */
@@ -34,18 +33,6 @@ int bzread(BZFILE * file, void *buf, int len)
 	}
 }
 
-static unsigned long sdbm(str)
-unsigned char *str;
-{
-	unsigned long hash = 0;
-	int c;
-
-	while (c = *str++)
-		hash = c + (hash << 6) + (hash << 16) - hash;
-
-	return hash;
-}
-
 KSEQ_INIT(void *, fileread)
 
 int main(int argc, char **argv)
@@ -56,9 +43,9 @@ int main(int argc, char **argv)
 	void *file;
 	kseq_t *seq;
 	int len;
-	int n = 0;
-	Trie known_hashes = trie_create(NULL, 3);
-	Trie files = trie_create(fclose, 3);
+	int i, j;
+	int count = 0;
+	int totalmismatches = 0;
 
 	/* Process command line arguments. */
 	while ((c = getopt(argc, argv, "jf:")) != -1) {
@@ -98,6 +85,16 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	for (i = optind; i < argc; i++) {
+		if (strlen(argv[i]) != 6) {
+			fprintf(stderr,
+				"Primer %s is not of the right length.\n",
+				argv[i]);
+			return 1;
+		}
+	}
+	printf("PRIMERS = %d\n", argc - optind);
+
 	/* Open files and initialise FASTQ reader. */
 	file = fileopen(filename, "r");
 	if (file == NULL) {
@@ -106,67 +103,32 @@ int main(int argc, char **argv)
 	}
 	seq = kseq_init(file);
 
-	for (c = optind; c < argc; c++){
-				FILE *f;
-				char buffer[FILENAME_MAX];
-				snprintf(buffer, FILENAME_MAX, "%s.%s",
-					 filename, argv[c]);
-				f = fopen(buffer, "w");
-				if (f == NULL) {
-					perror(buffer);
-					return 1;
-				}
-				trie_add(files, argv[c], f, true);
-				fprintf(stderr, "FOPN %s\n", buffer);
-	}
 	while ((len = kseq_read(seq)) >= 0) {
-		unsigned long hash;
-		int index;
-		int ncount = 0;
-		FILE *f;
-		char *indextag;
+		int bestmismatches = 6;
 
-		n++;
-		for (index = 0; index < seq->seq.l; index++) {
-			if (seq->seq.s[index] == 'N') {
-				ncount++;
-				break;
-			}
-		}
-		if (ncount > 0) {
-			fprintf(stderr, "SKIP %s\n", seq->name.s);
+		for (j = 0; j < seq->name.l && seq->name.s[j] != '#'; j++) ;
+
+		if (j + 6 >= seq->name.l)
 			continue;
-		}
 
-/*		hash = sdbm(seq->seq.s);
-		if (trie_getf(known_hashes, &hash, sizeof(hash)) == NULL) {
-			trie_addf(known_hashes, &hash, sizeof(hash), &main,
-				  true);*/
-
-			for (index = 0; index < seq->name.l; index++) {
-				if (seq->name.s[index] == '#') {
-					break;
+		for (i = optind; i < argc; i++) {
+			int mismatches = 0;
+			int k;
+			for (k = 0; k < 6; k++) {
+				if (seq->name.s[j + k + 1] != argv[i][k]) {
+					mismatches++;
 				}
 			}
-			indextag = seq->name.s + index + 1;
-			if (index + 7 >= seq->name.l) {
-				continue;
+			if (mismatches < bestmismatches) {
+				bestmismatches = mismatches;
 			}
-			indextag[6] = '\0';
-			f = trie_get(files, indextag);
-			if (f == NULL) {
-				fprintf(stderr, "EBADF %s\n", indextag);
-			} else {
-			fprintf(f, ">%s_%d\n%s\n", indextag, n,
-				seq->seq.s);
-			}/*
-		} else {
-			fprintf(stderr, "DUPL %s\n", seq->name.s);
-		}*/
+		}
+		count++;
+		totalmismatches += bestmismatches;
 	}
 	kseq_destroy(seq);
-	trie_destroy(files);
-	trie_destroy(known_hashes);
+	printf("TOTAL = %d\nMISMATCHES = %d\nQ = %f\n", count * 6,
+	       totalmismatches, (1.0 * totalmismatches) / (count * 6));
 	if (fileclose(file) != Z_OK && bzip == 0) {
 		perror(filename);
 	}

@@ -1,4 +1,4 @@
-/* Count Ns in an Illumina FASTQ read */
+/* Separate Illumina FASTQ reads by index tag and discard any degenerate sequences */
 #include<bzlib.h>
 #include<ctype.h>
 #include<errno.h>
@@ -13,6 +13,9 @@
 #include<time.h>
 #include<unistd.h>
 #include<zlib.h>
+#include<glib.h>
+#include<glib-object.h>
+#include<gee.h>
 #include "kseq.h"
 
 /* Function pointers for file I/O such that we can deal with compressed files. */
@@ -33,6 +36,18 @@ int bzread(BZFILE * file, void *buf, int len)
 	}
 }
 
+static unsigned long sdbm(str)
+unsigned char *str;
+{
+	unsigned long hash = 0;
+	int c;
+
+	while (c = *str++)
+		hash = c + (hash << 6) + (hash << 16) - hash;
+
+	return hash;
+}
+
 KSEQ_INIT(void *, fileread)
 
 int main(int argc, char **argv)
@@ -43,9 +58,10 @@ int main(int argc, char **argv)
 	void *file;
 	kseq_t *seq;
 	int len;
-	int i, j;
-	int count = 0;
-	int totalmismatches = 0;
+	int n = 0;
+	GeeHashMap* files;
+	g_type_init();
+	files = gee_hash_map_new(G_TYPE_STRING, (GBoxedCopyFunc) g_strdup, g_free, G_TYPE_POINTER, NULL, (GDestroyNotify) fclose, NULL, NULL, NULL);
 
 	/* Process command line arguments. */
 	while ((c = getopt(argc, argv, "jf:")) != -1) {
@@ -85,16 +101,6 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	for (i = optind; i < argc; i++) {
-		if (strlen(argv[i]) != 6) {
-			fprintf(stderr,
-				"Primer %s is not of the right length.\n",
-				argv[i]);
-			return 1;
-		}
-	}
-	printf("PRIMERS = %d\n", argc - optind);
-
 	/* Open files and initialise FASTQ reader. */
 	file = fileopen(filename, "r");
 	if (file == NULL) {
@@ -103,32 +109,58 @@ int main(int argc, char **argv)
 	}
 	seq = kseq_init(file);
 
-	while ((len = kseq_read(seq)) >= 0) {
-		int bestmismatches = 6;
-
-		for (j = 0; j < seq->name.l && seq->name.s[j] != '#'; j++) ;
-
-		if (j + 6 >= seq->name.l)
-			continue;
-
-		for (i = optind; i < argc; i++) {
-			int mismatches = 0;
-			int k;
-			for (k = 0; k < 6; k++) {
-				if (seq->name.s[j + k + 1] != argv[i][k]) {
-					mismatches++;
+	for (c = optind; c < argc; c++){
+				FILE *f;
+				char buffer[FILENAME_MAX];
+				snprintf(buffer, FILENAME_MAX, "%s.%s",
+					 filename, argv[c]);
+				f = fopen(buffer, "w");
+				if (f == NULL) {
+					perror(buffer);
+					return 1;
 				}
-			}
-			if (mismatches < bestmismatches) {
-				bestmismatches = mismatches;
+				gee_abstract_map_set((GeeAbstractMap*) files, argv[c], f);
+				fprintf(stderr, "FOPN %s\n", buffer);
+	}
+	while ((len = kseq_read(seq)) >= 0) {
+		unsigned long hash;
+		int index;
+		int ncount = 0;
+		FILE *f;
+		char *indextag;
+
+		n++;
+		for (index = 0; index < seq->seq.l; index++) {
+			if (seq->seq.s[index] == 'N') {
+				ncount++;
+				break;
 			}
 		}
-		count++;
-		totalmismatches += bestmismatches;
+		if (ncount > 0) {
+			fprintf(stderr, "SKIP %s\n", seq->name.s);
+			continue;
+		}
+
+		for (index = 0; index < seq->name.l; index++) {
+			if (seq->name.s[index] == '#') {
+				break;
+			}
+		}
+		indextag = seq->name.s + index + 1;
+		if (index + 7 >= seq->name.l) {
+			continue;
+		}
+		indextag[6] = '\0';
+		f = gee_abstract_map_get ((GeeAbstractMap*) files, indextag);
+		if (f == NULL) {
+			fprintf(stderr, "EBADF %s\n", indextag);
+		} else {
+			fprintf(f, ">%s_%d\n%s\n", indextag, n,
+					seq->seq.s);
+		}
 	}
 	kseq_destroy(seq);
-	printf("TOTAL = %d\nMISMATCHES = %d\nQ = %f\n", count * 6,
-	       totalmismatches, (1.0 * totalmismatches) / (count * 6));
+	g_object_unref(files);
 	if (fileclose(file) != Z_OK && bzip == 0) {
 		perror(filename);
 	}

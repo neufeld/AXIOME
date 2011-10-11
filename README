@@ -1,0 +1,9 @@
+AutoQIIME
+=========
+
+Tools for making QIIME easier to use.
+
+You'll need to install this package with:
+	autoreconf -i -m && make install
+
+And then you should read sample.aq
