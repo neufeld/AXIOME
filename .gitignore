@@ -10,7 +10,7 @@ aq-marry-illumina-index
 aq-mkrepset
 aq-qualhisto
 aq-syntheticfastq
-autom4te.cache/
+autom4te.cache
 autoqiime
 autoqiime.c
 build-aux/compile
@@ -26,9 +26,10 @@ configure
 debian/files
 debian/*.log
 debian/*.substvars
-.deps/
+.deps
 INSTALL
 joinn.c
+.libs
 libtool
 m4/
 Makefile

@@ -1,5 +1,5 @@
 NULL=
-ACLOCAL_AMFLAG = -I m4
+ACLOCAL_AMFLAGS = -I m4
 bin_SCRIPTS = \
 	aq-base \
 	aq-biplot \
