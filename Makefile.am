@@ -78,7 +78,7 @@ autoqiime_VALASOURCES = autoqiime.vala
 autoqiime_SOURCES = autoqiime.vala.stamp $(autoqiime_VALASOURCES:.vala=.c)
 
 autoqiime.vala.stamp $(autoqiime_VALASOURCES:.vala=.c): $(autoqiime_VALASOURCES)
-	$(VALAC) $(VALAFLAGS) -g -C --pkg libmagic --pkg=gee-1.0 --pkg=libxml-2.0 $(autoqiime_VALASOURCES)
+	$(VALAC) $(VALAFLAGS) -g -C --vapidir=. --pkg=libmagic --pkg=gee-1.0 --pkg=libxml-2.0 $(autoqiime_VALASOURCES)
 
 joinn.vala.stamp $(aq_joinn_VALASOURCES:.vala=.c): $(aq_joinn_VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -g -C  $(aq_joinn_VALASOURCES)

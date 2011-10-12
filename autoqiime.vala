@@ -138,12 +138,12 @@ namespace AutoQIIME {
 					primer = primer.up();
 					if (primer[0] == '#') {
 						primer = primer.substring(1);
-						if (primer in primers) {
+						if (primers.has_key(primer)) {
 							command.append_printf(" -%c %d", arg, primers[primer].length);
 						} else {
 							definition_error(definition, "Unknown primer %s. Ignorning, mumble, mumble.\n", primer);
 						}
-					} else if (primer in primers) {
+					} else if (primers.has_key(primer)) {
 						command.append_printf(" -%c %s", arg, Shell.quote(primers[primer]));
 					} else if (Regex.match_simple("^\\d+$", primer) || is_sequence(primer)) {
 						command.append_printf(" -%c %s", arg, Shell.quote(primer));
@@ -230,7 +230,7 @@ namespace AutoQIIME {
 						definition_error(definition, "Invalid element %s. Ignorning, mumble, mumble.\n", sample-> name);
 						continue;
 					}
-					if (tag in subst) {
+					if (subst.has_key(tag)) {
 						definition_error(definition, "Duplicated tag %s. Skipping.\n", tag);
 						continue;
 					}
