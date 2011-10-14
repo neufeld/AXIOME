@@ -6,4 +6,4 @@ then
 	exit 1
 fi
 
-joinn "$1" "$2" | awk -F '\t' 'NR == 1 {print $1}  NR > 1 { for (i = 1; i <=(NF/2); i++) {printf("%s\t", $i);} printf("%s\n", $NF);}'
+aq-joinn "$1" "$2" | awk -F '\t' 'NR == 1 {print $1}  NR > 1 { for (i = 1; i <=(NF/2); i++) {printf("%s\t", $i);} printf("%s\n", $NF);}'
