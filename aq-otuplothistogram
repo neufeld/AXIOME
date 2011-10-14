@@ -1,11 +1,11 @@
 #!/bin/bash
 
-/usr/bin/gnuplot -persist <<EOI
+gnuplot -persist <<EOI
 set nokey
 set xlabel "Prevalence of the OTU in All Samples"
 set ylabel "Frequency"
 set logscale y
 set logscale x
 plot '-' using 1:2 with lines
-$(otuhistogram $1 | sort -n)
+$(aq-otuhistogram $1 | sort -n)
 EOI
