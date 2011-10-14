@@ -8,13 +8,13 @@ bin_SCRIPTS = \
 	aq-fasta-length \
 	aq-libcontrib \
 	aq-oldillumina2fastq \
-	aq-otu2bar \
 	aq-otu2lnotu \
 	aq-otu2pcord \
 	aq-otubinner \
 	aq-otuhistogram \
 	aq-otunolineage \
 	aq-otuplothistogram \
+	aq-otusum \
 	aq-otutop \
 	aq-otuwithseqs \
 	aq-pca \
