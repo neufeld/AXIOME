@@ -11,7 +11,6 @@ bin_SCRIPTS = \
 	aq-otu2bar \
 	aq-otu2lnotu \
 	aq-otu2pcord \
-	aq-otu2seqs \
 	aq-otubinner \
 	aq-otuhistogram \
 	aq-otunolineage \
