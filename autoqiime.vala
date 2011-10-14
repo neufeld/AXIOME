@@ -572,8 +572,8 @@ namespace AutoQIIME {
 
 				output.add_rule("prefs_%s%s.txt: otu_table_summarized_%s%s.txt\n\tmake_prefs_file.py -i otu_table_summarized_%s%s.txt  -m mapping.txt -k white -o prefs_%s%s.txt\n\n", taxname, flavour, taxname, flavour, taxname, flavour, taxname, flavour);
 				output.add_rule("biplot_coords_%s%s.txt: beta_div_pcoa%s/pcoa_weighted_unifrac_otu_table.txt prefs_%s%s.txt otu_table_summarized_%s%s.txt\n\ttest ! -d biplot%s%s || rm -rf biplot%s%s\n\tmake_3d_plots.py -t otu_table_summarized_%s%s.txt -i beta_div_pcoa%s/pcoa_weighted_unifrac_otu_table%s.txt -m mapping.txt -p prefs_%s%s.txt -o biplot%s%s --biplot_output_file biplot_coords_%s%s.txt --n_taxa_keep=%d\n\n", taxname, flavour, flavour, taxname, flavour, taxname, flavour, taxname, flavour, taxname, flavour, taxname, flavour, flavour, flavour, taxname, flavour, taxname, flavour, taxname, flavour, taxakeep);
-				output.add_rule("biplot_%s%s.svg: biplot_coords_%s%s.txt mapping.extra\n\taq-biplot %s%s\n\n", taxname, flavour, taxname, flavour, taxname, flavour);
-				output.add_rule("bubblelot_%s%s.svg: biplot_coords_%s%s.txt mapping.extra\n\taq-bubbleplot %s%s\n\n", taxname, flavour, taxname, flavour, taxname, flavour);
+				output.add_rule("biplot_%s%s.svg: biplot_coords_%s%s.txt mapping.extra\n\taq-biplot \"%s\" \"%s\"\n\n", taxname, flavour, taxname, flavour, taxname, flavour);
+				output.add_rule("bubblelot_%s%s.svg: biplot_coords_%s%s.txt mapping.extra\n\taq-bubbleplot \"%s\" \"%s\"\n\n", taxname, flavour, taxname, flavour, taxname, flavour);
 
 				output.add_target("biplot_coords_%s%s.txt".printf(taxname, flavour));
 				return true;
