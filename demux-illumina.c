@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 
 	if (filename == NULL) {
 		fprintf(stderr,
-			"Usage: %s [-j] -f file.fastq\n\t-j\tInput files are bzipped.\n",
+			"Usage: %s [-j] -f file.fastq tag1 tag2 ...\n\t-j\tInput files are bzipped.\n",
 			argv[0]);
 		return 1;
 	}
