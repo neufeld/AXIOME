@@ -1,0 +1,27 @@
+.\" Authors: Andre Masella
+.TH aq-demux-illumina 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-demux-illumina \- Separate Illumina FASTQ reads by index tag and discard any degenerate sequences
+.SH SYNOPSIS
+.B aq-demux-illumina
+[
+.B \-j
+] 
+.B \-f 
+.I file.fastq
+.I tag1 tag2 ...
+.SH DESCRIPTION
+Given an Illumina FASTQ read from CASAVA 1.5 or newer, separate out sequences by tag and store them in files named \fIfile.fastq\fB.\fItagN\fR.
+.SH OPTIONS
+.TP
+\-f
+The FASTQ file to be examined.
+.TP
+\-j
+The input file is compressed with
+.BR bzip (1).
+.TP
+tag
+An Illumina tag to extract.
+.SH SEE ALSO
+.BR autoqiime (1).

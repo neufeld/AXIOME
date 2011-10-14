@@ -1,0 +1,27 @@
+.\" Authors: Andre Masella
+.TH aq-filter-fastq-known 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-filter-fastq-known \- Retain FASTQ reads similar to defined sequences
+.SH SYNOPSIS
+.B aq-filter-fastq-known
+[
+.B \-j
+] 
+.B \-f 
+.I file.fastq
+.I sequence1 sequence2 ...
+.SH DESCRIPTION
+Compare the sequences in a FASTQ file to some input sequences and emit sequences that have less than 3% error.
+.SH OPTIONS
+.TP
+\-f
+The FASTQ file to be examined.
+.TP
+\-j
+The input file is compressed with
+.BR bzip (1).
+.TP
+sequence
+A sequence to be compared.
+.SH SEE ALSO
+.BR autoqiime (1).

@@ -1,0 +1,27 @@
+.\" Authors: Andre Masella
+.TH aq-qualhisto 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-qualhisto \- Produce some quality statistics from FASTQ files
+.SH SYNOPSIS
+.B aq-qualhisto
+[
+.B \-j
+] 
+.B \-f 
+.I file.fastq
+.SH DESCRIPTION
+This produces quality statistics from Illumina FASTQ input files. Standard output contains the length, average quality score, quality score standard deviation and quality-mask region length for each sequence and standard error contains, as a function of the number of uncalled bases in the sequence, the average quality score, quality score deviation and percentage of degenerate nucleotides.
+
+This is mostly mean to be used internally by 
+.BR aq-qualityanal (1).
+.SH OPTIONS
+.TP
+\-f
+The FASTQ file to be examined.
+.TP
+\-j
+The input file is compressed with
+.BR bzip (1).
+.SH SEE ALSO
+.BR aq-qualityanal (1),
+.BR autoqiime (1).

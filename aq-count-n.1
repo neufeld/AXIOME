@@ -1,0 +1,23 @@
+.\" Authors: Andre Masella
+.TH aq-count-n 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-count-n \- Count Ns in a FASTQ read
+.SH SYNOPSIS
+.B aq-count-n
+[
+.B \-j
+] 
+.B \-f 
+.I file.fastq
+.SH DESCRIPTION
+Examine a FASTQ file and produce a histogram of the number of uncalled bases (Ns) in a sequence.
+.SH OPTIONS
+.TP
+\-f
+The FASTQ file to be examined.
+.TP
+\-j
+The input file is compressed with
+.BR bzip (1).
+.SH SEE ALSO
+.BR autoqiime (1).

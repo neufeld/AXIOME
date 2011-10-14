@@ -1,0 +1,19 @@
+.\" Authors: Andre Masella
+.TH aq-mkrepset 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-mkrepset \- Create a representative set of sequences
+.SH SYNOPSIS
+.B aq-mkrepset
+.I seq.fasta
+.I seq_otus.txt
+.SH DESCRIPTION
+Create a representative set as a replacement for \fBpick_rep_set.py\fR in QIIME. The QIIME version loads the entire FASTA file into a Python dictonary, which is unmanageable for large data sets. Instead, this version creates an index over the FASTA file, loads only the sequences in a single OTU and picks the mode (or randomly from the modes if there are multiple modes). This is much faster when the sets are large as it reduced memory usage and swapping.
+.SH OPTIONS
+.TP
+seq.fasta
+The original FASTA sequences.
+.TP
+seq_otus.txt
+The clusters produced by \fBpick_otus.py\fR.
+.SH SEE ALSO
+.BR autoqiime (1).

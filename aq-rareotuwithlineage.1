@@ -1,0 +1,19 @@
+.\" Authors: Andre Masella
+.TH aq-rareotuwithlineage 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-rareotuwithlineage \- Add lineages to a rareified OTU table
+.SH SYNOPSIS
+.B aq-rareotuwithlineage
+.I rareified_otu_table.txt 
+.I otu_table.txt
+.SH DESCRIPTION
+QIIME's \fBsingle_rarefaction.py\fR will lose the lineage information when producing a rarefied OTU table. This script adds that information back.
+.SH OPTIONS
+.TP
+rareified_otu_table.txt 
+The table produced by \fBsingle_rarefaction.py\fR.
+.TP
+otu_table.txt
+The original OTU table.
+.SH SEE ALSO
+.BR autoqiime (1).

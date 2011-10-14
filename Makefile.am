@@ -38,6 +38,40 @@ bin_PROGRAMS= \
 	aq-syntheticfastq \
 	$(NULL)
 
+man1_MANS = \
+	aq-base.1 \
+	aq-biplot.1 \
+	aq-bubbleplot.1 \
+	aq-cmplibs.1 \
+	aq-count-n.1 \
+	aq-demux-illumina.1 \
+	aq-fasta-length.1 \
+	aq-fastq2oldillumina.1 \
+	aq-filter-fastq-known.1 \
+	aq-joinn.1 \
+	aq-libcontrib.1 \
+	aq-marry-illumina-index.1 \
+	aq-mkrepset.1 \
+	aq-oldillumina2fastq.1 \
+	aq-otu2lnotu.1 \
+	aq-otu2pcord.1 \
+	aq-otubinner.1 \
+	aq-otuhistogram.1 \
+	aq-otunolineage.1 \
+	aq-otuplothistogram.1 \
+	aq-otusum.1 \
+	aq-otutop.1 \
+	aq-otuwithseqs.1 \
+	aq-pca.1 \
+	aq-pretendsummarize.1 \
+	aq-qualhisto.1 \
+	aq-qualityanal.1 \
+	aq-rareotuwithlineage.1 \
+	aq-sort-fasta.1 \
+	aq-syntheticfastq.1 \
+	autoqiime.1 \
+	$(NULL)
+
 docdir = $(datadir)/doc/@PACKAGE@
 dist_pkgdata_DATA = primers.lst
 doc_DATA = \

@@ -1,0 +1,25 @@
+.\" Authors: Andre Masella
+.TH aq-biplot 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-biplot \- Plot QIIME's biplot results using R
+.SH SYNOPSIS
+.B aq-biplot
+.I level
+.I flavour
+.SH DESCRIPTION
+Given QIIME has produced biplot results using AutoQIIME's naming scheme, this will invoke R to produce a 2D biplot as an SVG file. See the
+.I beta
+flag in
+.BR autoqiime (1).
+
+This assumes there will be \fBbiplot_coords_\fIlevelflavour\fB.txt\fR and \fBbeta_div_pcoa\fIflavour\fB/pcoa_weighted_unifrac_otu_table.txt\fR .
+.SH OPTIONS
+.TP
+level
+The taxonomic level to use.
+.TP
+flavour
+The type of beta-diversity analysis done. This is usually a size.
+.SH SEE ALSO
+.BR aq-bubbleplot (1),
+.BR autoqiime (1).

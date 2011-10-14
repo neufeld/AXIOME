@@ -12,6 +12,7 @@ aq-qualhisto
 aq-syntheticfastq
 autom4te.cache
 autoqiime
+autoqiime.1
 autoqiime.c
 build-aux/compile
 build-aux/config.guess

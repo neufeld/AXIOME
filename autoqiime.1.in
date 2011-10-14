@@ -1,0 +1,31 @@
+.\" Authors: Andre Masella
+.TH autoqiime 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+autoqiime \- Automation toolkit for QIIME
+.SH SYNOPSIS
+.B autoqiime
+.I input.aq
+.SH DESCRIPTION
+AutoQIIME is a way of automating tedious and error-prone analysis with the QIIME toolkit. Given a file of input data and analyses, it genereates a \fBMakefile\fR to perform the analyses.
+.SH OPTIONS
+.TP
+input.aq
+The input XML configuration file.
+.SH WORKFLOW
+Normally, one creates a input file with a \fB.aq\fR extension. After running AutoQIIME, a directory with a \fB.qiime\fR extension will be created with \fBMakefile\fR, \fBmapping.txt\fR, \fBmapping.extra\fR and possibly others depending on the analyses selected. In this directory, invoking \fBmake\fR will analysis. Normally, each analysis is done in the order specified in the original file, but this can be overriden by invoking \fBmake \fItarget\fR where \fItarget\fR is the output file desired (e.g., \fBotu_table.txt\fR).
+
+If \fBmake\fR is interrupted, invoking it again will continue, repeating only the last command. Furthermore, if input files are changed, \fBmake\fR will attempt to return the minimum number of commands needed to update the analysis. Sometimes, this does not work as expected and deleting \fBseq.fasta\fR will guarantee all files will be rebuilt.
+.SH CONFIGURATION FILE
+Included is a sample configuration file with all possible analyses enabled. The configuration file has three components: definitions, assemblies, and analyses.
+
+Definitions are a list of properties associated with the samples. These are usual physical or chemical information such as sampling time, pH, temperature, humidity, and location. As many properties as needed can be specified and each property can have a type so that incorrect information cannot be entered (e.g., enforcing that "year" be a whole number).
+
+Assemblies are descriptions of the samples. AutoQIIME can automatically assemble pair-end Illumina FASTQ data using 
+.BR pandaseq (1)
+or read data from FASTA files. In either case, a single file might contain multiple samples multiplexed. The format of this section allows all the input files to be specified and provide information about how to separate samples and the properties, defined above, to be associated with each sample.
+
+Finally, the file lists the analyses to be performed. AutoQIIME will do the analyses in the order specified. Some analyses can be repeated with different parameters and some can be specified only once.
+.SH SEE ALSO
+\fB@prefix@/share/doc/@PACKAGE@/sample.aq\fR,
+.BR pandaseq (1),
+.BR make (1).

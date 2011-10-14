@@ -1,0 +1,17 @@
+.\" Authors: Andre Masella
+.TH aq-joinn 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-joinn \- Join files based on numerically sorted fields
+.SH SYNOPSIS
+.B aq-joinn
+.I file1 file2
+.SH DESCRIPTION
+Join two text files based on numerically sorted IDs. This is different from 
+.BR join (1)
+which can only deal with alphabetically sorted data.
+.SH OPTIONS
+.TP
+file
+A file to sort. If you wish to sort of standard input, specify \fB/dev/stdin\fR.
+.SH SEE ALSO
+.BR autoqiime (1).

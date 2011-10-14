@@ -1,0 +1,28 @@
+.\" Authors: Andre Masella
+.TH aq-qualityanal 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-qualityanal \- Produce quality statistics from Illumina reads.
+.SH SYNOPSIS
+.B aq-qualityanal
+.SH DESCRIPTION
+This calculate a number of quality statistics and produces some pretty graphs compositing all the tiles in a flow cell into a single image. The analysis will be done for any FASTQ files in the current directory when called. The ouput graphs are as follows.
+.TP
+\fIinput\fB.n.pdf\fR
+The number of uncalled bases as distributed over the tiles.
+.TP
+\fIinput\fB.b.pdf\fR
+The length of the quality-masked region of each read as distributed over the tiles.
+.TP
+\fIinput\fB.q.pdf\fR
+The mean quality score as distributed over the tiles.
+.TP
+\fIinput\fB.cnt.pdf\fR
+The number of reads as distributed over the tiles.
+.TP
+\fIinput\fB.qposn.pdf\fR
+The average quality scores for each position in the reads.
+.TP
+\fIinput\fB.nposn.pdf\fR
+The number of uncalled bases for each position in the reads.
+.SH SEE ALSO
+.BR autoqiime (1).

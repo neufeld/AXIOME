@@ -1,0 +1,19 @@
+.\" Authors: Andre Masella
+.TH aq-otutop 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-otutop \- Keep top n taxa from an OTU table
+.SH SYNOPSIS
+.B aq-otutop
+.I n
+.I otu_table.txt
+.SH DESCRIPTION
+Sort the taxa in an OTU table by size across all samples and output a limited number of taxa, starting with the largest.
+.SH OPTIONS
+.TP
+n
+The number of OTUs to keep
+.TP
+otu_table.txt
+The OTU table.
+.SH SEE ALSO
+.BR autoqiime (1).

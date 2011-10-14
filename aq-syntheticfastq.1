@@ -1,0 +1,27 @@
+.\" Authors: Andre Masella
+.TH aq-syntheticfastq 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-syntheticfastq \- Apply real quality masks to arbitrary data
+.SH SYNOPSIS
+.B aq-syntheticfastq
+[
+.B \-j
+] 
+.B \-f 
+.I file.fastq
+.I sequence
+.SH DESCRIPTION
+For testing purposes, it is helpful to create arbitrary data with real quality masks. Given a sequence, a new FASTQ file is created by discarding the sequences from the original file and replacing them with the given sequence but preserving the quality mask.
+.SH OPTIONS
+.TP
+\-f
+The FASTQ file to be used for quality masks.
+.TP
+\-j
+The input file is compressed with
+.BR bzip (1).
+.TP
+sequence
+The sequence to be used in the output. The output is as long as the shorter of the read or the input sequence.
+.SH SEE ALSO
+.BR autoqiime (1).

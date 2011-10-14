@@ -1,0 +1,25 @@
+.\" Authors: Andre Masella
+.TH aq-bubbleplot 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-bubbleplot \- Plot QIIME's bubbleplot results using R
+.SH SYNOPSIS
+.B aq-bubbleplot
+.I level
+.I flavour
+.SH DESCRIPTION
+Given QIIME has produced bubbleplot results using AutoQIIME's naming scheme, this will invoke R to produce a 2D bubbleplot as an SVG file. See the
+.I beta
+flag in
+.BR autoqiime (1).
+
+This assumes there will be \fBbubbleplot_coords_\fIlevelflavour\fB.txt\fR and \fBbeta_div_pcoa\fIflavour\fB/pcoa_weighted_unifrac_otu_table.txt\fR .
+.SH OPTIONS
+.TP
+level
+The taxonomic level to use.
+.TP
+flavour
+The type of beta-diversity analysis done. This is usually a size.
+.SH SEE ALSO
+.BR aq-biplot (1),
+.BR autoqiime (1).

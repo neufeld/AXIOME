@@ -1,0 +1,15 @@
+.\" Authors: Andre Masella
+.TH aq-pretendsummarize 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-pretendsummarize \- Produce a non-summarized OTU table
+.SH SYNOPSIS
+.B aq-pretendsummarize
+.I otu_table.txt
+.SH DESCRIPTION
+QIIME's beta diversity analysis requires a summarized OTU table but there are various reasons to want to plot the original OTUs. Since the formats between the original OTU table and the summarized OTU table are different, this command creates an OTU table in the summarized format, but with the original data.
+.SH OPTIONS
+.TP
+otu_table.txt
+The original, unsummarized OTU table.
+.SH SEE ALSO
+.BR autoqiime (1).

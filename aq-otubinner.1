@@ -1,0 +1,22 @@
+.\" Authors: Andre Masella
+.TH aq-otubinner 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-otubinner \- Separate OTUs by total size
+.SH SYNOPSIS
+.B aq-otubinner
+.I otu_table.txt
+.I binboundary1
+.I binboundary2
+.I binboundary3
+.I ...
+.SH DESCRIPTION
+Splits an OTU table into sub-tables where each sub-table has OTUs with the number of sequences ranging between specific ranges. The output will be placed in files with \fB.bin\fIx\fR appended to the original name, where \fIx\fR is a bin number.
+.SH OPTIONS
+.TP
+otu_table.txt
+The OTU table to split.
+.TP
+binboundary
+The split between two neighbouring bins. Boundaries must be specified in ascending order. Implicity, the first bin is between zero and the first number specified and the last bin is between the largest number specified and the maximum value in the data.
+.SH SEE ALSO
+.BR autoqiime (1).

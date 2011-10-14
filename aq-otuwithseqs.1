@@ -1,0 +1,19 @@
+.\" Authors: Andre Masella
+.TH aq-otuwithseqs 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-otuwithseqs \- Add the representative sequences to an OTU table
+.SH SYNOPSIS
+.B aq-otuwithseqs
+.I rep_set.fasta
+.I otu_table.txt
+.SH DESCRIPTION
+Add an extra column to an OTU table that is the representative sequence for each OTU.
+.SH OPTIONS
+.TP
+rep_set.fasta
+The representative sequence set in FASTA corresponding to the supplied OTU table.
+.TP
+otu_table.txt
+The OTU table to which to add the sequences.
+.SH SEE ALSO
+.BR autoqiime (1).

@@ -1,0 +1,26 @@
+.\" Authors: Andre Masella
+.TH aq-marry-illumina-index 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-marry-illumina-index \- Add tag information from 3-part Illumina reads.
+.SH SYNOPSIS
+.B aq-marry-illumina-index
+[
+.B \-j
+] 
+.B \-f 
+.I file.fastq
+.SH DESCRIPTION
+Combine the indicies with the main (foward and reverse) reads. Normally, this is done by CASAVA, but in a special case of fun, a nameless genome centre didn't prepare the sequence.
+.SH OPTIONS
+.TP
+\-f
+The FASTQ file containing the main read.
+.TP
+\-i
+The FASTQ file containing the index reads.
+.TP
+\-j
+The input file is compressed with
+.BR bzip (1).
+.SH SEE ALSO
+.BR autoqiime (1).

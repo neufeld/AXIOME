@@ -1,0 +1,19 @@
+.\" Authors: Andre Masella
+.TH aq-otunolineage 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-otunolineage \- Replaces the linage with a unique ID
+.SH SYNOPSIS
+.B aq-otunolineage
+.I rep_set.fasta
+.I otu_table.txt
+.SH DESCRIPTION
+Replace the consensus linage for each sequence with the OTU identifier and the representative sequence.
+.SH OPTIONS
+.TP
+rep_set.fasta
+The representative sequence set in FASTA corresponding to the supplied OTU table.
+.TP
+otu_table.txt
+The OTU table to which to add the identifiers.
+.SH SEE ALSO
+.BR autoqiime (1).

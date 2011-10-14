@@ -1,0 +1,19 @@
+.\" Authors: Andre Masella
+.TH aq-otu2pcord 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-otu2pcord \- Convert an OTU table for use with PC-ORD
+.SH SYNOPSIS
+.B aq-otu2pcord
+.I otu_table.txt
+.I n
+.SH DESCRIPTION
+Converts the data in an OTU table into a format digestable by the Windows software PC-ORD. PC-ORD is a bit fussy over how much data it accepts and gives quirky errors when this is not the case.
+.SH OPTIONS
+.TP
+otu_table.txt
+The OTU table to convert.
+.TP
+n
+The number of taxa to put in the OTU table. The PC-ORD manual lies.
+.SH SEE ALSO
+.BR autoqiime (1).

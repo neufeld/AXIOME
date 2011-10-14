@@ -1,0 +1,15 @@
+.\" Authors: Andre Masella
+.TH aq-otu2lnotu 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-otu2lnotu \- Scale counts logarithmically
+.SH SYNOPSIS
+.B aq-otu2lnotu
+.I otu_table.txt
+.SH DESCRIPTION
+Scales each count in the OTU table logarithmically. This produces a distorted OTU table that can be used for downstream analysis where it is desirable for abundant taxa not to dominate the analysis. Doing this might be a Really Bad Idea and you should understand the math of what you are doing.
+.SH OPTIONS
+.TP
+otu_table.txt
+The OTU table to scale.
+.SH SEE ALSO
+.BR autoqiime (1).
