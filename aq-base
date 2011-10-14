@@ -1,4 +1,4 @@
-#!/usr/bin/make -f
+#!/usr/bin/env make -f
 # Automation tool for QIIME
 #
 # Basic rules for doing QIIME analysis. It assumes you have a mapping.txt file with all your sequences and that your sequences are named in QIIME's ${SampleID::int}_${UID::int} format. AutoQIIME does this for you. ;-)

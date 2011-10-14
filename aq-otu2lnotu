@@ -1,4 +1,4 @@
-#!/usr/bin/awk -f
+#!/usr/bin/env awk -f
 
 $1 ~ /^[0-9]*$/ {
 	printf "%s", $1;
