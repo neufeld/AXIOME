@@ -16,7 +16,6 @@ bin_SCRIPTS = \
 	aq-otuhistogram \
 	aq-otunolineage \
 	aq-otuplothistogram \
-	aq-otusumtop \
 	aq-otutop \
 	aq-otuwithseqs \
 	aq-pca \
