@@ -29,8 +29,6 @@ AC_SUBST(GLIB_LIBS)
 
 PKG_CHECK_MODULES(GEE, gee-1.0)
 PKG_CHECK_MODULES(LIBXML, libxml-2.0)
-AC_CHECK_HEADER([math.h], [], [AC_MSG_ERROR([*** math.h is required, install math header files])])
-AC_CHECK_LIB([m], [exp], [], [AC_MSG_ERROR([*** exp is required, install math library files])])
 AC_CHECK_HEADER([zlib.h], [], [AC_MSG_ERROR([*** zlib.h is required, install zlib header files])])
 AC_CHECK_LIB([z], [gzopen], [], [AC_MSG_ERROR([*** gzopen is required, install zlib library files])])
 AC_CHECK_HEADER([bzlib.h], [], [AC_MSG_ERROR([*** bzlib.h is required, install bzip2 header files])])
