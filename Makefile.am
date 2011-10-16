@@ -45,6 +45,7 @@ man1_MANS = \
 	aq-cmplibs.1 \
 	aq-count-n.1 \
 	aq-demux-illumina.1 \
+	aq-estimateq.1 \
 	aq-fasta-length.1 \
 	aq-fastq2oldillumina.1 \
 	aq-filter-fastq-known.1 \
@@ -84,7 +85,7 @@ aq_demux_illumina_CFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
 aq_demux_illumina_LDADD = $(GLIB_LIBS) $(GEE_LIBS)
 aq_demux_illumina_SOURCES = demux-illumina.c
 aq_estimateq_CFLAGS = 
-aq_estimateq_SOURCES = estimateq.c
+aq_estimateq_SOURCES = estimateq.c parser.c
 aq_fastq2oldillumina_CFLAGS = 
 aq_fastq2oldillumina_SOURCES = fastq2oldillumina.c
 aq_filter_fastq_known_CFLAGS = 

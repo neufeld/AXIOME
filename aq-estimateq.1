@@ -1,0 +1,29 @@
+.\" Authors: Andre Masella
+.TH aq-estimateq 1 "October 2011" "1.2" "USER COMMANDS"
+.SH NAME 
+aq-estimateq \- Estimate the error probability using Illumina tags
+.SH SYNOPSIS
+.B aq-estimateq
+[
+.B \-j
+] 
+.B \-f 
+.I file.fastq
+.I tag1 tag2 ...
+.SH DESCRIPTION
+Calculate the error rate in sequencing by counting the number of mismatches between every tag in the FASTQ file and all the tags provided on the command line. The best-matching tag is always assumed to be the best one. This will then calculate total mismatches over total number of nucleotides examined to determine the probability of error. This is how this value was approximated for
+.BR pandaseq (1).
+.SH OPTIONS
+.TP
+\-f
+The FASTQ file to be examined.
+.TP
+\-j
+The input file is compressed with
+.BR bzip (1).
+.TP
+tag
+An Illumina tag present in the file. If any valid tags present in the file are not present on the command line, they will be treated as mismatches to a provided tag, causing the error rate to be overestimated.
+.SH SEE ALSO
+.BR pandaseq (1),
+.BR autoqiime (1).

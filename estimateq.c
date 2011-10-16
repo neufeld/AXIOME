@@ -13,6 +13,7 @@
 #include<unistd.h>
 #include<zlib.h>
 #include "kseq.h"
+#include "parser.h"
 
 /* Function pointers for file I/O such that we can deal with compressed files. */
 void *(*fileopen) (char *, char *) = (void *(*)(char *, char *))gzopen;
@@ -104,17 +105,15 @@ int main(int argc, char **argv)
 
 	while ((len = kseq_read(seq)) >= 0) {
 		int bestmismatches = 6;
-
-		for (j = 0; j < seq->name.l && seq->name.s[j] != '#'; j++) ;
-
-		if (j + 6 >= seq->name.l)
+		seqidentifier id;
+		if (seqid_parse(&id, seq->name.s) == 0)
 			continue;
 
 		for (i = optind; i < argc; i++) {
 			int mismatches = 0;
 			int k;
 			for (k = 0; k < 6; k++) {
-				if (seq->name.s[j + k + 1] != argv[i][k]) {
+				if (id.tag[k] != argv[i][k]) {
 					mismatches++;
 				}
 			}
