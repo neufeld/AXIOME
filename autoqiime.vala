@@ -1011,7 +1011,7 @@ namespace AutoQIIME {
 				return null;
 			}
 		} catch (SpawnError e) {
-				stderr.printf("Could not run `print_qiime_config.py'.");
+				stderr.printf("Could not run `print_qiime_config.py': %s\n", e.message);
 				return null;
 		}
 		var index = output.index_of(QIIME_VERSION_MARKER);
