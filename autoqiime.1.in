@@ -1,12 +1,12 @@
 .\" Authors: Andre Masella
 .TH autoqiime 1 "October 2011" "1.2" "USER COMMANDS"
-.SH NAME 
+.SH NAME
 autoqiime \- Automation toolkit for QIIME
 .SH SYNOPSIS
 .B autoqiime
 .I input.aq
 .SH DESCRIPTION
-AutoQIIME is a way of automating tedious and error-prone analysis with the QIIME toolkit. Given a file of input data and analyses, it genereates a \fBMakefile\fR to perform the analyses.
+AutoQIIME is a way of automating tedious and error-prone analysis with the QIIME toolkit. Given a file of input data and analyses, it generates a \fBMakefile\fR to perform the analyses.
 .SH OPTIONS
 .TP
 input.aq
@@ -20,12 +20,67 @@ Included is a sample configuration file with all possible analyses enabled. The 
 
 Definitions are a list of properties associated with the samples. These are usual physical or chemical information such as sampling time, pH, temperature, humidity, and location. As many properties as needed can be specified and each property can have a type so that incorrect information cannot be entered (e.g., enforcing that "year" be a whole number).
 
-Assemblies are descriptions of the samples. AutoQIIME can automatically assemble pair-end Illumina FASTQ data using 
+Assemblies are descriptions of the samples. AutoQIIME can automatically assemble pair-end Illumina FASTQ data using
 .BR pandaseq (1)
 or read data from FASTA files. In either case, a single file might contain multiple samples multiplexed. The format of this section allows all the input files to be specified and provide information about how to separate samples and the properties, defined above, to be associated with each sample.
 
 Finally, the file lists the analyses to be performed. AutoQIIME will do the analyses in the order specified. Some analyses can be repeated with different parameters and some can be specified only once.
+.TP
+\fB<def name="\fIname\fB" \fR[\fBtype="\fItype\fB"\fR]\fB/>\fR
+The configration file must specify all the types of data we intend to associate with the samples. For instance, if we collected the collected the samples from different times, or different environments, or different substrates, then we define those here. Each definition can have a type. The type \fBd\fR is a decimal number, the type \fBi\fR is an integer, the type \fBs\fR is for text. If absent, the type is assumed to be \fBs\fR. The names \fBColour\fR and \fBDescription\fR are used by certain analyses. For each definition supplied, each sample must have a part \fIname\fB="\fIvalue\fB"\fR where \fIvalue\fR is specific to each sample.
+.TP
+\fB<panda forward="\fIforward.fastq\fB" reverse="\fIreverse.fastq\fB" version="\fIversion\fB" \fR[\fBfprimer="\fIACT...\fB"\fR]\fB \fR[\fBrprimer="\fITAG...\fB"\fR]\fB \fR[\fBfprimer="\fIACT...\fB"\fR]\fB>\fR...\fB</panda>\fR
+Assemble sequences using PANDAseq, if installed. Two files, the forward and reverse reads, must be supplied and they may be compressed with
+.BR gzip "(1) or"
+.BR bzip2 (1).
+Optionally, the forward and reverse primers can be specified as either a nucleotide string, which can contain degenerate nucleotides (e.g., \fBW\fR), or, the number bases to trim from the read. Primer names can also be specified from a database, stored in \fB@prefix@/share/@PACKAGE@/primers.lst\fR, either name or \fB#\fR followed by the name to use the length of that primer.
+
+The version of the CASAVA pipeline that generated the sequences must be specified. If the sequences are in the “old” Illumina format (i.e., not FASTQ), specify \fBversion="1.3"\fR and they will be converted. The newest sequences with PHRED+33-style quality scores are \fBversion="1.8"\fR. Versions 1.4 through 1.7 have identical data formats. If unsure, examine the data files. If every entry is one line, then it is version 1.3. If the quality scores have of many sequences have long stretches of \fB\fR at the end, the it is version 1.4. If they quality scores have many stretches of \fB#\fR, then it is 1.8.
+
+Since read files are often multiplexed, multiple samples can be specified. For each sample, include \fB<sample tag="\fItag\fB" \fR[\fBlimit="\fIlimit\fB"\fR]\fB \fIdefs\fB/>\fR where \fIdefs\fR includes a value for each definition noted above. Specify the 6 nucleotide Illumina sequencing bar code as \fItag\fR. To only allow some of the sequences, set \fIlimit\fR to the desired number of sequences.
+.TP
+\fB<fasta file="\fIfile.fasta\fB">\fR...\fB</fasta>\fR
+Existing FASTA files can be used as sources for sequences. This file may be compressed with
+.BR gzip "(1) or"
+.BR bzip2 (1).
+Sequences must be renamed to be compliant with QIIME's naming conventions. A single FASTA file can contain many samples, if desired. For each sample, include \fB<sample regex="\fIregex\fB" \fR[\fBlimit="\fIlimit\fB"\fR]\fB \fIdefs\fB/>\fR where \fIdefs\fR includes a value for each definition noted above. To only allow some of the sequences, set \fIlimit\fR to the desired number of sequences.
+To separate out multiple samples in each file, \fIregex\fR specifies a regular expression, described in
+.BR regex (7),
+and any sequences with FASTA headers matching that regular expression will be associated with that sample. To match all sequences, specify \fBregex="."\fR. If the sequences have a keyword, specifying it should be sufficient. For instance, all the sequences starting with \fBSALT\fR by specifying \fBregex="^SALT"\fR or only sequences with a numeric identifier by saying \fBregex="^[0-9]*$"\fR.
+.TP
+\fB<alpha/>\fR
+Do a basic alpha diversity analysis (i.e., QIIME's Chao1 curves).
+.TP
+\fB<rankabundance/>\fR
+Make a rank-abundance plot using QIIME.
+.TP
+\fB<compare level="\fIlevel\fB"/>\fR
+Compare libraries on a plot to see if one is a superset of another. This is useful if one sample which is (possibly) a subsample of another. This uses summarised taxa, not OTUs, so the taxonomic level for the analysis must be specified.
+.TP
+\fB<beta \fR[\fBlevel="\fIlevel\fB"\fR]\fB \fR[\fBsize="\fIsize\fB"\fR]\fB \fR[\fBtaxa="\fIdepth\fB"\fR]\fB/>\fR
+Do a QIIME beta diversity analysis and produce biplots and bubble plots. QIIME normally uses summarised taxa for the plots, so the taxonomic level can be specified; if it is omitted, OTUs are used instead. The library may be rarefied to a particular by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect. Specifying \fItaxa\fR can limit the number of taxa the appear in the biplot; the default is 10 and \fBall\fR can specified if desired. -->
+.TP
+\fB<qualityanal/>\fR
+Produce some data on the quality of the raw Illumina reads. This only applies to reads specified to PANDAseq. For more information, see
+.BR aq-qualityanal (1).
+.TP
+\fB<blast/>\fR
+Build a BLAST database over the sequences. This requires
+.BR formatdb (1)
+to be installed. A script called \fBblast\fR will be produced that will invoke
+.BR blastall (1)
+pointing to the appropriate database.
+.TP
+\fB<withseqs/>\fR
+Produce an OTU table with the representatives sequences in a final column.
+.TP
+\fB<uchime \fR[\fBprofile="\fIprofile\fB"\fR]\fB/>\fR
+Do chimera checking with UCHIME. Since the parameters vary based on the type of DNA, you can specify certain \fIprofile\fR to be one of \fBv3-stringent\fR, or \fBv3-relaxed\fR.
+.TP
+\fB<pca/>\fR
+Perform principal components in R using the numeric variables supplied in the definitions. While QIIME's biplots use Unifrac distances, this PCA uses the taxa information and any numeric supplemental information.
 .SH SEE ALSO
 \fB@prefix@/share/doc/@PACKAGE@/sample.aq\fR,
+\fB@prefix@/share/@PACKAGE@/primers.lst\fR,
 .BR pandaseq (1),
 .BR make (1).
