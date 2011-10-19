@@ -31,8 +31,7 @@ pick_otus:suppress_presort_by_abundance_uclust
 pick_otus:suppress_new_clusters
 pick_rep_set:rep_set_picking_method most_abundant
 pick_rep_set:sort_by otu
-align_seqs:template_fp /opt/qiime_support/core_set_aligned.fasta.imputed
-align_seqs:alignment_method pynast
+align_seqs:alignment_method infernal
 align_seqs:pairwise_alignment_method uclust
 align_seqs:blast_db
 align_seqs:min_length 100
@@ -72,16 +71,16 @@ seq.fasta_rep_set.fasta: picked_otus/seq_otus.txt seq.fasta
 	# mkrepset replactes the QIIME algorithm which is stupid
 	#pick_rep_set.py -i picked_otus/seq_otus.txt -f seq.fasta
 
-pynast_aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta 
-	test ! -d pynast_aligned || rm -r pynast_aligned
-	align_seqs.py -i seq.fasta_rep_set.fasta 
+aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
+	test ! -d aligned || rm -r aligned
+	align_seqs.py -m infernal -t $$INFERNAL_MODEL -i seq.fasta_rep_set.fasta
 
 rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt: seq.fasta_rep_set.fasta
 	test ! -d rdp_assigned_taxonomy || rm -r rdp_assigned_taxonomy
 	assign_taxonomy.py -i seq.fasta_rep_set.fasta
 
-seq.fasta_rep_set_aligned_pfiltered.fasta: pynast_aligned/seq.fasta_rep_set_aligned.fasta
-	filter_alignment.py -i pynast_aligned/seq.fasta_rep_set_aligned.fasta -s
+seq.fasta_rep_set_aligned_pfiltered.fasta: aligned/seq.fasta_rep_set_aligned.fasta
+	filter_alignment.py -i aligned/seq.fasta_rep_set_aligned.fasta -s
 
 seq.fasta_rep_set_aligned_pfiltered.tre:seq.fasta_rep_set_aligned_pfiltered.fasta
 	make_phylogeny.py -i seq.fasta_rep_set_aligned_pfiltered.fasta
