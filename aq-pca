@@ -36,4 +36,4 @@ contrib <- apply(p$rotation, 1, function(x) {sqrt(sum(x[1:2]^2));});
 useful <- rownames(newmapping);
 
 # This will fail if useful selects no rows
-biplot(p$x[, c("PC1", "PC2")], p$rotation[useful, c("PC1", "PC2")], asp = p$sdev[2]/p$sdev[1]);
+biplot(p$x[, c("PC1", "PC2")], p$rotation[useful, c("PC1", "PC2")], xlabs = extra[, "Description"], asp = p$sdev[2]/p$sdev[1]);
