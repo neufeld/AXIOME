@@ -977,11 +977,88 @@ namespace AutoQIIME {
 	[CCode(cname = "realpath", cheader_filename = "stdlib.h")]
 	extern string realpath(string path, [CCode(array_length = false, null_terminated = true)] char[] ? buffer = null);
 
+
+	const string QIIME_VERSION_MARKER = "QIIME library version:\t";
+
+	/**
+	 * Check that we have a new enough release of QIIME on this system.
+	 */
+	bool is_version_at_least(int major, int minor) {
+		if (qiime_version.length > 0 && qiime_version[0] > major)
+			return true;
+		if (qiime_version.length > 1 && qiime_version[0] == major && qiime_version[1] >= minor)
+			return true;
+		return false;
+	}
+
+	int[] qiime_version;
+
+	/**
+	 * Determine the QIIME version
+	 */
+	int[]? get_qiime_version() {
+		string output;
+		string error;
+		int status;
+		try {
+			if (!Process.spawn_command_line_sync("print_qiime_config.py", out output, out error, out status) || status != 0) {
+				stderr.printf("Could not run `print_qiime_config.py'. The error output was:\n%s\n", error);
+				return null;
+			}
+		} catch (SpawnError e) {
+				stderr.printf("Could not run `print_qiime_config.py'.");
+				return null;
+		}
+		var index = output.index_of(QIIME_VERSION_MARKER);
+		if (index == -1) {
+			stderr.printf("`print_qiime_config.py' doesn't have a version string like I expect.\n");
+			return null;
+		}
+		index += QIIME_VERSION_MARKER.length;
+		int[] parts = {};
+		int current = -1;
+		while(index < output.length && output[index] != '\n') {
+			if(output[index].isdigit()) {
+				if (current == -1) {
+					current = (int) (output[index] - '0');
+				} else {
+					current = current * 10 + (int) (output[index] - '0');
+				}
+			} else if (output[index] == '.') {
+				parts += current;
+				current = -1;
+			}
+			index++;
+		}
+		if (current != -1) {
+			parts += current;
+		}
+		if (parts.length == 0) {
+			stderr.printf("Could not make sense of the version from `print_qiime_config.py'.\n");
+			return null;
+		}
+		stdout.printf("QIIME version: ");
+		for (int i = 0; i < parts.length; i++) {
+			if (i > 0)
+				stdout.putc('.');
+			stdout.printf("%d", parts[i]);
+		}
+		stdout.putc('\n');
+		return parts;
+	}
+
 	int main(string[] args) {
 		if (args.length != 2) {
 			stderr.printf("Usage: %s config.aq\n", args[0]);
 			return 1;
 		}
+
+		var version = get_qiime_version();
+		if (version == null) {
+			return 1;
+		}
+		qiime_version = version;
+
 		Xml.Doc *doc = Parser.parse_file(args[1]);
 		if (doc == null) {
 			stderr.printf("%s: unable to read or parse file\n", args[1]);
