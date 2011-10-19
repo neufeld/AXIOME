@@ -544,6 +544,7 @@ namespace AutoQIIME {
 					flavour = "";
 				} else if (size == "auto") {
 					flavour = "_auto";
+					output.add_rule("otu_table_auto.txt: otu_table.txt\n\tsingle_rarefaction.py -i otu_table.txt -o otu_table_auto.txt %s -d $$(awk -F '\t' 'NR == 1 {} NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; }}} NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; }} END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest;}' otu_table.txt)\n\n", is_version_at_least(1, 3) ? "" : "--lineages_included");
 				} else {
 					int v = int.parse(size);
 					if (v < 1) {
@@ -551,7 +552,7 @@ namespace AutoQIIME {
 						return false;
 					}
 					flavour = "_%d".printf(v);
-					output.add_rule("otu_table_%d.txt: otu_table.txt\n\tsingle_rarefaction.py -i otu_table.txt -o otu_table_auto.txt --lineages_included -d %d\n\n", v, v);
+					output.add_rule("otu_table_%d.txt: otu_table.txt\n\tsingle_rarefaction.py -i otu_table.txt -o otu_table_auto.txt -d %d %s\n\n", v, v, is_version_at_least(1, 3) ? "" : "--lineages_included");
 				}
 
 				string taxname;
@@ -751,7 +752,11 @@ namespace AutoQIIME {
 			var type = "%s%s".printf(taxname, flavour);
 			if (!(type in summarized_otus)) {
 				summarized_otus.add(type);
-				makerules.append_printf("otu_table_summarized_%s%s.txt: otu_table%s.txt\n\tsummarize_taxa.py -i otu_table%s.txt -L %d -o otu_table_summarized_%s%s.txt -a\n\n", taxname, flavour, flavour, flavour, taxindex, taxname, flavour);
+				if (is_version_at_least(1, 3)) {
+					makerules.append_printf("otu_table_summarized_%s%s.txt: otu_table%s.txt\n\tsummarize_taxa.py -i otu_table%s.txt -L %d -o . -a\n\tmv otu_table_%s_L%d.txt otu_table_summarized_%s%s.txt -a\n\n", taxname, flavour, flavour, flavour, taxindex, flavour, taxindex, taxname, flavour);
+				} else {
+					makerules.append_printf("otu_table_summarized_%s%s.txt: otu_table%s.txt\n\tsummarize_taxa.py -i otu_table%s.txt -L %d -o otu_table_summarized_%s%s.txt -a\n\n", taxname, flavour, flavour, flavour, taxindex, taxname, flavour);
+				}
 			}
 		}
 

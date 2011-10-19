@@ -95,9 +95,6 @@ beta_div%/unweighted_unifrac_otu_table.txt beta_div%/weighted_unifrac_otu_table.
 beta_div_pcoa%/pcoa_unweighted_unifrac_otu_table.txt beta_div_pcoa%/pcoa_weighted_unifrac_otu_table.txt: beta_div%/unweighted_unifrac_otu_table.txt beta_div%/weighted_unifrac_otu_table.txt
 	principal_coordinates.py -i beta_div$* -o beta_div_pcoa$*
 
-# Produce an OTU table which is rarefied buy not summarised
-otu_table_auto.txt: otu_table.txt
-	single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt --lineages_included -d $$(awk -F '\t' 'NR == 1 {} NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; }}} NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; }} END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest;}' otu_table.txt)
 
 otu_table_summarized_otu%.txt: otu_table%.txt
 	aq-pretendsummarize $< > $@
