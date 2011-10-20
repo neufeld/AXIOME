@@ -27,7 +27,7 @@ PKG_CHECK_MODULES(GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED
 AC_SUBST(GLIB_CFLAGS)
 AC_SUBST(GLIB_LIBS)
 
-PKG_CHECK_MODULES(GEE, gee-0.8, [GEE_VER=0.8], [PKG_CHECK_MODULES(GEE, gee-1.0, [GEE_VER=1.0; AC_DEFINE(HAVE_OLD_GEE, 1, [Use short gee constructors])])])
+PKG_CHECK_MODULES(GEE, gee-0.8, [GEE_VER=0.8], [PKG_CHECK_MODULES(GEE, gee-1.0, [GEE_VER=1.0])])
 PKG_CHECK_MODULES(LIBXML, libxml-2.0)
 AC_CHECK_HEADER([zlib.h], [], [AC_MSG_ERROR([*** zlib.h is required, install zlib header files])])
 AC_CHECK_LIB([z], [gzopen], [], [AC_MSG_ERROR([*** gzopen is required, install zlib library files])])

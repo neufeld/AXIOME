@@ -14,7 +14,7 @@
 #include<zlib.h>
 #include<glib.h>
 #include<glib-object.h>
-#include<gee.h>
+#include "fmap.h"
 #include "config.h"
 #include "kseq.h"
 
@@ -59,13 +59,8 @@ int main(int argc, char **argv)
 	kseq_t *seq;
 	int len;
 	int n = 0;
-	GeeHashMap* files;
 	g_type_init();
-#if HAVE_OLD_GEE 
-	files = gee_hash_map_new(G_TYPE_STRING, (GBoxedCopyFunc) g_strdup, g_free, G_TYPE_POINTER, NULL, (GDestroyNotify) fclose, NULL, NULL, NULL);
-#else
-	files = gee_hash_map_new(G_TYPE_STRING, (GBoxedCopyFunc) g_strdup, g_free, G_TYPE_POINTER, NULL, (GDestroyNotify) fclose, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-#endif
+	files_init();
 	/* Process command line arguments. */
 	while ((c = getopt(argc, argv, "jf:")) != -1) {
 		switch (c) {
@@ -122,7 +117,7 @@ int main(int argc, char **argv)
 					perror(buffer);
 					return 1;
 				}
-				gee_abstract_map_set((GeeAbstractMap*) files, argv[c], f);
+				files_put(argv[c], f);
 				fprintf(stderr, "FOPN %s\n", buffer);
 	}
 	while ((len = kseq_read(seq)) >= 0) {
@@ -154,16 +149,12 @@ int main(int argc, char **argv)
 			continue;
 		}
 		indextag[6] = '\0';
-		f = gee_abstract_map_get ((GeeAbstractMap*) files, indextag);
-		if (f == NULL) {
+		if (!files_write(indextag, ">%s_%d\n%s\n", indextag, n, seq->seq.s)) {
 			fprintf(stderr, "EBADF %s\n", indextag);
-		} else {
-			fprintf(f, ">%s_%d\n%s\n", indextag, n,
-					seq->seq.s);
 		}
 	}
 	kseq_destroy(seq);
-	g_object_unref(files);
+	files_finish();
 	if (fileclose(file) != Z_OK && bzip == 0) {
 		perror(filename);
 	}

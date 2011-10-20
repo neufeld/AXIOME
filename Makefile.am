@@ -83,7 +83,7 @@ aq_count_n_CFLAGS =
 aq_count_n_SOURCES = count-n.c
 aq_demux_illumina_CFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
 aq_demux_illumina_LDADD = $(GLIB_LIBS) $(GEE_LIBS)
-aq_demux_illumina_SOURCES = demux-illumina.c
+aq_demux_illumina_SOURCES = fmap.c demux-illumina.c
 aq_estimateq_CFLAGS = 
 aq_estimateq_SOURCES = estimateq.c parser.c
 aq_fastq2oldillumina_CFLAGS = 
@@ -119,3 +119,5 @@ joinn.vala.stamp $(aq_joinn_VALASOURCES:.vala=.c): $(aq_joinn_VALASOURCES)
 mkrepset.vala.stamp $(aq_mkrepset_VALASOURCES:.vala=.c): $(aq_mkrepset_VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -g -C --pkg=gee-$(GEE_VER) --pkg=posix $(aq_mkrepset_VALASOURCES)
 
+fmap.c fmap.h: fmap.vala
+	$(VALAC) $(VALAFLAGS) -g -C -H fmap.h --pkg=gee-$(GEE_VER) fmap.vala
