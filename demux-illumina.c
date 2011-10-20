@@ -15,6 +15,7 @@
 #include<glib.h>
 #include<glib-object.h>
 #include<gee.h>
+#include "config.h"
 #include "kseq.h"
 
 /* Function pointers for file I/O such that we can deal with compressed files. */
@@ -60,8 +61,11 @@ int main(int argc, char **argv)
 	int n = 0;
 	GeeHashMap* files;
 	g_type_init();
+#if HAVE_OLD_GEE 
 	files = gee_hash_map_new(G_TYPE_STRING, (GBoxedCopyFunc) g_strdup, g_free, G_TYPE_POINTER, NULL, (GDestroyNotify) fclose, NULL, NULL, NULL);
-
+#else
+	files = gee_hash_map_new(G_TYPE_STRING, (GBoxedCopyFunc) g_strdup, g_free, G_TYPE_POINTER, NULL, (GDestroyNotify) fclose, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+#endif
 	/* Process command line arguments. */
 	while ((c = getopt(argc, argv, "jf:")) != -1) {
 		switch (c) {

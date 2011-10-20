@@ -93,7 +93,7 @@ namespace AutoQIIME {
 						}
 						continue;
 					}
-					if (regexstr in subst) {
+					if (subst.has_key(regexstr)) {
 						definition_error(node, "Duplicated regex `%s'. Skipping.\n", regexstr);
 						continue;
 					}
