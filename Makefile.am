@@ -110,6 +110,13 @@ autoqiime_LDADD = $(GLIB_LIBS) $(GEE_LIBS) $(LIBXML_LIBS)
 autoqiime_VALASOURCES = autoqiime.vala
 autoqiime_SOURCES = autoqiime.vala.stamp $(autoqiime_VALASOURCES:.vala=.c)
 
+BUILT_SOURCES = \
+	fmap.c fmap.h \
+	$(autoqiime_VALASOURCES:.vala=.c) \
+	$(aq_joinn_VALASOURCES:.vala=.c) \
+	$(aq_mkrepset_VALASOURCES:.vala=.c) \
+	$(NULL)
+
 autoqiime.vala.stamp $(autoqiime_VALASOURCES:.vala=.c): $(autoqiime_VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -g -C --vapidir=. --pkg=libmagic --pkg=gee-$(GEE_VER) --pkg=libxml-2.0 $(autoqiime_VALASOURCES)
 
