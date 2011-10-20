@@ -28,6 +28,8 @@ debian/files
 debian/*.log
 debian/*.substvars
 .deps
+fmap.c
+fmap.h
 INSTALL
 joinn.c
 .libs
