@@ -1052,6 +1052,52 @@ namespace AutoQIIME {
 		return parts;
 	}
 
+	bool process_document(string filename, RuleLookup lookup, Output output) {
+		Xml.Doc *doc = Parser.parse_file(filename);
+		if (doc == null) {
+			stderr.printf("%s: unable to read or parse file\n", filename);
+			return false;
+		}
+
+		Xml.Node *root = doc-> get_root_element();
+		if (root == null) {
+			stderr.printf("%s: no data in file\n", filename);
+			return false;
+			delete doc;
+		}
+
+		/* Iterate over the XML document and call all the appropriate rules. */
+		for (Xml.Node *iter = root-> children; iter != null; iter = iter-> next) {
+			if (iter-> type != ElementType.ELEMENT_NODE) {
+				continue;
+			}
+			if (iter-> name == "include") {
+				if (process_document(iter-> get_content(), lookup, output)) {
+					continue;
+				} else {
+					stderr.printf("%s: %d: Problem in included file `%s'.\n", filename, iter-> line, iter-> get_content());
+					delete doc;
+					return false;
+				}
+			}
+
+			var rule = lookup[iter-> name];
+			if (rule == null) {
+				stderr.printf("%s: %d: The directive `%s' is either unknown, in the wrong place, or duplicated.\n", filename, iter-> line, iter-> name);
+				delete doc;
+				return false;
+			}
+			if (!rule.process(iter, output)) {
+				stderr.printf("%s: %d: The directive `%s' is malformed.\n", filename, iter-> line, iter-> name);
+				delete doc;
+				return false;
+			}
+		}
+		delete doc;
+		return true;
+	}
+
+
 	int main(string[] args) {
 		if (args.length != 2) {
 			stderr.printf("Usage: %s config.aq\n", args[0]);
@@ -1064,26 +1110,12 @@ namespace AutoQIIME {
 		}
 		qiime_version = version;
 
-		Xml.Doc *doc = Parser.parse_file(args[1]);
-		if (doc == null) {
-			stderr.printf("%s: unable to read or parse file\n", args[1]);
-			return 1;
-		}
-
-		Xml.Node *root = doc-> get_root_element();
-		if (root == null) {
-			delete doc;
-			stderr.printf("%s: no data in file\n", args[1]);
-			return 1;
-		}
-
 		var dirname = (args[1].has_suffix(".aq") ? args[1].substring(0, args[1].length-3) : args[1]).concat(".qiime");
 		var output = new Output(dirname, args[1]);
 
 		stdout.printf("Creating directory...\n");
 		if (DirUtils.create_with_parents(dirname, 0755) == -1) {
 			stderr.printf("%s: %s\n", dirname, strerror(errno));
-			delete doc;
 			return 1;
 		}
 
@@ -1117,22 +1149,8 @@ namespace AutoQIIME {
 			stderr.printf("Warning: Couldn't find the primers list in `%s'.\n", DATADIR);
 		}
 
-		/* Iterate over the XML document and call all the appropriate rules. */
-		for (Xml.Node *iter = root-> children; iter != null; iter = iter-> next) {
-			if (iter-> type != ElementType.ELEMENT_NODE) {
-				continue;
-			}
-
-			var rule = lookup[iter-> name];
-			if (rule == null) {
-				stderr.printf("%s: %d: The directive `%s' is either unknown, in the wrong place, or duplicated.\n", args[1], iter-> line, iter-> name);
-				delete doc;
-				return 1;
-			}
-			if (!rule.process(iter, output)) {
-				delete doc;
-				return 1;
-			}
+		if (!process_document(args[1], lookup, output)) {
+			return 1;
 		}
 
 		/* Generate the Makefile and mapping.txt. */
@@ -1142,7 +1160,6 @@ namespace AutoQIIME {
 			stdout.printf("Generating makefile...\n");
 			state = output.generate_makefile(lookup);
 		}
-		delete doc;
 		return state ? 0 : 1;
 	}
 }

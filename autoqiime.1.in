@@ -26,6 +26,9 @@ or read data from FASTA files. In either case, a single file might contain multi
 
 Finally, the file lists the analyses to be performed. AutoQIIME will do the analyses in the order specified. Some analyses can be repeated with different parameters and some can be specified only once.
 .TP
+\fB<include>\fIfilename\fB</include>\fR
+Includes the contents of another file as if they were typed in the location where this command is. This may be used anywhere in the configuration file and may be used multiple times. A file must not include itself, directly or indirectly.
+.TP
 \fB<def name="\fIname\fB" \fR[\fBtype="\fItype\fB"\fR]\fB/>\fR
 The configration file must specify all the types of data we intend to associate with the samples. For instance, if we collected the collected the samples from different times, or different environments, or different substrates, then we define those here. Each definition can have a type. The type \fBd\fR is a decimal number, the type \fBi\fR is an integer, the type \fBs\fR is for text. If absent, the type is assumed to be \fBs\fR. The names \fBColour\fR and \fBDescription\fR are used by certain analyses. For each definition supplied, each sample must have a part \fIname\fB="\fIvalue\fB"\fR where \fIvalue\fR is specific to each sample.
 .TP
