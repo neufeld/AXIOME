@@ -61,7 +61,7 @@ Make a rank-abundance plot using QIIME.
 Compare libraries on a plot to see if one is a superset of another. This is useful if one sample which is (possibly) a subsample of another. This uses summarised taxa, not OTUs, so the taxonomic level for the analysis must be specified.
 .TP
 \fB<beta \fR[\fBlevel="\fIlevel\fB"\fR]\fB \fR[\fBsize="\fIsize\fB"\fR]\fB \fR[\fBtaxa="\fIdepth\fB"\fR]\fB/>\fR
-Do a QIIME beta diversity analysis and produce biplots and bubble plots. QIIME normally uses summarised taxa for the plots, so the taxonomic level can be specified; if it is omitted, OTUs are used instead. The library may be rarefied to a particular by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect. Specifying \fItaxa\fR can limit the number of taxa the appear in the biplot; the default is 10 and \fBall\fR can specified if desired. -->
+Do a QIIME beta diversity analysis and produce biplots and bubble plots. QIIME normally uses summarised taxa for the plots, so the taxonomic level can be specified; if it is omitted, OTUs are used instead. The library may be rarefied to a particular by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect. Specifying \fItaxa\fR can limit the number of taxa the appear in the biplot; the default is 10 and \fBall\fR can specified if desired.
 .TP
 \fB<qualityanal/>\fR
 Produce some data on the quality of the raw Illumina reads. This only applies to reads specified to PANDAseq. For more information, see
@@ -91,3 +91,36 @@ Full path to the alignment Infernal model, usually \fBseed.16s.reference_model.s
 \fB@prefix@/share/@PACKAGE@/primers.lst\fR,
 .BR pandaseq (1),
 .BR make (1).
+
+The following are components used by AutoQIIME or supplemental tools:
+.BR aq-base (1),
+.BR aq-biplot (1),
+.BR aq-bubbleplot (1),
+.BR aq-cmplibs (1),
+.BR aq-count-n (1),
+.BR aq-demux-illumina (1),
+.BR aq-estimateq (1),
+.BR aq-fasta-length (1),
+.BR aq-fastq2oldillumina (1),
+.BR aq-filter-fastq-known (1),
+.BR aq-joinn (1),
+.BR aq-libcontrib (1),
+.BR aq-marry-illumina-index (1),
+.BR aq-mkrepset (1),
+.BR aq-oldillumina2fastq (1),
+.BR aq-otu2lnotu (1),
+.BR aq-otu2pcord (1),
+.BR aq-otubinner (1),
+.BR aq-otuhistogram (1),
+.BR aq-otunolineage (1),
+.BR aq-otuplothistogram (1),
+.BR aq-otusum (1),
+.BR aq-otutop (1),
+.BR aq-otuwithseqs (1),
+.BR aq-pca (1),
+.BR aq-pretendsummarize (1),
+.BR aq-qualhisto (1),
+.BR aq-qualityanal (1),
+.BR aq-rareotuwithlineage (1),
+.BR aq-sort-fasta (1),
+.BR aq-syntheticfastq (1).
