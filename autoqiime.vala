@@ -73,7 +73,7 @@ namespace AutoQIIME {
 					return false;
 				}
 				if (!FileUtils.test(file, FileTest.EXISTS)) {
-					definition_error(node, "File `%s' does not exist.\n", file);
+					definition_error(node, "File \"%s\" does not exist.\n", file);
 					return false;
 				}
 				var subst = new HashMap<string, int>();
@@ -94,7 +94,7 @@ namespace AutoQIIME {
 						continue;
 					}
 					if (subst.has_key(regexstr)) {
-						definition_error(node, "Duplicated regex `%s'. Skipping.\n", regexstr);
+						definition_error(node, "Duplicated regex \"%s\". Skipping.\n", regexstr);
 						continue;
 					}
 					subst[regexstr] = output.add_sample(sample);
@@ -160,7 +160,7 @@ namespace AutoQIIME {
 					return false;
 				}
 				if (!FileUtils.test(forward, FileTest.EXISTS)) {
-					definition_error(definition, "File `%s' does not exist.\n", forward);
+					definition_error(definition, "File \"%s\" does not exist.\n", forward);
 					return false;
 				}
 
@@ -199,7 +199,7 @@ namespace AutoQIIME {
 					convert = false;
 					dashsix = false;
 				} else {
-					definition_error(definition, "The version `%s' is not one that I recognise. You should probably do something about that. Until then, I'm going to make some assumptions.\n", version);
+					definition_error(definition, "The version \"%s\" is not one that I recognise. You should probably do something about that. Until then, I'm going to make some assumptions.\n", version);
 					domagic = true;
 					convert = false;
 					dashsix = false;
@@ -384,7 +384,7 @@ namespace AutoQIIME {
 						output["UCHIMEFLAGS"] = "--mindiv 1 --minh 2.5";
 						break;
 					default :
-						definition_error(definition, "Unknown profile `%s'.\n", profile);
+						definition_error(definition, "Unknown profile \"%s\".\n", profile);
 						return false;
 					}
 				}
@@ -505,7 +505,7 @@ namespace AutoQIIME {
 					}
 				}
 				if (!hasnumeric) {
-					definition_error(definition, "You should probably have at least one numeric variable over which to do PCA.");
+					definition_error(definition, "You should probably have at least one numeric variable over which to do PCA.\n");
 				}
 				output.add_target("biplot.pdf");
 				return true;
@@ -548,7 +548,7 @@ namespace AutoQIIME {
 				} else {
 					int v = int.parse(size);
 					if (v < 1) {
-						definition_error(definition, "Cannot rareify to a size of `%s'. Use a positive number or `auto'.\n", size);
+						definition_error(definition, "Cannot rareify to a size of \"%s\". Use a positive number or \"auto\".\n", size);
 						return false;
 					}
 					flavour = "_%d".printf(v);
@@ -1007,16 +1007,16 @@ namespace AutoQIIME {
 		int status;
 		try {
 			if (!Process.spawn_command_line_sync("print_qiime_config.py", out output, out error, out status) || status != 0) {
-				stderr.printf("Could not run `print_qiime_config.py'. The error output was:\n%s\n", error);
+				stderr.printf("Could not run \"print_qiime_config.py\". The error output was:\n%s\n", error);
 				return null;
 			}
 		} catch (SpawnError e) {
-				stderr.printf("Could not run `print_qiime_config.py': %s\n", e.message);
+				stderr.printf("Could not run \"print_qiime_config.py\": %s\n", e.message);
 				return null;
 		}
 		var index = output.index_of(QIIME_VERSION_MARKER);
 		if (index == -1) {
-			stderr.printf("`print_qiime_config.py' doesn't have a version string like I expect.\n");
+			stderr.printf("\"print_qiime_config.py\" doesn't have a version string like I expect.\n");
 			return null;
 		}
 		index += QIIME_VERSION_MARKER.length;
@@ -1039,7 +1039,7 @@ namespace AutoQIIME {
 			parts += current;
 		}
 		if (parts.length == 0) {
-			stderr.printf("Could not make sense of the version from `print_qiime_config.py'.\n");
+			stderr.printf("Could not make sense of the version from \"print_qiime_config.py\".\n");
 			return null;
 		}
 		stdout.printf("QIIME version: ");
@@ -1075,7 +1075,7 @@ namespace AutoQIIME {
 				if (process_document(iter-> get_content(), lookup, output)) {
 					continue;
 				} else {
-					stderr.printf("%s: %d: Problem in included file `%s'.\n", filename, iter-> line, iter-> get_content());
+					stderr.printf("%s: %d: Problem in included file \"%s\".\n", filename, iter-> line, iter-> get_content());
 					delete doc;
 					return false;
 				}
@@ -1083,12 +1083,12 @@ namespace AutoQIIME {
 
 			var rule = lookup[iter-> name];
 			if (rule == null) {
-				stderr.printf("%s: %d: The directive `%s' is either unknown, in the wrong place, or duplicated.\n", filename, iter-> line, iter-> name);
+				stderr.printf("%s: %d: The directive \"%s\" is either unknown, in the wrong place, or duplicated.\n", filename, iter-> line, iter-> name);
 				delete doc;
 				return false;
 			}
 			if (!rule.process(iter, output)) {
-				stderr.printf("%s: %d: The directive `%s' is malformed.\n", filename, iter-> line, iter-> name);
+				stderr.printf("%s: %d: The directive \"%s\" is malformed.\n", filename, iter-> line, iter-> name);
 				delete doc;
 				return false;
 			}
@@ -1146,7 +1146,7 @@ namespace AutoQIIME {
 				primers[parts[0]] = parts[1];
 			}
 		} else {
-			stderr.printf("Warning: Couldn't find the primers list in `%s'.\n", DATADIR);
+			stderr.printf("Warning: Couldn't find the primers list in \"%s\".\n", DATADIR);
 		}
 
 		if (!process_document(args[1], lookup, output)) {
