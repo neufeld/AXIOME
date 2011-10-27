@@ -1,3 +1,16 @@
+autoqiime (1.2) lucid natty oneiric; urgency=low
+
+  * Added manual pages for all utilities
+  * Fixed build issues with new libgee
+  * QIIME version is checked to support changes in QIIME 1.3.0
+  * Switched to Infernal for alignment
+  * Fixed incorrectly named references to scripts
+  * Modified scaling for otu2lnotu
+  * Removed redundant script (otusumtop)
+  * Fixed bug in biplot data sources where biplots were getting data
+    from the wrong PCOA files
+
+ -- Andre Masella <andre@masella.name>  Thu, 27 Oct 2011 11:40:44 -0400
 autoqiime (1.1) natty; urgency=low
 
   * Fixed packaging issue with stock Vala

@@ -15,7 +15,8 @@ namespace Files {
 	public bool write(string s, string format, ...) {
 		if (map.has_key(s)) {
 			var va = va_list();
-			map[s].stream.vprintf(format, va);
+			var str = format.vprintf(va);
+			map[s].stream.puts(str);
 			return true;
 		} else {
 			return false;
