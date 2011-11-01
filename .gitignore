@@ -22,7 +22,9 @@ build-aux/install-sh
 build-aux/ltmain.sh
 build-aux/missing
 ChangeLog
-config.*
+config.h*
+config.log
+config.status
 configure
 debian/files
 debian/*.log

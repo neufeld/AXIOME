@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<autoqiime>
+<autoqiime version="1.2">
 	<!-- Definitions -->
 	<!-- First, we must specify all the types of data we intend to associate with our data. For instance, if we collected the collected the samples from different times, or different environment, or different substrates, then we define those here. Each definition can have a type. The type "d" is a decimal number, the type "i" is an integer, the type "s" is for text. If absent, the type is assumed to be "s". -->
 	<def name="pH" type="d"/>

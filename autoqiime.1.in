@@ -16,7 +16,21 @@ Normally, one creates a input file with a \fB.aq\fR extension. After running Aut
 
 If \fBmake\fR is interrupted, invoking it again will continue, repeating only the last command. Furthermore, if input files are changed, \fBmake\fR will attempt to return the minimum number of commands needed to update the analysis. Sometimes, this does not work as expected and deleting \fBseq.fasta\fR will guarantee all files will be rebuilt.
 .SH CONFIGURATION FILE
-Included is a sample configuration file with all possible analyses enabled. The configuration file has three components: definitions, assemblies, and analyses.
+Included is a sample configuration file with all possible analyses enabled. The configuration file has three components: definitions, assemblies, and analyses. File will look like this.
+
+.B <?xml version="1.0"?>
+.br
+.B <autoqiime version="1.2">
+.br
+.I Definitions
+.br
+.I Assemblies
+.br
+.I Analyses
+.br
+.B </autoqiime>
+
+The version is used to check that a file is not newer than the version of AutoQIIME being used.
 
 Definitions are a list of properties associated with the samples. These are usual physical or chemical information such as sampling time, pH, temperature, humidity, and location. As many properties as needed can be specified and each property can have a type so that incorrect information cannot be entered (e.g., enforcing that "year" be a whole number).
 
@@ -25,6 +39,9 @@ Assemblies are descriptions of the samples. AutoQIIME can automatically assemble
 or read data from FASTA files. In either case, a single file might contain multiple samples multiplexed. The format of this section allows all the input files to be specified and provide information about how to separate samples and the properties, defined above, to be associated with each sample.
 
 Finally, the file lists the analyses to be performed. AutoQIIME will do the analyses in the order specified. Some analyses can be repeated with different parameters and some can be specified only once.
+.TP
+\fB<!-- \fIcomment\fB -->\fR
+This is a comment and will be ignored.
 .TP
 \fB<include>\fIfilename\fB</include>\fR
 Includes the contents of another file as if they were typed in the location where this command is. This may be used anywhere in the configuration file and may be used multiple times. A file must not include itself, directly or indirectly.

@@ -118,7 +118,7 @@ BUILT_SOURCES = \
 	$(NULL)
 
 autoqiime.vala.stamp $(autoqiime_VALASOURCES:.vala=.c): $(autoqiime_VALASOURCES)
-	$(VALAC) $(VALAFLAGS) -g -C --vapidir=. --pkg=libmagic --pkg=gee-$(GEE_VER) --pkg=libxml-2.0 $(autoqiime_VALASOURCES)
+	$(VALAC) $(VALAFLAGS) -g -C --vapidir=. --pkg=config --pkg=libmagic --pkg=gee-$(GEE_VER) --pkg=libxml-2.0 $(autoqiime_VALASOURCES)
 
 joinn.vala.stamp $(aq_joinn_VALASOURCES:.vala=.c): $(aq_joinn_VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -g -C  $(aq_joinn_VALASOURCES)
