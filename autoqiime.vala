@@ -624,6 +624,7 @@ namespace AutoQIIME {
 		public HashMap<string, string> vars { get; private set; }
 		Set<string> summarized_otus;
 		StringBuilder targets = new StringBuilder();
+		ArrayList<Xml.Doc*> doc_list;
 
 		public Output(string dirname, string sourcefile) {
 			this.dirname = dirname;
@@ -638,6 +639,7 @@ namespace AutoQIIME {
 			summarized_otus = new HashSet<string>();
 			targets = new StringBuilder();
 			vars = new HashMap<string, string>();
+			doc_list = new ArrayList<Xml.Doc*>();
 		}
 
 		/**
@@ -820,6 +822,14 @@ namespace AutoQIIME {
 				awkprint.append_printf(") { print \">%d_\" NR \"\\n\" seq; count%d++; }", entry.value, entry.value);
 			}
 			seqrule.append_printf("\t(%s | awk '/^>/ { if (seq) {%s } name = substr($$0, 2); seq = \"\"; } $$0 !~ /^>/ {seq = seq $$0; } END { if (seq) {%s }}' >> seq.fasta) 2>&1 | bzip2 > seq_%d.log.bz2\n\n", prep, awkprint.str, awkprint.str, sequence_preparations++);
+		}
+		public void add_doc(Xml.Doc* doc) {
+			doc_list.add(doc);
+		}
+		~Output() {
+			foreach(var doc in doc_list) {
+				delete doc;
+			}
 		}
 	}
 
@@ -1100,7 +1110,7 @@ namespace AutoQIIME {
 				return false;
 			}
 		}
-		delete doc;
+		output.add_doc(doc);
 		return true;
 	}
 
