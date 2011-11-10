@@ -73,7 +73,7 @@ seq.fasta_rep_set.fasta: picked_otus/seq_otus.txt seq.fasta
 
 aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
 	test ! -d aligned || rm -r aligned
-	align_seqs.py -m infernal -t $$INFERNAL_MODEL -i seq.fasta_rep_set.fasta
+	align_seqs.py -o aligned -m infernal -t $$INFERNAL_MODEL -i seq.fasta_rep_set.fasta
 
 rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt: seq.fasta_rep_set.fasta
 	test ! -d rdp_assigned_taxonomy || rm -r rdp_assigned_taxonomy
