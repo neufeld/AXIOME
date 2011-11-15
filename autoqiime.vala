@@ -358,6 +358,58 @@ namespace AutoQIIME {
 		}
 
 		/**
+		 * Produce NMF concordance plot
+		 */
+		class ConcordancePlot : RuleProcessor {
+			public override RuleType get_ruletype() {
+				return RuleType.ANALYSIS;
+			}
+			public override unowned string get_name() {
+				return "nmf-concordance";
+			}
+			public override unowned string ? get_include() {
+				return null;
+			}
+			public override bool is_only_once() {
+				return true;
+			}
+			public override bool process(Xml.Node *definition, Output output) {
+				output.add_target("nmf-concordance.pdf");
+				return true;
+			}
+		}
+
+		/**
+		 * Non-negative matrix factorization
+		 *
+		 * Do a non-negative matrix factorization at a particular degree. This relies on an R script to do the heavy lifting.
+		 */
+		class NonnegativeMatrixFactorization : RuleProcessor {
+			public override RuleType get_ruletype() {
+				return RuleType.ANALYSIS;
+			}
+			public override unowned string get_name() {
+				return "nmf";
+			}
+			public override unowned string ? get_include() {
+				return null;
+			}
+			public override bool is_only_once() {
+				return false;
+			}
+			public override bool process(Xml.Node *definition, Output output) {
+				var degree = int.parse(definition-> get_prop("degree"));
+				if (degree < 2 || degree > 30) {
+					definition_error(definition, "The degree \"%s\" is not resonable for NMF.\n", definition-> get_prop("degree"));
+					return false;
+				}
+				output.add_target("nmf_%d.pdf".printf(degree));
+				output.add_rule("nmf_%d.pdf: otu_table.txt mapping.extra\n\taq-nmf %d\n\n", degree, degree);
+				return true;
+			}
+		}
+
+		/**
 		 * Perform a chimera check with uchime
 		 */
 		class UchimeCheck : RuleProcessor {
@@ -1142,7 +1194,9 @@ namespace AutoQIIME {
 		lookup.add(new Analyses.AlphaDiversity());
 		lookup.add(new Analyses.BetaDiversity());
 		lookup.add(new Analyses.BlastDatabase());
+		lookup.add(new Analyses.ConcordancePlot());
 		lookup.add(new Analyses.LibraryComparison());
+		lookup.add(new Analyses.NonnegativeMatrixFactorization());
 		lookup.add(new Analyses.PrincipalComponentAnalysis());
 		lookup.add(new Analyses.QualityAnalysis());
 		lookup.add(new Analyses.RankAbundance());

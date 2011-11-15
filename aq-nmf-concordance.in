@@ -1,0 +1,24 @@
+#!/usr/bin/env Rscript
+# Copyright 2011
+#  Xingpeng Jiang <xingpengjiang@gmail.com>
+#  Jonathan Dushoff <dushoff@mcmaster.ca>
+#  Andre Masella <andre@masella.name>
+kstart <- 2  # start rank
+kend <- ncol(otutable) - 1   # end rank
+nloop <- 100  # runs for each rank
+nmf.method <- "brunet" # NMF method
+
+source("@prefix@/share/@PACKAGE@/nmf.R")
+
+print("Reading OTU table")
+otutable <- read.table("otu_table.txt", skip = 1, 
+		comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+print("Computing")
+z <- apply(as.matrix(otutable[, 1:(ncol(otutable) - 1)]), 2, function(x) { x/sum(x) })
+ad <- ConsensusFuzzyH(z, nmf.method = nmf.method, Rnmf = FALSE, kstart, kend, nloop, method = "square", ifseed = FALSE)
+
+print("Plotting")
+pdf("nmf-concordance.pdf")
+print(ad$averdiff)
+plot(kstart:kend, ad$averdiff, type = "l", xlab = "Degree", ylab = "Concordance")
+points(kstart:kend, ad$averdiff, pch = 16)

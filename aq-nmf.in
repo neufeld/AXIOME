@@ -1,0 +1,59 @@
+#!/usr/bin/env Rscript
+# Copyright 2011
+#  Xingpeng Jiang <xingpengjiang@gmail.com>
+#  Jonathan Dushoff <dushoff@mcmaster.ca>
+#  Andre Masella <andre@masella.name>
+K <- as.numeric(tail(commandArgs(),1))
+nloop <- 100
+
+source("@prefix@/share/@PACKAGE@/nmf.R")
+
+# Similarity threshold
+simiv <- 0.8
+# Main code
+if (is.na(K) || K < 2 || K > 20) {
+	print("No dimension specified on command line")
+	q("no", status = 1, runLast = FALSE)
+	
+}
+print("Reading OTU table")
+otutable <- read.table("otu_table.txt", skip = 1, 
+		comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+print("Reading mapping extra");
+extra <- read.table("mapping.extra", header = TRUE,
+    comment.char = "", row.names = "X.SampleID", sep = "\t")
+# Create a normalised matrix
+Z <- apply(otutable[, 1:(ncol(otutable) - 1)], 2, function(x) { x/sum(x) })
+print("Factoring...")
+best <- BestKLDiver(Z, K, nloop, nmf.method = "brunet", r.nmf = FALSE, difcon = 1e-12, ifseed = TRUE)
+K <- nrow(best$Hmatrix)
+H <- apply(best$Hmatrix, 1, rnor)
+
+P <- t(apply(Z, 1, rnor))
+
+An <- P %*% H  # similarity matrix of taxas and basis taxas
+#indk <- matrix()
+#ind1 <- matrix()
+#ind <- matrix()
+#lix0 <- 1
+V.m <- c(1:ncol(best$Hmatrix))
+lim <- 0.001
+Spe <- spectreorder(best$Hmatrix, L = 2, beta = c(0.001, 0.2), lim = lim)
+print("Writing basis taxa")
+for (k in 1:K) {
+	pfam.file <- file(paste("basis_taxa_", K, "_", k, ".txt", sep = ""), "w")
+		ix <- write.taxa.list(X = An, P = P, H = H, spw1 = spw1, 
+				labelnames = labelname, taxaid = otutable[, ncol(otutable)], pfams = otutable[, ncol(otutable)], 
+				ixv = Spe$V, k, pfam.file = pfam.file, 
+				simiv = simiv, profile = otutable[, 1:(ncol(otutable) - 1)], V.m = V.m)
+		#lix <- length(ix)
+		#indk[lix0:(lix0 + lix - 1)] <- k
+		#ind1[lix0:(lix0 + lix - 1)] <- ix
+		#lix0 = lix0 + lix
+		close(pfam.file)
+}
+pdf(paste("nmf_", K, ".pdf", sep = ""))
+nmfplot(Spe$HTH, extra[Spe$V, "Description"], extra[Spe$V, "Description"], cexaxis = 0.8)
+nmfplot(Spe$HTH, extra[Spe$V, "Description"], extra[Spe$V, "Description"], cexaxis = 0.8, cexayis = 0.5)
+nmfplot.h(best$Hmatrix[, Spe$V], taxa = paste("Basis taxa", 1:K), samples = extra[Spe$V, "Description"])
+#ind <- cbind(indk, ind1) 

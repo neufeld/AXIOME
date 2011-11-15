@@ -8,6 +8,8 @@ aq-filter-fastq-known
 aq-joinn
 aq-marry-illumina-index
 aq-mkrepset
+aq-nmf
+aq-nmf-concordance
 aq-qualhisto
 aq-syntheticfastq
 autom4te.cache

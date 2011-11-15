@@ -40,5 +40,10 @@ AC_SUBST(GEE_CFLAGS)
 AC_SUBST(GEE_LIBS)
 AC_SUBST(GEE_VER)
 
-AC_CONFIG_FILES([Makefile autoqiime.1]) 
+AC_CONFIG_FILES([
+	Makefile
+	autoqiime.1
+	aq-nmf
+	aq-nmf-concordance
+	]) 
 AC_OUTPUT

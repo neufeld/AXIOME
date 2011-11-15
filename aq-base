@@ -135,4 +135,8 @@ chimeras%.uchime chimeras%.aln chimeras%.fasta: identities%.fasta
 biplot.pdf: mapping.txt otu_table.txt headers.txt
 	aq-pca
 
+# NMF Concordance
+nmf-concordance.pdf: otu_table.txt
+	aq-nmf-concordance
+
 .PHONY: all alpha

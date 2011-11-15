@@ -7,6 +7,8 @@ bin_SCRIPTS = \
 	aq-cmplibs \
 	aq-fasta-length \
 	aq-libcontrib \
+	aq-nmf \
+	aq-nmf-concordance \
 	aq-oldillumina2fastq \
 	aq-otu2lnotu \
 	aq-otu2pcord \
@@ -53,6 +55,8 @@ man1_MANS = \
 	aq-libcontrib.1 \
 	aq-marry-illumina-index.1 \
 	aq-mkrepset.1 \
+	aq-nmf-concordance.1 \
+	aq-nmf.1 \
 	aq-oldillumina2fastq.1 \
 	aq-otu2lnotu.1 \
 	aq-otu2pcord.1 \
@@ -74,7 +78,11 @@ man1_MANS = \
 	$(NULL)
 
 docdir = $(datadir)/doc/@PACKAGE@
-dist_pkgdata_DATA = primers.lst
+dist_pkgdata_DATA = \
+	nmf.R \
+	primers.lst \
+	$(NULL)
+
 doc_DATA = \
 	sample.aq \
 	$(NULL)

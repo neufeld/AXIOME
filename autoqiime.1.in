@@ -99,6 +99,15 @@ Do chimera checking with UCHIME. Since the parameters vary based on the type of 
 .TP
 \fB<pca/>\fR
 Perform principal components in R using the numeric variables supplied in the definitions. While QIIME's biplots use Unifrac distances, this PCA uses the taxa information and any numeric supplemental information.
+.TP
+\fB<nmf-concordance/>\fR
+Create a concordance plot for non-negative matrix factorization. The actual NMF analysis, described below, requires a degree and a concordance plot is needed which will show the suitability of a particular degree for the data. The degrees that appear as local minima in the concordance plot are suitable to try for NMF analysis. See
+.BR aq-nmf-concordance (1)
+for more information.
+.TP
+\fB<nmf degree="\fIdegree\fB"/>\fR
+Do a non-negative matrix factorization of the data creating \fIdegree\fR bases, where this degree has been selected from the concordance plot generated above. For more information, see
+.BR aq-nmf (1).
 .SH ENVIRONMENT VARIABLES
 .TP
 INFERNAL_MODEL
@@ -124,6 +133,8 @@ The following are components used by AutoQIIME or supplemental tools:
 .BR aq-libcontrib (1),
 .BR aq-marry-illumina-index (1),
 .BR aq-mkrepset (1),
+.BR aq-nmf (1),
+.BR aq-nmf-concordance (1),
 .BR aq-oldillumina2fastq (1),
 .BR aq-otu2lnotu (1),
 .BR aq-otu2pcord (1),
