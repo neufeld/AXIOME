@@ -1,0 +1,6 @@
+#!/bin/sh
+
+(for each in ./autoqiime.1 ./aq-*.1
+do
+	man -t ${each}
+done ) | ps2pdf - > AutoQIIMEManual.pdf
