@@ -106,7 +106,7 @@ rank_abundance/rank_abundance.pdf: otu_table.txt
 
 # Produce a BLAST database
 nr.nhr nr.nin nr.nsq: seq.fasta
-	formatdb -i seq.fasta -n nr -p F
+	formatdb -i seq.fasta -n nr -p F -t "$(BLASTDB_NAME)"
 
 # Decorate OTU table with representative sequences
 otu_table_with_sequences.txt: seq.fasta_rep_set.fasta otu_table.txt

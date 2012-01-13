@@ -84,12 +84,12 @@ Do a QIIME beta diversity analysis and produce biplots and bubble plots. QIIME n
 Produce some data on the quality of the raw Illumina reads. This only applies to reads specified to PANDAseq. For more information, see
 .BR aq-qualityanal (1).
 .TP
-\fB<blast/>\fR
+\fB<blast \fR[\fBtitle="\fItitle\fB"\fR]\fB/>\fR
 Build a BLAST database over the sequences. This requires
 .BR formatdb (1)
 to be installed. A script called \fBblast\fR will be produced that will invoke
 .BR blastall (1)
-pointing to the appropriate database.
+pointing to the appropriate database. The database may optionally be given a friendly name, \fItitle\fR. If one is not provided, it will be inferred from the file name.
 .TP
 \fB<withseqs/>\fR
 Produce an OTU table with the representatives sequences in a final column.
