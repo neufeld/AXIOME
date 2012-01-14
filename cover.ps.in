@@ -1,0 +1,29 @@
+%!PS-Adobe-1.0
+%%Title:Dragon Curve
+%%Creator:Andre Masella
+
+/DragonDistance 4 def
+/DragonAngle 90 def
+
+% Defined by  { X Y, F + -, FX, X -> X+YF+; Y -> -FX-Y }
+/DragonForward {DragonDistance 0 rlineto} def
+/DragonX { dup 0 eq not { 1 sub dup DragonX DragonAngle rotate dup DragonY DragonForward DragonAngle rotate} if pop} def
+/DragonY { dup 0 eq not { 1 sub DragonAngle neg rotate DragonForward dup DragonX DragonAngle neg rotate dup DragonY} if pop } def
+
+gsave
+0.75 setgray
+0 0 moveto
+90 rotate
+200 100 moveto
+DragonForward 15 DragonX
+stroke
+grestore
+/NewCenturySchlbk-Bold findfont 72 scalefont setfont
+newpath
+72 72 2 mul moveto
+(AutoQIIME) show
+/NewCenturySchlbk-Bold findfont 24 scalefont setfont
+newpath
+72 72 moveto
+(Manual for Version @PACKAGE_VERSION@) show
+showpage

@@ -35,6 +35,7 @@ config.h*
 config.log
 config.status
 configure
+cover.ps
 debian/*.log
 debian/*.substvars
 debian/files
