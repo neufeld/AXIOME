@@ -77,7 +77,7 @@ aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
 
 rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt: seq.fasta_rep_set.fasta
 	test ! -d rdp_assigned_taxonomy || rm -r rdp_assigned_taxonomy
-	assign_taxonomy.py -i seq.fasta_rep_set.fasta
+	assign_taxonomy.py -i seq.fasta_rep_set.fasta -o rdp_assigned_taxonomy
 
 seq.fasta_rep_set_aligned_pfiltered.fasta: aligned/seq.fasta_rep_set_aligned.fasta
 	filter_alignment.py -i aligned/seq.fasta_rep_set_aligned.fasta -s
