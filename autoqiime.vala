@@ -108,7 +108,7 @@ namespace AutoQIIME {
 				}
 
 				output.add_sequence_source(file);
-				var command = "%s %s".printf(FileCompression.for_file(file).get_cat(), Shell.quote(file));
+				var command = @"$(FileCompression.for_file(file).get_cat()) $(Shell.quote(file))";
 				output.prepare_sequences(command, subst, limits);
 				return true;
 			}
@@ -640,12 +640,12 @@ namespace AutoQIIME {
 					}
 				}
 
-				output.add_rule("prefs_%s%s.txt: otu_table_summarized_%s%s.txt\n\tmake_prefs_file.py -i otu_table_summarized_%s%s.txt  -m mapping.txt -k white -o prefs_%s%s.txt\n\n", taxname, flavour, taxname, flavour, taxname, flavour, taxname, flavour);
-				output.add_rule("biplot_coords_%s%s.txt: beta_div_pcoa%s/pcoa_weighted_unifrac_otu_table.txt prefs_%s%s.txt otu_table_summarized_%s%s.txt\n\ttest ! -d biplot%s%s || rm -rf biplot%s%s\n\tmake_3d_plots.py -t otu_table_summarized_%s%s.txt -i beta_div_pcoa%s/pcoa_weighted_unifrac_otu_table%s.txt -m mapping.txt -p prefs_%s%s.txt -o biplot%s%s --biplot_output_file biplot_coords_%s%s.txt --n_taxa_keep=%d\n\n", taxname, flavour, flavour, taxname, flavour, taxname, flavour, taxname, flavour, taxname, flavour, taxname, flavour, flavour, flavour, taxname, flavour, taxname, flavour, taxname, flavour, taxakeep);
-				output.add_rule("biplot_%s%s.svg: biplot_coords_%s%s.txt mapping.extra\n\taq-biplot \"%s\" \"%s\"\n\n", taxname, flavour, taxname, flavour, taxname, flavour);
-				output.add_rule("bubblelot_%s%s.svg: biplot_coords_%s%s.txt mapping.extra\n\taq-bubbleplot \"%s\" \"%s\"\n\n", taxname, flavour, taxname, flavour, taxname, flavour);
+				output.add_rule(@"prefs_$(taxname)$(flavour).txt: otu_table_summarized_$(taxname)$(flavour).txt\n\tmake_prefs_file.py -i otu_table_summarized_$(taxname)$(flavour).txt  -m mapping.txt -k white -o prefs_$(taxname)$(flavour).txt\n\n");
+				output.add_rule(@"biplot_coords_$(taxname)$(flavour).txt: beta_div_pcoa$(flavour)/pcoa_weighted_unifrac_otu_table.txt prefs_$(taxname)$(flavour).txt otu_table_summarized_$(taxname)$(flavour).txt\n\ttest ! -d biplot$(taxname)$(flavour) || rm -rf biplot$(taxname)$(flavour)\n\tmake_3d_plots.py -t otu_table_summarized_$(taxname)$(flavour).txt -i beta_div_pcoa$(flavour)/pcoa_weighted_unifrac_otu_table$(flavour).txt -m mapping.txt -p prefs_$(taxname)$(flavour).txt -o biplot$(taxname)$(flavour) --biplot_output_file biplot_coords_$(taxname)$(flavour).txt --n_taxa_keep=$(taxakeep)\n\n");
+				output.add_rule(@"biplot_$(taxname)$(flavour).svg: biplot_coords_$(taxname)$(flavour).txt mapping.extra\n\taq-biplot \"$(taxname)\" \"$(flavour)\"\n\n");
+				output.add_rule(@"bubblelot_$(taxname)$(flavour).svg: biplot_coords_$(taxname)$(flavour).txt mapping.extra\n\taq-bubbleplot \"$(taxname)\" \"$(flavour)\"\n\n");
 
-				output.add_target("biplot_coords_%s%s.txt".printf(taxname, flavour));
+				output.add_target(@"biplot_coords_$(taxname)$(flavour).txt");
 				return true;
 			}
 		}
@@ -811,13 +811,13 @@ namespace AutoQIIME {
 		public void make_summarized_otu(TaxonomicLevel level, string flavour) {
 			var taxname = level.to_string();
 			var taxindex = (int) level;
-			var type = "%s%s".printf(taxname, flavour);
+			var type = @"$(taxname)$(flavour)";
 			if (!(type in summarized_otus)) {
 				summarized_otus.add(type);
 				if (is_version_at_least(1, 3)) {
-					makerules.append_printf("otu_table_summarized_%s%s.txt: otu_table%s.txt\n\tsummarize_taxa.py -i otu_table%s.txt -L %d -o . -a\n\tmv otu_table%s%s_L%d.txt otu_table_summarized_%s%s.txt\n\n", taxname, flavour, flavour, flavour, taxindex, flavour.length == 0 ? "" : "_", flavour, taxindex, taxname, flavour);
+					makerules.append(@"otu_table_summarized_$(taxname)$(flavour).txt: otu_table$(flavour).txt\n\tsummarize_taxa.py -i otu_table$(flavour).txt -L $(taxindex) -o . -a\n\tmv otu_table$(flavour.length == 0 ? "" : "_")$(flavour)_L$(taxindex).txt otu_table_summarized_$(taxname)$(flavour).txt\n\n");
 				} else {
-					makerules.append_printf("otu_table_summarized_%s%s.txt: otu_table%s.txt\n\tsummarize_taxa.py -i otu_table%s.txt -L %d -o otu_table_summarized_%s%s.txt -a\n\n", taxname, flavour, flavour, flavour, taxindex, taxname, flavour);
+					makerules.append(@"otu_table_summarized_$(taxname)$(flavour).txt: otu_table$(flavour).txt\n\tsummarize_taxa.py -i otu_table$(flavour).txt -L $(taxindex) -o otu_table_summarized_$(taxname)$(flavour).txt -a\n\n");
 				}
 			}
 		}
