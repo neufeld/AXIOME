@@ -23,7 +23,10 @@ aq-syntheticfastq
 autom4te.cache
 autoqiime
 autoqiime.1
+autoqiime.deps
 autoqiime.c
+autoqiime.h
+autoqiime.vapi
 build-aux/compile
 build-aux/config.guess
 build-aux/config.sub
@@ -45,4 +48,5 @@ joinn.c
 libtool
 m4/
 mkrepset.c
+plugins/*.c
 stamp-h1

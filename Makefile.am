@@ -87,36 +87,50 @@ doc_DATA = \
 	sample.aq \
 	$(NULL)
 
-aq_count_n_CFLAGS = 
+aq_count_n_CPPFLAGS = 
 aq_count_n_SOURCES = count-n.c
-aq_demux_illumina_CFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
+aq_demux_illumina_CPPFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
 aq_demux_illumina_LDADD = $(GLIB_LIBS) $(GEE_LIBS)
 aq_demux_illumina_SOURCES = fmap.c demux-illumina.c
-aq_estimateq_CFLAGS = 
+aq_estimateq_CPPFLAGS = 
 aq_estimateq_SOURCES = estimateq.c parser.c
-aq_fastq2oldillumina_CFLAGS = 
+aq_fastq2oldillumina_CPPFLAGS = 
 aq_fastq2oldillumina_SOURCES = fastq2oldillumina.c
-aq_filter_fastq_known_CFLAGS = 
+aq_filter_fastq_known_CPPFLAGS = 
 aq_filter_fastq_known_SOURCES = filter-fastq-known.c
-aq_marry_illumina_index_CFLAGS = 
+aq_marry_illumina_index_CPPFLAGS = 
 aq_marry_illumina_index_SOURCES = marry-illumina-index.c
-aq_qualhisto_CFLAGS = 
+aq_qualhisto_CPPFLAGS = 
 aq_qualhisto_SOURCES = qualhisto.c parser.c
-aq_syntheticfastq_CFLAGS = 
+aq_syntheticfastq_CPPFLAGS = 
 aq_syntheticfastq_SOURCES = syntheticfastq.c
 
-aq_joinn_CFLAGS = $(GLIB_CFLAGS)
+aq_joinn_CPPFLAGS = $(GLIB_CFLAGS)
 aq_joinn_VALASOURCES = joinn.vala
 aq_joinn_LDADD = $(GLIB_LIBS)
-aq_joinn_SOURCES = joinn.vala.stamp $(aq_joinn_VALASOURCES:.vala=.c)
-aq_mkrepset_CFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
+aq_joinn_SOURCES = $(aq_joinn_VALASOURCES:.vala=.c)
+aq_mkrepset_CPPFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
 aq_mkrepset_LDADD = $(GLIB_LIBS) $(GEE_LIBS)
 aq_mkrepset_VALASOURCES = mkrepset.vala
-aq_mkrepset_SOURCES = mkrepset.vala.stamp $(aq_mkrepset_VALASOURCES:.vala=.c)
-autoqiime_CFLAGS = -DBINDIR=\"$(bindir)\" -DDATADIR=\"$(pkgdatadir)\" $(GLIB_CFLAGS) $(GEE_CFLAGS) $(LIBXML_CFLAGS)
+aq_mkrepset_SOURCES = $(aq_mkrepset_VALASOURCES:.vala=.c)
+autoqiime_CPPFLAGS = -DBINDIR=\"$(bindir)\" -DDATADIR=\"$(pkgdatadir)\" $(GLIB_CFLAGS) $(GEE_CFLAGS) $(LIBXML_CFLAGS)
 autoqiime_LDADD = $(GLIB_LIBS) $(GEE_LIBS) $(LIBXML_LIBS)
-autoqiime_VALASOURCES = autoqiime.vala
-autoqiime_SOURCES = autoqiime.vala.stamp $(autoqiime_VALASOURCES:.vala=.c)
+autoqiime_VALASOURCES = \
+	autoqiime.vala \
+	plugins/a-alpha.vala \
+	plugins/a-beta.vala \
+	plugins/a-blast.vala \
+	plugins/a-libcmp.vala \
+	plugins/a-nmf.vala \
+	plugins/a-pca.vala \
+	plugins/a-qualanal.vala \
+	plugins/a-rankabundance.vala \
+	plugins/a-uchime.vala \
+	plugins/a-withseqs.vala \
+	plugins/src-fasta.vala \
+	plugins/src-panda.vala \
+	$(NULL)
+autoqiime_SOURCES = $(autoqiime_VALASOURCES:.vala=.c) plugins/types.c
 
 BUILT_SOURCES = \
 	fmap.c fmap.h \
@@ -125,13 +139,14 @@ BUILT_SOURCES = \
 	$(aq_mkrepset_VALASOURCES:.vala=.c) \
 	$(NULL)
 
-autoqiime.vala.stamp $(autoqiime_VALASOURCES:.vala=.c): $(autoqiime_VALASOURCES)
-	$(VALAC) $(VALAFLAGS) -g -C --vapidir=. --pkg=config --pkg=libmagic --pkg=gee-$(GEE_VER) --pkg=libxml-2.0 $(autoqiime_VALASOURCES)
+autoqiime.vapi autoqiime.h $(autoqiime_SOURCES): $(autoqiime_VALASOURCES)
+	$(VALAC) $(VALAFLAGS) -g -C -H autoqiime.h --vapi autoqiime.vapi --vapidir=. --pkg=config --pkg=libmagic --pkg=gee-$(GEE_VER) --pkg=libxml-2.0 $(autoqiime_VALASOURCES) && touch $(autoqiime_VALASOURCES:.vala=.c)
+	awk '/define/ && /_get_type / { t[substr($$3, 2)] = 1 } END { for(x in t) { print "extern " x "();"; } print "void register_plugin_types(void) {"; for(x in t) { print x"();"; } print "}"}' plugins/*.c > plugins/types.c
 
-joinn.vala.stamp $(aq_joinn_VALASOURCES:.vala=.c): $(aq_joinn_VALASOURCES)
+$(joinn_SOURCES): $(aq_joinn_VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -g -C  $(aq_joinn_VALASOURCES)
 
-mkrepset.vala.stamp $(aq_mkrepset_VALASOURCES:.vala=.c): $(aq_mkrepset_VALASOURCES)
+$(mkrepset_SOURCES): $(aq_mkrepset_VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -g -C --pkg=gee-$(GEE_VER) --pkg=posix $(aq_mkrepset_VALASOURCES)
 
 fmap.c fmap.h: fmap.vala

@@ -1,24 +1,96 @@
-using GLib;
 using Gee;
 using Xml;
 
 namespace AutoQIIME {
 
-	public HashMap<string, string> primers;
+	HashMap<string, string> primers;
 	[CCode(cname = "DATADIR")]
-	extern const string DATADIR;
+	public extern const string DATADIR;
 	[CCode(cname = "BINDIR")]
-	extern const string BINDIR;
+	public extern const string BINDIR;
+
+	public abstract class Sources.BaseSource : RuleProcessor {
+		public override RuleType get_ruletype() {
+			return RuleType.SOURCE;
+		}
+		protected string? get_primer(Xml.Node *definition, string? primer) {
+			if (primer != null) {
+			var up_primer = primer.up();
+				if (up_primer[0] == '#') {
+					up_primer = up_primer.substring(1);
+					if (primers.has_key(up_primer)) {
+						return primers[up_primer].length.to_string();
+					} else {
+						definition_error(definition, "Unknown primer %s. Ignorning, mumble, mumble.\n", primer);
+						return null;
+					}
+				} else if (primers.has_key(up_primer)) {
+					return Shell.quote(primers[up_primer]);
+				} else if (Regex.match_simple("^\\d+$", up_primer) || is_sequence(up_primer)) {
+				return Shell.quote(up_primer);
+				} else {
+					definition_error(definition, "Invalid primer %s. Ignorning, mumble, mumble.\n", primer);
+					return null;
+				}
+			}
+			return null;
+		}
+		protected abstract bool generate_command(Xml.Node *definition, Collection<Sample> samples, StringBuilder command, Output output);
+		protected abstract string? get_sample_id(Xml.Node *sample);
+		public override bool process(Xml.Node *definition, Output output) {
+			var samples = new HashMap<string, Sample>();
+			for (Xml.Node *sample = definition-> children; sample != null; sample = sample-> next) {
+				if (sample-> type != Xml.ElementType.ELEMENT_NODE) {
+					continue;
+				}
+				if (sample-> name != "sample") {
+					definition_error(definition, "Invalid element %s. Ignorning, mumble, mumble.\n", sample-> name);
+					continue;
+				}
+				var tag = get_sample_id(sample);
+				if (tag == null || tag == "") {
+					continue;
+				}
+				if (samples.has_key(tag)) {
+					definition_error(definition, "Duplicated identifer %s on %s:%d. Skipping.\n", tag, sample-> doc-> url, sample-> line);
+					continue;
+				}
+				var sample_obj = output.add_sample(tag, sample);
+				samples[tag] = sample_obj;
+				var limit = sample-> get_prop("limit");
+				if (limit != null) {
+					var limitval = int.parse(limit);
+					if (limitval > 0) {
+						samples[tag].limit = limitval;
+					}
+				}
+			}
+
+			var command = new StringBuilder();
+			if (!generate_command(definition, samples.values.read_only_view, command, output)) {
+				return false;
+			}
+			output.prepare_sequences(command.str, samples.values);
+			return true;
+		}
+	}
+
+	public class Sample : Object {
+		public Xml.Node *xml { get; internal set;}
+		public string tag { get; internal set;}
+		public int limit { get; internal set;}
+		public int id { get; internal set;}
+	}
 
 	/**
 	 * Type of stanzas in the XML input document.
 	 */
-	enum RuleType { DEFINITON, SOURCE, ANALYSIS }
+	public enum RuleType { DEFINITON, SOURCE, ANALYSIS }
 
 	/**
 	 * Rule processor interface for analyses and data sources
 	 */
-	abstract class RuleProcessor : Object {
+	public abstract class RuleProcessor : Object {
 		public abstract RuleType get_ruletype();
 		/**
 		 * Name of the XML tag for this sequence source.
@@ -43,640 +115,40 @@ namespace AutoQIIME {
 	}
 
 	/**
-	 * Source of sequence data
-	 */
-	namespace Sources {
-
-		/**
-		 * Copy data from existing FASTA files
-		 *
-		 * Read a FASTA file into seq.fasta and pull sequences with ids matching specific regular expressions.
-		 */
-		class FastaSource : RuleProcessor {
-			public override RuleType get_ruletype() {
-				return RuleType.SOURCE;
-			}
-			public override unowned string get_name() {
-				return "fasta";
-			}
-			public override unowned string ? get_include() {
-				return null;
-			}
-			public override bool is_only_once() {
-				return false;
-			}
-
-			public override bool process(Xml.Node *node, Output output) {
-				var file = node-> get_prop("file");
-				if (file == null) {
-					definition_error(node, "FASTA file not specified.\n");
-					return false;
-				}
-				if (!FileUtils.test(file, FileTest.EXISTS)) {
-					definition_error(node, "File \"%s\" does not exist.\n", file);
-					return false;
-				}
-				var subst = new HashMap<string, int>();
-				var limits = new HashMap<string, int>();
-				for (Xml.Node *sample = node-> children; sample != null; sample = sample-> next) {
-					if (sample-> type != ElementType.ELEMENT_NODE) {
-						continue;
-					}
-					var regexstr = sample-> get_prop("regex");
-					if (sample-> name != "sample" || regexstr == null || regexstr == "") {
-						definition_error(node, "Invalid element %s. Ignorning, mumble, mumble.\n", sample-> name);
-						try {
-							new Regex(regexstr);
-						} catch(RegexError e) {
-							definition_error(node, "Invalid regex %s. If you want everything, just make regex=\".\" or go read about the joy of POSIX regexs.\n", regexstr);
-							return false;
-						}
-						continue;
-					}
-					if (subst.has_key(regexstr)) {
-						definition_error(node, "Duplicated regex \"%s\". Skipping.\n", regexstr);
-						continue;
-					}
-					subst[regexstr] = output.add_sample(sample);
-					var limit = sample-> get_prop("limit");
-					if (limit != null) {
-						var limitval = int.parse(limit);
-						if (limitval > 0) {
-							limits[regexstr] = limitval;
-						}
-					}
-				}
-
-				output.add_sequence_source(file);
-				var command = @"$(FileCompression.for_file(file).get_cat()) $(Shell.quote(file))";
-				output.prepare_sequences(command, subst, limits);
-				return true;
-			}
-		}
-
-		/**
-		 * Assemble data using PANDAseq from Illumina files.
-		 *
-		 * Calls PANDAseq and pulls out specific indecies.
-		 */
-		class PandaSource : RuleProcessor {
-			public override RuleType get_ruletype() {
-				return RuleType.SOURCE;
-			}
-			public override unowned string get_name() {
-				return "panda";
-			}
-			public override unowned string ? get_include() {
-				return null;
-			}
-			public override bool is_only_once() {
-				return false;
-			}
-			private void add_primer(StringBuilder command, Xml.Node *definition, string name, char arg) {
-				var primer = definition-> get_prop(name);
-				if (primer != null) {
-					primer = primer.up();
-					if (primer[0] == '#') {
-						primer = primer.substring(1);
-						if (primers.has_key(primer)) {
-							command.append_printf(" -%c %d", arg, primers[primer].length);
-						} else {
-							definition_error(definition, "Unknown primer %s. Ignorning, mumble, mumble.\n", primer);
-						}
-					} else if (primers.has_key(primer)) {
-						command.append_printf(" -%c %s", arg, Shell.quote(primers[primer]));
-					} else if (Regex.match_simple("^\\d+$", primer) || is_sequence(primer)) {
-						command.append_printf(" -%c %s", arg, Shell.quote(primer));
-					} else {
-						definition_error(definition, "Invalid primer %s. Ignorning, mumble, mumble.\n", primer);
-					}
-				}
-			}
-			public override bool process(Xml.Node *definition, Output output) {
-
-				var forward = definition-> get_prop("forward");
-				if (forward == null) {
-					definition_error(definition, "Forward file not specified.\n");
-					return false;
-				}
-				if (!FileUtils.test(forward, FileTest.EXISTS)) {
-					definition_error(definition, "File \"%s\" does not exist.\n", forward);
-					return false;
-				}
-
-				var reverse = definition-> get_prop("reverse");
-				if (reverse == null) {
-					definition_error(definition, "Reverse file not specified.\n");
-					return false;
-				}
-				if (!FileUtils.test(reverse, FileTest.EXISTS)) {
-					definition_error(definition, "File does not exist.\n");
-					return false;
-				}
-
-				bool dashj = false;
-				bool dashsix;
-				bool domagic;
-				bool convert;
-
-				/* How we process this file depends on what version of CASAVA created the FASTQ files. The old ones need to be converted. We also need to know if they are bzipped so we can give the -j option to PANDAseq. */
-				var version = definition-> get_prop("version");
-				if (version == null) {
-					definition_error(definition, "No version specified. I'm going to assume you have the latest version.\n");
-					domagic = true;
-					convert = false;
-					dashsix = false;
-				} else if (version == "1.3") {
-					domagic = false;
-					convert = true;
-					dashsix = true;
-				} else if (version == "1.4" || version == "1.5" || version == "1.6" || version == "1.7") {
-					domagic = true;
-					convert = false;
-					dashsix = true;
-				} else if (version == "1.8") {
-					domagic = true;
-					convert = false;
-					dashsix = false;
-				} else {
-					definition_error(definition, "The version \"%s\" is not one that I recognise. You should probably do something about that. Until then, I'm going to make some assumptions.\n", version);
-					domagic = true;
-					convert = false;
-					dashsix = false;
-				}
-
-				if (convert) {
-					var oldforward = forward;
-					var oldreverse = reverse;
-					forward = "converted%x_1.fastq.bz2".printf(oldforward.hash());
-					reverse = "converted%x_2.fastq.bz2".printf(oldreverse.hash());
-					output.add_rule("%s: %s\n\tzcat %s | aq-oldillumina2fastq > %s\n\n%s: %s\n\tzcat %s | aq-oldillumina2fastq > %s\n\n", forward, oldforward, oldforward, forward, reverse, oldreverse, oldreverse, reverse);
-					domagic = false;
-					dashj = true;
-				}
-
-				if (domagic) {
-					dashj = FileCompression.for_file(forward) == FileCompression.BZIP;
-				}
-
-				var subst = new HashMap<string, int>();
-				var limits = new HashMap<string, int>();
-				for (Xml.Node *sample = definition-> children; sample != null; sample = sample-> next) {
-					if (sample-> type != ElementType.ELEMENT_NODE) {
-						continue;
-					}
-					var tag = sample-> get_prop("tag");
-					if (sample-> name != "sample" || tag == null || tag == "") {
-						definition_error(definition, "Invalid element %s. Ignorning, mumble, mumble.\n", sample-> name);
-						continue;
-					}
-					if (subst.has_key(tag)) {
-						definition_error(definition, "Duplicated tag %s. Skipping.\n", tag);
-						continue;
-					}
-					subst[tag] = output.add_sample(sample);
-					var limit = sample-> get_prop("limit");
-					if (limit != null) {
-						var limitval = int.parse(limit);
-						if (limitval > 0) {
-							limits[tag] = limitval;
-						}
-					}
-				}
-
-				output.add_sequence_source(forward);
-				output.add_sequence_source(reverse);
-				var command = new StringBuilder();
-				command.append_printf("pandaseq -N -f %s -r %s", Shell.quote(forward), Shell.quote(reverse));
-
-				if (dashj) {
-					command.append_printf(" -j");
-				}
-				if (dashsix) {
-					command.append_printf(" -6");
-				}
-				add_primer(command, definition, "fprimer", 'p');
-				add_primer(command, definition, "rprimer", 'q');
-				var threshold = definition-> get_prop("threshold");
-				if (threshold != null) {
-					command.append_printf(" -t %s", Shell.quote(threshold));
-				}
-				command.append_printf(" -C validtag");
-				foreach (var entry in subst.entries) {
-					command.append_printf(":%s", entry.key);
-				}
-				output.prepare_sequences(command.str, subst, limits);
-				return true;
-			}
-		}
-	}
-
-	/**
-	 * Those things what the user cares about.
-	 */
-	namespace Analyses {
-		/**
-		 * Perform quality analysis on the raw read data
-		 *
-		 * Quality analysis is done by a makefile, so it only needs to know the FASTQ files that are included. It can handle anything except the really old 1.3 files.
-		 */
-		class QualityAnalysis : RuleProcessor {
-			private string include = Path.build_filename(BINDIR, "aq-qualityanal");
-			public override RuleType get_ruletype() {
-				return RuleType.ANALYSIS;
-			}
-			public override unowned string get_name() {
-				return "qualityanal";
-			}
-			public override unowned string ? get_include() {
-				return include;
-			}
-			public override bool is_only_once() {
-				return true;
-			}
-			public override bool process(Xml.Node *definition, Output output) {
-				output.add_target("qualityanal");
-				output["FASTQFILES"] = "$(SEQSOURCES)";
-				return true;
-			}
-		}
-
-		/**
-		 * Compare the distribution of taxa between pairs of libraries
-		 *
-		 * This relies on an R script to do the heavy lifting. A summarized OTU table is needed.
-		 */
-		class LibraryComparison : RuleProcessor {
-			public override RuleType get_ruletype() {
-				return RuleType.ANALYSIS;
-			}
-			public override unowned string get_name() {
-				return "compare";
-			}
-			public override unowned string ? get_include() {
-				return null;
-			}
-			public override bool is_only_once() {
-				return true;
-			}
-			public override bool process(Xml.Node *definition, Output output) {
-				var taxlevel = TaxonomicLevel.parse(definition-> get_prop("level"));
-				if (taxlevel == null) {
-					definition_error(definition, "Unknown taxonomic level \"%s\" in library abundance comparison analysis.\n", definition-> get_prop("level"));
-					return false;
-				}
-				var taxname = taxlevel.to_string();
-				output.make_summarized_otu(taxlevel, "");
-				output.add_target("correlation_%s.pdf".printf(taxname));
-				output.add_rule("correlation_%s.pdf: otu_table_summarized_%s.txt mapping.extra\n\taq-cmplibs %s\n\n", taxname, taxname, taxname);
-				return true;
-			}
-		}
-
-		/**
-		 * Produce alpha diversity statistics
-		 *
-		 * Do basic alpha diversity analysis using QIIME's script.
-		 */
-		class AlphaDiversity : RuleProcessor {
-			public override RuleType get_ruletype() {
-				return RuleType.ANALYSIS;
-			}
-			public override unowned string get_name() {
-				return "alpha";
-			}
-			public override unowned string ? get_include() {
-				return null;
-			}
-			public override bool is_only_once() {
-				return true;
-			}
-			public override bool process(Xml.Node *definition, Output output) {
-				output.add_target("alpha");
-				return true;
-			}
-		}
-
-		/**
-		 * Produce NMF concordance plot
-		 */
-		class ConcordancePlot : RuleProcessor {
-			public override RuleType get_ruletype() {
-				return RuleType.ANALYSIS;
-			}
-			public override unowned string get_name() {
-				return "nmf-concordance";
-			}
-			public override unowned string ? get_include() {
-				return null;
-			}
-			public override bool is_only_once() {
-				return true;
-			}
-			public override bool process(Xml.Node *definition, Output output) {
-				output.add_target("nmf-concordance.pdf");
-				return true;
-			}
-		}
-
-		/**
-		 * Non-negative matrix factorization
-		 *
-		 * Do a non-negative matrix factorization at a particular degree. This relies on an R script to do the heavy lifting.
-		 */
-		class NonnegativeMatrixFactorization : RuleProcessor {
-			public override RuleType get_ruletype() {
-				return RuleType.ANALYSIS;
-			}
-			public override unowned string get_name() {
-				return "nmf";
-			}
-			public override unowned string ? get_include() {
-				return null;
-			}
-			public override bool is_only_once() {
-				return false;
-			}
-			public override bool process(Xml.Node *definition, Output output) {
-				var degree = int.parse(definition-> get_prop("degree"));
-				if (degree < 2 || degree > 30) {
-					definition_error(definition, "The degree \"%s\" is not resonable for NMF.\n", definition-> get_prop("degree"));
-					return false;
-				}
-				output.add_target("nmf_%d.pdf".printf(degree));
-				output.add_rule("nmf_%d.pdf: otu_table.txt mapping.extra\n\taq-nmf %d\n\n", degree, degree);
-				return true;
-			}
-		}
-
-		/**
-		 * Perform a chimera check with uchime
-		 */
-		class UchimeCheck : RuleProcessor {
-			public override RuleType get_ruletype() {
-				return RuleType.ANALYSIS;
-			}
-			public override unowned string get_name() {
-				return "uchime";
-			}
-			public override unowned string ? get_include() {
-				return null;
-			}
-			public override bool is_only_once() {
-				return true;
-			}
-			public override bool process(Xml.Node *definition, Output output) {
-				var profile = definition-> get_prop("profile");
-				if (profile != null) {
-					switch (profile.down()) {
-					case "v3-stringent" :
-						output["UCHIMEFLAGS"] = "--mindiv 1.5 --minh 5";
-						break;
-					case "v3-relaxed" :
-						output["UCHIMEFLAGS"] = "--mindiv 1 --minh 2.5";
-						break;
-					default :
-						definition_error(definition, "Unknown profile \"%s\".\n", profile);
-						return false;
-					}
-				}
-				for (var i = 0; i < output.sequence_preparations; i++) {
-					output.add_target("chimeras%d.uchime".printf(i));
-				}
-				return true;
-			}
-		}
-
-		/**
-		 * Create a BLAST database for the sequence library
-		 *
-		 * Call formatdb to create a BLAST database and create a shell script to sensibly handle calling BLAST with decent options.
-		 */
-		class BlastDatabase : RuleProcessor {
-			public override RuleType get_ruletype() {
-				return RuleType.ANALYSIS;
-			}
-			public override unowned string get_name() {
-				return "blast";
-			}
-			public override unowned string ? get_include() {
-				return null;
-			}
-			public override bool is_only_once() {
-				return true;
-			}
-			public override bool process(Xml.Node *definition, Output output) {
-
-				output.add_target("nr.nhr");
-				output.add_target("nr.nin");
-				output.add_target("nr.nsq");
-				output.add_target("blast");
-				output.add_rule("blast: Makefile\n\t@echo '#!/bin/sh' > blast\n\t@echo blastall -p blastn -d \\'%s/nr\\' '\"$$@\"' >> blast\n\tchmod a+x blast\n\n", Shell.quote(realpath(output.dirname)));
-				var title = definition->get_prop("title");
-				if (title == null) {
-					var name = Path.get_basename(output.dirname);
-					if (name.has_suffix(".qiime")) {
-						name = name.substring(0, name.length - 6);
-					}
-					title = @"$(name) 16S Sequence Library";
-				}
-				output.add_rule("BLASTDB_NAME = %s\n\n", title);
-				return true;
-			}
-		}
-
-		/**
-		 * Decorate the OTU table with the representative sequences
-		 */
-		class TableWithSeqs : RuleProcessor {
-			public override RuleType get_ruletype() {
-				return RuleType.ANALYSIS;
-			}
-			public override unowned string get_name() {
-				return "withseqs";
-			}
-			public override unowned string ? get_include() {
-				return null;
-			}
-			public override bool is_only_once() {
-				return true;
-			}
-			public override bool process(Xml.Node *definition, Output output) {
-				output.add_target("otu_table_with_sequences.txt");
-				return true;
-			}
-		}
-
-		/**
-		 * Make a rank-abundance curve using QIIME
-		 */
-		class RankAbundance : RuleProcessor {
-			public override RuleType get_ruletype() {
-				return RuleType.ANALYSIS;
-			}
-			public override unowned string get_name() {
-				return "rankabundance";
-			}
-			public override unowned string ? get_include() {
-				return null;
-			}
-			public override bool is_only_once() {
-				return true;
-			}
-			public override bool process(Xml.Node *definition, Output output) {
-				output.add_target("rank_abundance/rank_abundance.pdf");
-				return true;
-			}
-		}
-
-		/**
-		 * Produce principle component analysis using R
-		 *
-		 * Do prinicpal component analysis on the taxa and the other (numeric) variables specified.
-		 */
-		class PrincipalComponentAnalysis : RuleProcessor {
-			public override RuleType get_ruletype() {
-				return RuleType.ANALYSIS;
-			}
-			public override unowned string get_name() {
-				return "pca";
-			}
-			public override unowned string ? get_include() {
-				return null;
-			}
-			public override bool is_only_once() {
-				return true;
-			}
-			public override bool process(Xml.Node *definition, Output output) {
-				if (!output.vars.has_key("Colour") || output.vars["Colour"] != "s") {
-					definition_error(definition, "PCA requires there to be a \"Colour\" associated with each sample.\n");
-					return false;
-				}
-				if (!output.vars.has_key("Description") || output.vars["Description"] != "s") {
-					definition_error(definition, "PCA requires there to be a \"Description\" associated with each sample.\n");
-					return false;
-				}
-
-				var hasnumeric = false;
-				foreach (var type in output.vars.values) {
-					if (type == "i" || type == "d") {
-						hasnumeric = true;
-						break;
-					}
-				}
-				if (!hasnumeric) {
-					definition_error(definition, "You should probably have at least one numeric variable over which to do PCA.\n");
-				}
-				output.add_target("biplot.pdf");
-				return true;
-			}
-		}
-
-		/**
-		 * Produce beta-diversity (UniFrac) analysis using QIIME
-		 *
-		 * Calling UniFrac using QIIME requires rarefying the OTU table and summarising it to a particular taxonomic level.
-		 */
-		class BetaDiversity : RuleProcessor {
-			public override RuleType get_ruletype() {
-				return RuleType.ANALYSIS;
-			}
-			public override unowned string get_name() {
-				return "beta";
-			}
-			public override unowned string ? get_include() {
-				return null;
-			}
-			public override bool is_only_once() {
-				return false;
-			}
-			public override bool process(Xml.Node *definition, Output output) {
-				if (!output.vars.has_key("Colour") || output.vars["Colour"] != "s") {
-					definition_error(definition, "Biplots require there to be a \"Colour\" associated with each sample.\n");
-				}
-				if (!output.vars.has_key("Description") || output.vars["Description"] != "s") {
-					definition_error(definition, "Biplots require there to be a \"Description\" associated with each sample.\n");
-				}
-
-				string flavour;
-				var size = definition-> get_prop("size");
-				if (size == null) {
-					flavour = "";
-				} else if (size == "auto") {
-					flavour = "_auto";
-					output.add_rule("otu_table_auto.txt: otu_table.txt\n\tsingle_rarefaction.py -i otu_table.txt -o otu_table_auto.txt %s -d $$(awk -F '\t' 'NR == 1 {} NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; }}} NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; }} END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest;}' otu_table.txt)\n\n", is_version_at_least(1, 3) ? "" : "--lineages_included");
-				} else {
-					int v = int.parse(size);
-					if (v < 1) {
-						definition_error(definition, "Cannot rareify to a size of \"%s\". Use a positive number or \"auto\".\n", size);
-						return false;
-					}
-					flavour = "_%d".printf(v);
-					output.add_rule("otu_table_%d.txt: otu_table.txt\n\tsingle_rarefaction.py -i otu_table.txt -o otu_table_auto.txt -d %d %s\n\n", v, v, is_version_at_least(1, 3) ? "" : "--lineages_included");
-				}
-
-				string taxname;
-				if (definition-> get_prop("level") == null) {
-					taxname = "otu";
-				} else {
-					var taxlevel = TaxonomicLevel.parse(definition-> get_prop("level"));
-					if (taxlevel == null) {
-						definition_error(definition, "Unknown taxonomic level \"%s\" in beta diversity analysis.\n", definition-> get_prop("level"));
-						return false;
-					}
-					taxname = taxlevel.to_string();
-					output.make_summarized_otu(taxlevel, flavour);
-				}
-				var numtaxa = definition-> get_prop("taxa");
-				int taxakeep;
-				if (numtaxa == null) {
-					taxakeep = 10;
-				} else if (numtaxa == "all") {
-					taxakeep = -1;
-				} else {
-					taxakeep = int.parse(numtaxa);
-					if (taxakeep == 0) {
-						taxakeep = 10;
-					}
-				}
-
-				output.add_rule(@"prefs_$(taxname)$(flavour).txt: otu_table_summarized_$(taxname)$(flavour).txt\n\tmake_prefs_file.py -i otu_table_summarized_$(taxname)$(flavour).txt  -m mapping.txt -k white -o prefs_$(taxname)$(flavour).txt\n\n");
-				output.add_rule(@"biplot_coords_$(taxname)$(flavour).txt: beta_div_pcoa$(flavour)/pcoa_weighted_unifrac_otu_table.txt prefs_$(taxname)$(flavour).txt otu_table_summarized_$(taxname)$(flavour).txt\n\ttest ! -d biplot$(taxname)$(flavour) || rm -rf biplot$(taxname)$(flavour)\n\tmake_3d_plots.py -t otu_table_summarized_$(taxname)$(flavour).txt -i beta_div_pcoa$(flavour)/pcoa_weighted_unifrac_otu_table$(flavour).txt -m mapping.txt -p prefs_$(taxname)$(flavour).txt -o biplot$(taxname)$(flavour) --biplot_output_file biplot_coords_$(taxname)$(flavour).txt --n_taxa_keep=$(taxakeep)\n\n");
-				output.add_rule(@"biplot_$(taxname)$(flavour).svg: biplot_coords_$(taxname)$(flavour).txt mapping.extra\n\taq-biplot \"$(taxname)\" \"$(flavour)\"\n\n");
-				output.add_rule(@"bubblelot_$(taxname)$(flavour).svg: biplot_coords_$(taxname)$(flavour).txt mapping.extra\n\taq-bubbleplot \"$(taxname)\" \"$(flavour)\"\n\n");
-
-				output.add_target(@"biplot_coords_$(taxname)$(flavour).txt");
-				return true;
-			}
-		}
-	}
-
-	/**
 	 * Friendly names for taxnomic levels as used by QIIME/RDP
 	 */
-	enum TaxonomicLevel { LIFE = 1, DOMAIN = 2, PHYLUM = 3, CLASS = 4, ORDER = 5, FAMILY = 6, GENUS = 7, SPECIES = 8, STRAIN = 9;
-			      public static TaxonomicLevel ? parse(string name) {
-				      var enum_class = (EnumClass) typeof(TaxonomicLevel).class_ref();
-				      var nick = name.down().replace("_", "-");
-				      unowned GLib.EnumValue ? enum_value = enum_class.get_value_by_nick(nick);
-				      if (enum_value != null) {
-					      TaxonomicLevel value = (TaxonomicLevel) enum_value.value;
-					      return value;
-				      }
-				      return null;
-			      }
-			      public string to_string() {
-				      return ((EnumClass) typeof (TaxonomicLevel).class_ref()).get_value(this).value_nick;
-			      }
+	public enum TaxonomicLevel {
+		LIFE = 1,
+		DOMAIN = 2,
+		PHYLUM = 3,
+		CLASS = 4,
+		ORDER = 5,
+		FAMILY = 6,
+		GENUS = 7,
+		SPECIES = 8,
+		STRAIN = 9;
+		public static TaxonomicLevel ? parse(string name) {
+		  var enum_class = (EnumClass) typeof(TaxonomicLevel).class_ref();
+		  var nick = name.down().replace("_", "-");
+		  unowned GLib.EnumValue ? enum_value = enum_class.get_value_by_nick(nick);
+		  if (enum_value != null) {
+		    TaxonomicLevel value = (TaxonomicLevel) enum_value.value;
+		    return value;
+		  }
+		  return null;
+		}
+		public string to_string() {
+		  return ((EnumClass) typeof (TaxonomicLevel).class_ref()).get_value(this).value_nick;
+		}
 	}
 
 	/**
 	 * Output processor responsible for collecting all information needed to generate the Makefile and mapping.txt
 	 */
-	class Output {
+	public class Output : Object {
 		public string dirname { get; private set; }
 		StringBuilder makerules;
-		ArrayList<Xml.Node*> samples;
+		ArrayList<Sample> samples;
 		StringBuilder seqrule;
 		StringBuilder seqsources;
 		public int sequence_preparations { get; private set; }
@@ -692,7 +164,7 @@ namespace AutoQIIME {
 
 			sequence_preparations = 0;
 			makerules = new StringBuilder();
-			samples = new ArrayList<Xml.Node*>();
+			samples = new ArrayList<Sample>();
 			seqrule = new StringBuilder();
 			seqrule.printf("\ttest ! -f seq.fasta || rm seq.fasta\n");
 			seqsources = new StringBuilder();
@@ -705,7 +177,7 @@ namespace AutoQIIME {
 		/**
 		 * Output the mapping.txt file in the appropriate directory.
 		 */
-		public bool generate_mapping() {
+		internal bool generate_mapping() {
 			var mapping = new StringBuilder();
 			var extra = new StringBuilder();
 			var headers = new StringBuilder();
@@ -730,14 +202,13 @@ namespace AutoQIIME {
 			mapping.append_c('\n');
 			extra.append_c('\n');
 			headers.append_c('\n');
-			for (var it = 0; it < samples.size; it++) {
-				var sample = samples[it];
-				mapping.append_printf("%d", it);
-				extra.append_printf("%d", it);
+			foreach (var sample in samples) {
+				mapping.append_printf("%d", sample.id);
+				extra.append_printf("%d", sample.id);
 				foreach (var entry in vars.entries) {
-					var prop = sample-> get_prop(entry.key);
+					var prop = sample.xml-> get_prop(entry.key);
 					if (prop == null) {
-						stderr.printf("%s: %d: Missing attribute %s.\n", sample-> doc-> url, sample-> line, entry.key);
+						stderr.printf("%s: %d: Missing attribute %s.\n", sample.xml-> doc-> url, sample.xml-> line, entry.key);
 						(entry.key == "Colour" || entry.key == "Description" ? extra : mapping).append_printf("\t");
 					} else {
 						if (entry.key == "Colour" || entry.key == "Description") {
@@ -750,7 +221,7 @@ namespace AutoQIIME {
 								var value = Variant.parse(new VariantType(entry.value), prop);
 								mapping.append_printf("\t%s", value.print(false));
 							} catch(GLib.VariantParseError e) {
-								stderr.printf("%s: %d: Attribute %s:%s = \"%s\" is not of the correct format.\n", sample-> doc-> url, sample-> line, entry.key, entry.value, prop);
+								stderr.printf("%s: %d: Attribute %s:%s = \"%s\" is not of the correct format.\n", sample.xml-> doc-> url, sample.xml-> line, entry.key, entry.value, prop);
 								mapping.append_c('\t');
 							}
 						}
@@ -785,7 +256,7 @@ namespace AutoQIIME {
 		/**
 		 * Output the Makefile file in the appropriate directory.
 		 */
-		public bool generate_makefile(RuleLookup lookup) {
+		internal bool generate_makefile(RuleLookup lookup) {
 			var now = Time.local(time_t());
 			var makefile = FileStream.open(Path.build_filename(dirname, "Makefile"), "w");
 			if (makefile == null) {
@@ -850,7 +321,7 @@ namespace AutoQIIME {
 		/**
 		 * Add declaration to the make Makefile.
 		 */
-		public void set(string key, string value) {
+		public new void set(string key, string value) {
 			makerules.append_printf("%s = %s\n\n", key, value);
 		}
 
@@ -859,9 +330,14 @@ namespace AutoQIIME {
 		 *
 		 * @return the unique identifier for a sample. This must be associated with the map used in {@link prepare_sequences}.
 		 */
-		public int add_sample(Xml.Node *sample) {
-			samples.add(sample);
-			return samples.size-1;
+		internal Sample add_sample(string tag, Xml.Node *sample) {
+			var sample_obj = new Sample();
+			sample_obj.limit = -1;
+			sample_obj.xml = sample;
+			sample_obj.id = samples.size;
+			sample_obj.tag = tag;
+			samples.add(sample_obj);
+			return sample_obj;
 		}
 
 		/**
@@ -869,17 +345,15 @@ namespace AutoQIIME {
 		 *
 		 * It is assumed the supplied command will output FASTA data. The FASTA sequences will be binned into samples and the error output will be saved to a file.
 		 * @param prep the command to prepare the sequence
-		 * @param samplelookup a mapping between regular expressions and sample identifiers. The regular expressions are used by AWK to convert the sequence names to QIIME-friendly format. Any sequences not matched by a regular expression in this dictionary will be discarded.
-		 * @param samplelimits a list of the maximum number of sequences in this sample, or, missing or 0 if there is no limit.
 		 */
-		public void prepare_sequences(string prep, HashMap<string, int> samplelookup, HashMap<string, int> samplelimits) {
+		internal void prepare_sequences(string prep, Collection<Sample> samples) {
 			var awkprint = new StringBuilder();
-			foreach (var entry in samplelookup.entries) {
-				awkprint.append_printf("if (name ~ /%s/", entry.key);
-				if (samplelimits.has_key(entry.key) && samplelimits[entry.key] > 0) {
-					awkprint.append_printf(" && count%d < %d", entry.value, samplelimits[entry.key]);
+			foreach (var sample in samples) {
+				awkprint.append_printf("if (name ~ /%s/", sample.tag);
+				if (sample.limit > 0) {
+					awkprint.append_printf(" && count%d < %d", sample.id, sample.limit);
 				}
-				awkprint.append_printf(") { print \">%d_\" NR \"\\n\" seq; count%d++; }", entry.value, entry.value);
+				awkprint.append_printf(") { print \">%d_\" NR \"\\n\" seq; count%d++; }", sample.id, sample.id);
 			}
 			seqrule.append_printf("\t(%s | awk '/^>/ { if (seq) {%s } name = substr($$0, 2); seq = \"\"; } $$0 !~ /^>/ {seq = seq $$0; } END { if (seq) {%s }}' >> seq.fasta) 2>&1 | bzip2 > seq_%d.log.bz2\n\n", prep, awkprint.str, awkprint.str, sequence_preparations++);
 		}
@@ -906,8 +380,10 @@ namespace AutoQIIME {
 	/**
 	 * Determine how compressed files are processed.
 	 */
-	enum FileCompression {
-		PLAIN, GZIP, BZIP;
+	public enum FileCompression {
+		PLAIN,
+		GZIP,
+		BZIP;
 
 		/**
 		 * Get the tool that one would use to render the file to plain text.
@@ -946,7 +422,7 @@ namespace AutoQIIME {
 	/**
 	 * Class to provide access to {@link RuleProcessor}s in the correct parsing order.
 	 */
-	class RuleLookup {
+	class RuleLookup : TypeModule {
 		RuleType state;
 		HashMap<string, RuleProcessor> table;
 		HashSet<string> seen;
@@ -954,10 +430,6 @@ namespace AutoQIIME {
 			state = RuleType.DEFINITON;
 			table = new HashMap<string, RuleProcessor>();
 			seen = new HashSet<string>();
-		}
-
-		public void reset() {
-			state = RuleType.DEFINITON;
 		}
 
 		/**
@@ -975,7 +447,7 @@ namespace AutoQIIME {
 		/**
 		 * Get the appropriate processor and update state so that the file is ensured to be in the correct order.
 		 */
-		public RuleProcessor ? @get(string name) {
+		public new RuleProcessor ? @get(string name) {
 			if (!table.has_key(name)) {
 				return null;
 			}
@@ -997,9 +469,18 @@ namespace AutoQIIME {
 		/**
 		 * Register a new file processor.
 		 */
-		public void add(owned RuleProcessor processor) {
+		public void add(RuleProcessor processor) {
 			var name = processor.get_name();
-			table[name] = (owned) processor;
+			table[name] = processor;
+		}
+
+		public void add_children(Type t) requires (t.is_a(typeof(RuleProcessor))) {
+			foreach (var child in t.children()) {
+				if (child.is_instantiatable() && !child.is_abstract()) {
+					add((RuleProcessor) Object.new(child));
+				}
+				add_children(child);
+			}
 		}
 	}
 
@@ -1052,13 +533,12 @@ namespace AutoQIIME {
 	[CCode(cname = "realpath", cheader_filename = "stdlib.h")]
 	extern string realpath(string path, [CCode(array_length = false, null_terminated = true)] char[] ? buffer = null);
 
-
 	const string QIIME_VERSION_MARKER = "QIIME library version:\t";
 
 	/**
 	 * Check that we have a new enough release of QIIME on this system.
 	 */
-	bool is_version_at_least(int major, int minor) {
+	public bool is_version_at_least(int major, int minor) {
 		if (qiime_version.length > 0 && qiime_version[0] > major)
 			return true;
 		if (qiime_version.length > 1 && qiime_version[0] == major && qiime_version[1] >= minor)
@@ -1174,6 +654,8 @@ namespace AutoQIIME {
 		return true;
 	}
 
+	[CCode(cname = "register_plugin_types")]
+	extern void register_plugin_types();
 
 	int main(string[] args) {
 		if (args.length != 2) {
@@ -1196,22 +678,12 @@ namespace AutoQIIME {
 			return 1;
 		}
 
-		/* Build a lookup for all the rules we know about. If you need to add a new one, add it here, alphabetically please. */
+		/* Discover all the RuleProcessors in the plugin directory. This is really ugly. GLib doesn't know about a type until we register it by instantiating or calling typeof on it or one of it subtypes. There is some grep nastiness in the Makefile that goes and populates plugins/types.c with all the types it can find, so we can reflectively find them now. */
+		register_plugin_types();
+		/* Build a lookup for all the rules we know about. */
 		var lookup = new RuleLookup();
 		lookup.add(new Definition());
-		lookup.add(new Analyses.AlphaDiversity());
-		lookup.add(new Analyses.BetaDiversity());
-		lookup.add(new Analyses.BlastDatabase());
-		lookup.add(new Analyses.ConcordancePlot());
-		lookup.add(new Analyses.LibraryComparison());
-		lookup.add(new Analyses.NonnegativeMatrixFactorization());
-		lookup.add(new Analyses.PrincipalComponentAnalysis());
-		lookup.add(new Analyses.QualityAnalysis());
-		lookup.add(new Analyses.RankAbundance());
-		lookup.add(new Analyses.TableWithSeqs());
-		lookup.add(new Analyses.UchimeCheck());
-		lookup.add(new Sources.FastaSource());
-		lookup.add(new Sources.PandaSource());
+		lookup.add_children(typeof(RuleProcessor));
 
 		primers = new HashMap<string, string>();
 		var primerfile = FileStream.open(Path.build_filename(DATADIR, "primers.lst"), "r");

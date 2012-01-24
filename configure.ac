@@ -43,6 +43,7 @@ AC_SUBST(GEE_VER)
 AC_CONFIG_FILES([
 	Makefile
 	autoqiime.1
+	autoqiime.deps
 	aq-nmf
 	aq-nmf-concordance
 	cover.ps
