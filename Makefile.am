@@ -80,6 +80,7 @@ man1_MANS = \
 	aq-rareotuwithlineage.1 \
 	aq-sort-fasta.1 \
 	aq-syntheticfastq.1 \
+	aqxs.1 \
 	autoqiime.1 \
 	$(NULL)
 
