@@ -29,7 +29,7 @@ class AutoQIIME.Analyses.UchimeCheck : RuleProcessor {
 				return false;
 			}
 		}
-		foreach (var sample in output.samples) {
+		foreach (var sample in output.known_samples) {
 			output.add_target("chimeras%d.uchime".printf(sample.id));
 		}
 		return true;
