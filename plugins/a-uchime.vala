@@ -29,8 +29,8 @@ class AutoQIIME.Analyses.UchimeCheck : RuleProcessor {
 				return false;
 			}
 		}
-		for (var i = 0; i < output.sequence_preparations; i++) {
-			output.add_target("chimeras%d.uchime".printf(i));
+		foreach (var sample in output.samples) {
+			output.add_target("chimeras%d.uchime".printf(sample.id));
 		}
 		return true;
 	}
