@@ -577,7 +577,48 @@ namespace AutoQIIME {
 				add_children(child);
 			}
 		}
+
+		/**
+		 * Discover dynamically loadable modules/plugins.
+		 */
+		public void find_modules() {
+			if (!Module.supported())
+				return;
+			var dir = File.new_for_path(MODDIR);
+			if (dir == null)
+				return;
+			try {
+				FileInfo? info = dir.query_info(FILE_ATTRIBUTE_STANDARD_TYPE, FileQueryInfoFlags.NONE, null);
+				if (info == null || info.get_file_type() != FileType.DIRECTORY)
+					return;
+				var it = dir.enumerate_children("standard::*", FileQueryInfoFlags.NONE);
+				while((info = it.next_file()) != null) {
+					var file = dir.get_child(info.get_name());
+
+					if (info.get_file_type() == FileType.DIRECTORY)
+						continue;
+					if (ContentType.get_mime_type(info.get_content_type()) == "application/x-sharedlib") {
+						var file_path = Path.build_filename(file.get_path(), info.get_name());
+						var module = Module.open (file_path, ModuleFlags.BIND_LOCAL);
+						if (module != null) {
+							void* function;
+							if (module.symbol("init", out function) && function != null) {
+								var init_func = (InitFunc) function;
+								module.make_resident();
+								init_func(this);
+							}
+						}
+					}
+				}
+			} catch (GLib.Error error) {
+				warning("Failed to discover modules in %s. %s", MODDIR, error.message);
+				return;
+			}
+		}
 	}
+
+	[CCode(has_target = false)]
+	delegate void InitFunc(TypeModule module);
 
 	/**
 	 * Processor for definitions (aka “def” tags) in the input file.
@@ -779,6 +820,7 @@ namespace AutoQIIME {
 		var lookup = new RuleLookup();
 		lookup.add(new Definition());
 		lookup.add_children(typeof(RuleProcessor));
+		lookup.find_modules();
 
 		primers = new HashMap<string, string>();
 		var primerfile = FileStream.open(Path.build_filename(DATADIR, "primers.lst"), "r");
