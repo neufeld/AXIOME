@@ -1,0 +1,5 @@
+usr/bin/aqxs
+usr/include/*
+usr/share/autoqiime/*.vala
+usr/share/man/man1/aqxs.1
+usr/share/vala/vapi/*

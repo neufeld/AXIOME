@@ -24,8 +24,8 @@ aqxs
 autom4te.cache
 autoqiime
 autoqiime.1
-autoqiime.deps
 autoqiime.c
+autoqiime.deps
 autoqiime.h
 autoqiime.vapi
 build-aux/compile
@@ -42,7 +42,10 @@ configure
 cover.ps
 debian/*.log
 debian/*.substvars
+debian/autoqiime
+debian/autoqiime-dev
 debian/files
+debian/tmp
 fmap.c
 fmap.h
 joinn.c
