@@ -110,6 +110,9 @@ Do a non-negative matrix factorization of the data creating \fIdegree\fR bases, 
 .BR aq-nmf (1).
 .SH ENVIRONMENT VARIABLES
 .TP
+QIIME_PREFIX
+Prefix before QIIME commands, used for special installations such as MacQIIME or BioLinux. (e.g., \fBQIIME_PREFIX="macqiime "\fR for MacQIIME, or \fBQIIME_PREFIX="qiime "\fR for BioLinux)
+.TP
 INFERNAL_MODEL
 Full path to the alignment Infernal model, usually \fBseed.16s.reference_model.sto\fR.
 .SH SEE ALSO

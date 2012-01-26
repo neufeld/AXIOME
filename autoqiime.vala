@@ -286,9 +286,9 @@ namespace AutoQIIME {
 			if (!(type in summarized_otus)) {
 				summarized_otus.add(type);
 				if (is_version_at_least(1, 3)) {
-					makerules.append(@"otu_table_summarized_$(taxname)$(flavour).txt: otu_table$(flavour).txt\n\tsummarize_taxa.py -i otu_table$(flavour).txt -L $(taxindex) -o . -a\n\tmv otu_table$(flavour.length == 0 ? "" : "_")$(flavour)_L$(taxindex).txt otu_table_summarized_$(taxname)$(flavour).txt\n\n");
+					makerules.append(@"otu_table_summarized_$(taxname)$(flavour).txt: otu_table$(flavour).txt\n\t$$(QIIME_PREFIX)summarize_taxa.py -i otu_table$(flavour).txt -L $(taxindex) -o . -a\n\tmv otu_table$(flavour.length == 0 ? "" : "_")$(flavour)_L$(taxindex).txt otu_table_summarized_$(taxname)$(flavour).txt\n\n");
 				} else {
-					makerules.append(@"otu_table_summarized_$(taxname)$(flavour).txt: otu_table$(flavour).txt\n\tsummarize_taxa.py -i otu_table$(flavour).txt -L $(taxindex) -o otu_table_summarized_$(taxname)$(flavour).txt -a\n\n");
+					makerules.append(@"otu_table_summarized_$(taxname)$(flavour).txt: otu_table$(flavour).txt\n\t$$(QIIME_PREFIX)summarize_taxa.py -i otu_table$(flavour).txt -L $(taxindex) -o otu_table_summarized_$(taxname)$(flavour).txt -a\n\n");
 				}
 			}
 		}
@@ -555,18 +555,22 @@ namespace AutoQIIME {
 		string output;
 		string error;
 		int status;
+		
+		// Get QIIME_PREFIX, and if it is NULL, set to empty string
+		var qiime_config = (Environment.get_variable("QIIME_PREFIX")??"") + "print_qiime_config.py";
+		
 		try {
-			if (!Process.spawn_command_line_sync("print_qiime_config.py", out output, out error, out status) || status != 0) {
-				stderr.printf("Could not run \"print_qiime_config.py\". The error output was:\n%s\n", error);
+			if (!Process.spawn_command_line_sync(qiime_config, out output, out error, out status) || status != 0) {
+				stderr.printf("Could not run \"%s\". The error output was:\n%s\n", qiime_config, error);
 				return null;
 			}
 		} catch (SpawnError e) {
-				stderr.printf("Could not run \"print_qiime_config.py\": %s\n", e.message);
+				stderr.printf("Could not run \"%s\": %s\n", qiime_config, e.message);
 				return null;
 		}
 		var index = output.index_of(QIIME_VERSION_MARKER);
 		if (index == -1) {
-			stderr.printf("\"print_qiime_config.py\" doesn't have a version string like I expect.\n");
+			stderr.printf("\"%s\" doesn't have a version string like I expect.\n", qiime_config);
 			return null;
 		}
 		index += QIIME_VERSION_MARKER.length;
@@ -589,7 +593,7 @@ namespace AutoQIIME {
 			parts += current;
 		}
 		if (parts.length == 0) {
-			stderr.printf("Could not make sense of the version from \"print_qiime_config.py\".\n");
+			stderr.printf("Could not make sense of the version from \"%s\".\n", qiime_config);
 			return null;
 		}
 		stdout.printf("QIIME version: ");
