@@ -47,6 +47,7 @@ vapidir = $(datadir)/vala/vapi
 dist_vapi_DATA = autoqiime.vapi autoqiime.deps
 
 man1_MANS = \
+	autoqiime.1 \
 	aq-base.1 \
 	aq-biplot.1 \
 	aq-bubbleplot.1 \
@@ -81,7 +82,6 @@ man1_MANS = \
 	aq-sort-fasta.1 \
 	aq-syntheticfastq.1 \
 	aqxs.1 \
-	autoqiime.1 \
 	$(NULL)
 
 docdir = $(datadir)/doc/@PACKAGE@
@@ -160,3 +160,6 @@ $(mkrepset_SOURCES): $(aq_mkrepset_VALASOURCES)
 
 fmap.c fmap.h: fmap.vala
 	$(VALAC) $(VALAFLAGS) -g -C -H fmap.h --pkg=gee-$(GEE_VER) fmap.vala
+
+AutoQIIMEManual.pdf: $(man1_MANS)
+	(cat cover.ps; groff -Tps -mandoc -fN $^) | ps2pdf - > $@

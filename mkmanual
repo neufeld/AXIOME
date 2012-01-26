@@ -1,3 +1,0 @@
-#!/bin/sh
-
-(cat cover.ps; groff -Tps -mandoc -fN ./autoqiime.1 ./aq-*.1) | ps2pdf - > AutoQIIMEManual.pdf
