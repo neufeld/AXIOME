@@ -14,3 +14,14 @@ Description: QIIME automation toolkit
  AutoQIIME is a set of tools for making QIIME <http://qiime.sourceforge.net>
  easier to manage by automating error-prone tasks and walking through
  common analyses.
+
+Package: autoqiime-dev
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, autoqiime (= ${binary:Version}), valac (>= 0.12), libgee-dev, libxml2-dev
+Description: QIIME automation toolkit -- Plugin Development
+ AutoQIIME is a set of tools for making QIIME <http://qiime.sourceforge.net>
+ easier to manage by automating error-prone tasks and walking through
+ common analyses.
+ .
+ This package includes headers and scripts for developing new plugins.
+ Regular users probably don't need it.

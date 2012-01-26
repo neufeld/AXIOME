@@ -27,8 +27,10 @@ PKG_CHECK_MODULES(GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED
 AC_SUBST(GLIB_CFLAGS)
 AC_SUBST(GLIB_LIBS)
 
-PKG_CHECK_MODULES(GEE, gee-0.8, [GEE_VER=0.8], [PKG_CHECK_MODULES(GEE, gee-1.0, [GEE_VER=1.0])])
-PKG_CHECK_MODULES(LIBXML, libxml-2.0)
+PKG_CHECK_MODULES(GEE, gee-0.8, [GEE_VER=0.8], [PKG_CHECK_MODULES(GEE, gee-1.0, [GEE_VER=1.0],[AC_MSG_ERROR([*** libgee is required])] )])
+PKG_CHECK_MODULES(GMODULE, gmodule-2.0, [], [AC_MSG_ERROR([*** gmodule is required])])
+PKG_CHECK_MODULES(GIO, gio-2.0, [], [AC_MSG_ERROR([*** gio is required])])
+PKG_CHECK_MODULES(LIBXML, libxml-2.0, [], [AC_MSG_ERROR([*** libxml2 is required])])
 AC_CHECK_HEADER([zlib.h], [], [AC_MSG_ERROR([*** zlib.h is required, install zlib header files])])
 AC_CHECK_LIB([z], [gzopen], [], [AC_MSG_ERROR([*** gzopen is required, install zlib library files])])
 AC_CHECK_HEADER([bzlib.h], [], [AC_MSG_ERROR([*** bzlib.h is required, install bzip2 header files])])
@@ -39,6 +41,30 @@ AC_CHECK_LIB([magic], [magic_open], [], [AC_MSG_ERROR([*** magic_open is require
 AC_SUBST(GEE_CFLAGS)
 AC_SUBST(GEE_LIBS)
 AC_SUBST(GEE_VER)
+AC_SUBST(GMODULE_CFLAGS)
+AC_SUBST(GMODULE_LIBS)
+AC_SUBST(GIO_CFLAGS)
+AC_SUBST(GIO_LIBS)
+
+AC_MSG_CHECKING([for module flags])
+case "$host" in
+*-mingw*)
+	MOD_ARGS='-no-undefined'
+	MOD_LIBTOOL=libtool
+	;;
+*darwin*|*Darwin*)
+	MOD_ARGS='-no-undefined -flat_namespace -undefined suppress -bundle'
+	MOD_LIBTOOL=glibtool
+	;;
+*)
+	MOD_ARGS=''
+	MOD_LIBTOOL=libtool
+	;;
+esac
+AC_MSG_RESULT([$MOD_ARGS])
+
+AC_SUBST(MOD_LIBTOOL)
+AC_SUBST(MOD_ARGS)
 
 AC_CONFIG_FILES([
 	Makefile
@@ -47,5 +73,6 @@ AC_CONFIG_FILES([
 	aq-nmf
 	aq-nmf-concordance
 	cover.ps
+	aqxs
 	]) 
 AC_OUTPUT

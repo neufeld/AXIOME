@@ -4,7 +4,7 @@
  * Quality analysis is done by a makefile, so it only needs to know the FASTQ files that are included. It can handle anything except the really old 1.3 files.
  */
 class AutoQIIME.Analyses.QualityAnalysis : RuleProcessor {
-	private string include = Path.build_filename(BINDIR, "aq-qualityanal");
+	private string include = bin_dir("aq-qualityanal");
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

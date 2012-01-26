@@ -5,14 +5,49 @@ namespace AutoQIIME {
 
 	HashMap<string, string> primers;
 	[CCode(cname = "DATADIR")]
-	public extern const string DATADIR;
+	extern const string DATADIR;
+	[CCode(cname = "MODDIR")]
+	extern const string MODDIR;
 	[CCode(cname = "BINDIR")]
-	public extern const string BINDIR;
+	extern const string BINDIR;
 
-	public abstract class Sources.BaseSource : RuleProcessor {
+	/**
+	 * Create a path for a file inside the bin directory where AutoQIIME was installed.
+	 *
+	 * e.g., bin_dir("aq-nmf") = "/usr/local/bin/aq-nmf"
+	 */
+	public string bin_dir(string filename) {
+		return Path.build_filename(BINDIR, filename);
+	}
+
+	/**
+	 * Create a path for a file inside the shared directory where AutoQIIME was installed.
+	 *
+	 * e.g., data_dir("nmf.R") = "/usr/local/share/autoqiime/nmf.R"
+	 */
+	public string data_dir(string filename) {
+		return Path.build_filename(DATADIR, filename);
+	}
+
+	/**
+	 * Convenience class for new sequence sources.
+	 *
+	 * To create a rule responsible for drawing sequences out of some entity (a file, program, or database), create a subclass.
+	 *
+	 * A sequence source is expected to provide a shell command to extract sequences and provide them in FASTA format. Each sample must be associated with a regular expression capable of extracting matching sequences from the FASTA.
+	 */
+	public abstract class BaseSource : RuleProcessor {
+		/**
+		 * {@inheritDoc}
+		 */
 		public override RuleType get_ruletype() {
 			return RuleType.SOURCE;
 		}
+		/**
+		 * Gets a primer, by name, from the primer database.
+		 *
+		 * Primers may be either a length, a name, or a string of nucleotides. Names are resolved using AutoQIIME's primer database. If a primer name begins with a #, the length of the named primer will be returned, instead of the primer itself.
+		 */
 		protected string? get_primer(Xml.Node *definition, string? primer) {
 			if (primer != null) {
 			var up_primer = primer.up();
@@ -35,7 +70,22 @@ namespace AutoQIIME {
 			}
 			return null;
 		}
+		/**
+		 * Produce the shell command needed to provide the sequence to an output pipe in FASTA format.
+		 *
+		 * For a FASTA file, this is trivially "cat".
+		 * @param defintion the XML element causing this ruckus
+		 * @param samples the samples that are expected to be extracted from this data source
+		 * @param command where to write the command
+		 * @param output the nascent Makefile, if any extra rules are needed
+		 * @return whether the command is valid
+		 */
 		protected abstract bool generate_command(Xml.Node *definition, Collection<Sample> samples, StringBuilder command, Output output);
+
+		/**
+		 * For a sample XML tag, produce a valid regular expression that will appear in the FASTA headers for sequences belonging to this sample
+		 * @return if null, the sample is invalid; otherwise, a regular expression to filter the FASTA stream.
+		 */
 		protected abstract string? get_sample_id(Xml.Node *sample);
 		public override bool process(Xml.Node *definition, Output output) {
 			var samples = new HashMap<string, Sample>();
@@ -75,11 +125,26 @@ namespace AutoQIIME {
 		}
 	}
 
+	/**
+	 * Represents a sample from the input file, across all sequence sources.
+	 */
 	public class Sample : Object {
-		public Xml.Node *xml { get; internal set;}
-		public string tag { get; internal set;}
-		public int limit { get; internal set;}
-		public int id { get; internal set;}
+		/**
+		 * The XML sample tag that generated this sample.
+		 */
+		public Xml.Node *xml { get; internal set; }
+		/**
+		 * The regular expression used the extract this sample from the source's FASTA stream.
+		 */
+		public string tag { get; internal set; }
+		/**
+		 * The maximum number of sequences to allow from this sample, or all if non-positive.
+		 */
+		public int limit { get; internal set; }
+		/**
+		 * The QIIME library identifier associated with this sample.
+		 */
+		public int id { get; internal set; }
 	}
 
 	/**
@@ -91,6 +156,9 @@ namespace AutoQIIME {
 	 * Rule processor interface for analyses and data sources
 	 */
 	public abstract class RuleProcessor : Object {
+		/**
+		 * The type of the rule. This determines the order in which rules must appear.
+		 */
 		public abstract RuleType get_ruletype();
 		/**
 		 * Name of the XML tag for this sequence source.
@@ -110,6 +178,9 @@ namespace AutoQIIME {
 		public abstract bool process(Xml.Node *definition, Output output);
 	}
 
+	/**
+	 * Check if a sequence is a valid (degenerate) nucleotide sequence.
+	 */
 	public bool is_sequence(string sequence) {
 		return Regex.match_simple("^[ACGTKMSWRYBDHV]*$", sequence);
 	}
@@ -146,19 +217,37 @@ namespace AutoQIIME {
 	 * Output processor responsible for collecting all information needed to generate the Makefile and mapping.txt
 	 */
 	public class Output : Object {
+		/**
+		 * The output directory name.
+		 */
 		public string dirname { get; private set; }
 		StringBuilder makerules;
+		/**
+		 * All the samples currently processed in the file.
+		 *
+		 * They can be from multiple sources.
+		 */
+		public Gee.List<Sample> known_samples {
+			owned get {
+				return samples.read_only_view;
+			}
+		}
 		ArrayList<Sample> samples;
 		StringBuilder seqrule;
 		StringBuilder seqsources;
-		public int sequence_preparations { get; private set; }
+		int sequence_preparations;
 		string sourcefile;
+		/**
+		 * The defined variables and their types.
+		 *
+		 * (i.e., all the def tags)
+		 */
 		public HashMap<string, string> vars { get; private set; }
 		Set<string> summarized_otus;
 		StringBuilder targets = new StringBuilder();
 		ArrayList<Xml.Doc*> doc_list;
 
-		public Output(string dirname, string sourcefile) {
+		internal Output(string dirname, string sourcefile) {
 			this.dirname = dirname;
 			this.sourcefile = realpath(sourcefile);
 
@@ -357,6 +446,9 @@ namespace AutoQIIME {
 			}
 			seqrule.append_printf("\t(%s | awk '/^>/ { if (seq) {%s } name = substr($$0, 2); seq = \"\"; } $$0 !~ /^>/ {seq = seq $$0; } END { if (seq) {%s }}' >> seq.fasta) 2>&1 | bzip2 > seq_%d.log.bz2\n\n", prep, awkprint.str, awkprint.str, sequence_preparations++);
 		}
+		/**
+		 * Include and process another parsed XML document.
+		 */
 		public void add_doc(Xml.Doc* doc) {
 			doc_list.add(doc);
 		}
@@ -474,6 +566,9 @@ namespace AutoQIIME {
 			table[name] = processor;
 		}
 
+		/**
+		 * Register all rule processors in a type heirarchy. This assumes the can be instantiated with an empty constructor.
+		 */
 		public void add_children(Type t) requires (t.is_a(typeof(RuleProcessor))) {
 			foreach (var child in t.children()) {
 				if (child.is_instantiatable() && !child.is_abstract()) {
@@ -482,7 +577,48 @@ namespace AutoQIIME {
 				add_children(child);
 			}
 		}
+
+		/**
+		 * Discover dynamically loadable modules/plugins.
+		 */
+		public void find_modules() {
+			if (!Module.supported())
+				return;
+			var dir = File.new_for_path(MODDIR);
+			if (dir == null)
+				return;
+			try {
+				FileInfo? info = dir.query_info(FILE_ATTRIBUTE_STANDARD_TYPE, FileQueryInfoFlags.NONE, null);
+				if (info == null || info.get_file_type() != FileType.DIRECTORY)
+					return;
+				var it = dir.enumerate_children("standard::*", FileQueryInfoFlags.NONE);
+				while((info = it.next_file()) != null) {
+					var file = dir.get_child(info.get_name());
+
+					if (info.get_file_type() == FileType.DIRECTORY)
+						continue;
+					if (ContentType.get_mime_type(info.get_content_type()) == "application/x-sharedlib") {
+						var file_path = Path.build_filename(file.get_path(), info.get_name());
+						var module = Module.open (file_path, ModuleFlags.BIND_LOCAL);
+						if (module != null) {
+							void* function;
+							if (module.symbol("init", out function) && function != null) {
+								var init_func = (InitFunc) function;
+								module.make_resident();
+								init_func(this);
+							}
+						}
+					}
+				}
+			} catch (GLib.Error error) {
+				warning("Failed to discover modules in %s. %s", MODDIR, error.message);
+				return;
+			}
+		}
 	}
+
+	[CCode(has_target = false)]
+	delegate void InitFunc(TypeModule module);
 
 	/**
 	 * Processor for definitions (aka “def” tags) in the input file.
@@ -688,6 +824,7 @@ namespace AutoQIIME {
 		var lookup = new RuleLookup();
 		lookup.add(new Definition());
 		lookup.add_children(typeof(RuleProcessor));
+		lookup.find_modules();
 
 		primers = new HashMap<string, string>();
 		var primerfile = FileStream.open(Path.build_filename(DATADIR, "primers.lst"), "r");
