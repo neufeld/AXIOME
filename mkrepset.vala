@@ -3,12 +3,24 @@ using Gee;
 
 enum IndexParsingState { MAYBE, ID, HEADER, SEQUENCE }
 
+class Count {
+
+	public long val;
+
+	public Count(long val) {
+
+		this.val = val;
+
+	}
+
+}
+
 class IndexedFasta {
 	FileStream file;
-	HashMap<string, int64?> index;
+	HashMap<string, Count> index;
 	private IndexedFasta(owned FileStream file) {
 		this.file = (owned) file;
-		this.index = new HashMap<string, int64?>(Gee.Functions.get_hash_func_for(typeof(string)), Gee.Functions.get_equal_func_for(typeof(string)));
+		this.index = new HashMap<string, Count>(Gee.Functions.get_hash_func_for(typeof(string)), Gee.Functions.get_equal_func_for(typeof(string)));
 
 		int v;
 		IndexParsingState state = IndexParsingState.MAYBE;
@@ -27,7 +39,7 @@ class IndexedFasta {
 			case IndexParsingState.HEADER:
 				if (c == '\n' || c == '\r') {
 					state = IndexParsingState.SEQUENCE;
-					index[buffer.str] = this.file.tell();
+					index[buffer.str] = new Count(this.file.tell());
 					buffer.truncate();
 				} else if (c.isspace()) {
 					state = IndexParsingState.HEADER;
@@ -57,8 +69,8 @@ class IndexedFasta {
 			return null;
 		}
 		var buffer = new StringBuilder();
-		if (file.seek((long)index[id], FileSeek.SET) != 0) {
-			stderr.printf("%s %ld: %s\n", id,(long) index[id], Posix.strerror(errno));
+		if (file.seek(index[id].val, FileSeek.SET) != 0) {
+			stderr.printf("%s %ld: %s\n", id, index[id].val, Posix.strerror(errno));
 			return null;
 		 }
 		int v;
@@ -93,7 +105,7 @@ int main(string[] args) {
 			stderr.printf("Malformed line: %s\n", line);
 			continue;
 		}
-		var representatives = new HashMap<string, int64?>(Gee.Functions.get_hash_func_for(typeof(string)), Gee.Functions.get_equal_func_for(typeof(string)));
+		var representatives = new HashMap<string, Count>(Gee.Functions.get_hash_func_for(typeof(string)), Gee.Functions.get_equal_func_for(typeof(string)));
 		for (var i = 1; i < members.length; i++) {
 			var sequence = sequences[members[i]];
 			if (sequence == null) {
@@ -102,17 +114,17 @@ int main(string[] args) {
 			}
 
 			if (representatives.has_key(sequence)) {
-				representatives[sequence] = representatives[sequence] + 1;
+				representatives[sequence].val++;
 			} else {
-				representatives[sequence] = 1;
+				representatives[sequence] = new Count(1);
 			}
 		}
 
-		int64 maxcount = 0;
+		long maxcount = 0;
 		string maxsequence = "";
 		foreach (var entry in representatives.entries) {
-			if (entry.value > maxcount) {
-				maxcount = entry.value;
+			if (entry.value.val > maxcount) {
+				maxcount = entry.value.val;
 				maxsequence = entry.key;
 			}
 		}
