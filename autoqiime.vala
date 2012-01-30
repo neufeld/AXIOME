@@ -611,7 +611,9 @@ namespace AutoQIIME {
 					}
 				}
 			} catch (GLib.Error error) {
-				warning("Failed to discover modules in %s. %s", MODDIR, error.message);
+				if (!(error is IOError.NOT_FOUND)) {
+					warning("Failed to discover modules in %s. %s", MODDIR, error.message);
+				}
 				return;
 			}
 		}
