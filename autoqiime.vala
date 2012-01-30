@@ -375,7 +375,7 @@ namespace AutoQIIME {
 			if (!(type in summarized_otus)) {
 				summarized_otus.add(type);
 				if (is_version_at_least(1, 3)) {
-					makerules.append(@"otu_table_summarized_$(taxname)$(flavour).txt: otu_table$(flavour).txt\n\t$$(QIIME_PREFIX)summarize_taxa.py -i otu_table$(flavour).txt -L $(taxindex) -o . -a\n\tmv otu_table$(flavour.length == 0 ? "" : "_")$(flavour)_L$(taxindex).txt otu_table_summarized_$(taxname)$(flavour).txt\n\n");
+					makerules.append(@"otu_table_summarized_$(taxname)$(flavour).txt: otu_table$(flavour).txt\n\t$$(QIIME_PREFIX)summarize_taxa.py -i otu_table$(flavour).txt -L $(taxindex) -o . -a\n\tmv otu_table$(flavour)_L$(taxindex).txt otu_table_summarized_$(taxname)$(flavour).txt\n\n");
 				} else {
 					makerules.append(@"otu_table_summarized_$(taxname)$(flavour).txt: otu_table$(flavour).txt\n\t$$(QIIME_PREFIX)summarize_taxa.py -i otu_table$(flavour).txt -L $(taxindex) -o otu_table_summarized_$(taxname)$(flavour).txt -a\n\n");
 				}
