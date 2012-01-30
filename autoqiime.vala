@@ -693,10 +693,10 @@ namespace AutoQIIME {
 		string output;
 		string error;
 		int status;
-		
+
 		// Get QIIME_PREFIX, and if it is NULL, set to empty string
 		var qiime_config = (Environment.get_variable("QIIME_PREFIX")??"") + "print_qiime_config.py";
-		
+
 		try {
 			if (!Process.spawn_command_line_sync(qiime_config, out output, out error, out status) || status != 0) {
 				stderr.printf("Could not run \"%s\". The error output was:\n%s\n", qiime_config, error);
