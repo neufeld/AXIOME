@@ -153,13 +153,13 @@ autoqiime.vapi autoqiime.h $(autoqiime_SOURCES): $(autoqiime_VALASOURCES)
 	awk '/define/ && /_get_type / { t[substr($$3, 2)] = 1 } END { for(x in t) { print "extern " x "();"; } print "void register_plugin_types(void) {"; for(x in t) { print x"();"; } print "}"}' $(autoqiime_SOURCES) > plugins/types.c
 
 $(aq_joinn_SOURCES): $(aq_joinn_VALASOURCES)
-	$(VALAC) $(VALAFLAGS) -g -C  $(aq_joinn_VALASOURCES)
+	$(VALAC) $(VALAFLAGS) -g -C  $(aq_joinn_VALASOURCES) && touch $@
 
 $(aq_mkrepset_SOURCES): $(aq_mkrepset_VALASOURCES)
-	$(VALAC) $(VALAFLAGS) -g -C --pkg=gee-$(GEE_VER) --pkg=posix $(aq_mkrepset_VALASOURCES)
+	$(VALAC) $(VALAFLAGS) -g -C --pkg=gee-$(GEE_VER) --pkg=posix $(aq_mkrepset_VALASOURCES) && touch $@
 
 fmap.c fmap.h: fmap.vala
-	$(VALAC) $(VALAFLAGS) -g -C -H fmap.h --pkg=gee-$(GEE_VER) fmap.vala
+	$(VALAC) $(VALAFLAGS) -g -C -H fmap.h --pkg=gee-$(GEE_VER) fmap.vala && touch $@
 
 AutoQIIMEManual.pdf: $(man1_MANS)
 	(cat cover.ps; groff -Tps -mandoc -fN $^) | ps2pdf - > $@
