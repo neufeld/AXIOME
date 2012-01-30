@@ -30,7 +30,7 @@ class AutoQIIME.Analyses.BetaDiversity : RuleProcessor {
 			flavour = "";
 		} else if (size == "auto") {
 			flavour = "_auto";
-			output.add_rule("otu_table_auto.txt: otu_table.txt\n\t$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt %s -d $$(awk -F '\t' 'NR == 1 {} NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; }}} NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; }} END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest;}' otu_table.txt)\n\n", is_version_at_least(1, 3) ? "" : "--lineages_included");
+			output.add_rulef("otu_table_auto.txt: otu_table.txt\n\t$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt %s -d $$(awk -F '\t' 'NR == 1 {} NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; }}} NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; }} END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest;}' otu_table.txt)\n\n", is_version_at_least(1, 3) ? "" : "--lineages_included");
 		} else {
 			int v = int.parse(size);
 			if (v < 1) {
@@ -38,7 +38,7 @@ class AutoQIIME.Analyses.BetaDiversity : RuleProcessor {
 				return false;
 			}
 			flavour = "_%d".printf(v);
-			output.add_rule("otu_table_%d.txt: otu_table.txt\n\t$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt -d %d %s\n\n", v, v, is_version_at_least(1, 3) ? "" : "--lineages_included");
+			output.add_rulef("otu_table_%d.txt: otu_table.txt\n\t$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt -d %d %s\n\n", v, v, is_version_at_least(1, 3) ? "" : "--lineages_included");
 		}
 
 		string taxname;

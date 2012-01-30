@@ -401,8 +401,17 @@ namespace AutoQIIME {
 		 *
 		 * In reality, this allows you to append arbitrary content to the innards of the makefile. Obviously, you must output valid make rules and definitions which do not conflict with other definitions.
 		 */
+		public void add_rule(string str) {
+			makerules.append(str);
+		}
+
+		/**
+		 * Add a rule to the Makefile.
+		 *
+		 * In reality, this allows you to append arbitrary content to the innards of the makefile. Obviously, you must output valid make rules and definitions which do not conflict with other definitions.
+		 */
 		[PrintfFormat]
-		public void add_rule(string format, ...) {
+		public void add_rulef(string format, ...) {
 			var va = va_list();
 			makerules.append_vprintf(format, va);
 		}

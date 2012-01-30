@@ -45,7 +45,7 @@ class AutoQIIME.Analyses.NonnegativeMatrixFactorization : RuleProcessor {
 			return false;
 		}
 		output.add_target("nmf_%d.pdf".printf(degree));
-		output.add_rule("nmf_%d.pdf: otu_table.txt mapping.extra\n\taq-nmf %d\n\n", degree, degree);
+		output.add_rulef("nmf_%d.pdf: otu_table.txt mapping.extra\n\taq-nmf %d\n\n", degree, degree);
 		return true;
 	}
 }
