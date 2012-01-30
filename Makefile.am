@@ -149,7 +149,7 @@ BUILT_SOURCES = \
 	$(NULL)
 
 autoqiime.vapi autoqiime.h $(autoqiime_SOURCES): $(autoqiime_VALASOURCES)
-	$(VALAC) $(VALAFLAGS) -g -C -H autoqiime.h --vapi autoqiime.vapi --vapidir=. --pkg=config --pkg=libmagic --pkg=gee-$(GEE_VER) --pkg=libxml-2.0 --pkg=gmodule-2.0 --pkg=gio-2.0 $(autoqiime_VALASOURCES) && touch $(autoqiime_VALASOURCES:.vala=.c)
+	$(VALAC) $(VALAFLAGS) -g -C -H autoqiime.h --vapi autoqiime.vapi --vapidir=. --pkg=config --pkg=libmagic --pkg=gee-$(GEE_VER) --pkg=libxml-2.0 --pkg=gmodule-2.0 --pkg=gio-2.0 $(autoqiime_VALASOURCES) && touch $(autoqiime_VALASOURCES:.vala=.c) autoqiime.vapi autoqiime.h
 	awk '/define/ && /_get_type / { t[substr($$3, 2)] = 1 } END { for(x in t) { print "extern " x "();"; } print "void register_plugin_types(void) {"; for(x in t) { print x"();"; } print "}"}' $(autoqiime_SOURCES) > plugins/types.c
 
 $(aq_joinn_SOURCES): $(aq_joinn_VALASOURCES)
