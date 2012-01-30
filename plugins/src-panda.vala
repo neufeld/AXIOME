@@ -87,7 +87,7 @@ class AutoQIIME.Sources.PandaSource : BaseSource {
 			var oldreverse = reverse;
 			forward = "converted%x_1.fastq.bz2".printf(oldforward.hash());
 			reverse = "converted%x_2.fastq.bz2".printf(oldreverse.hash());
-			output.add_rule("%s: %s\n\tzcat %s | aq-oldillumina2fastq > %s\n\n%s: %s\n\tzcat %s | aq-oldillumina2fastq > %s\n\n", forward, oldforward, oldforward, forward, reverse, oldreverse, oldreverse, reverse);
+			output.add_rule("%s: %s\n\t%s %s | aq-oldillumina2fastq > %s\n\n%s: %s\n\t%s %s | aq-oldillumina2fastq > %s\n\n", forward, oldforward, FileCompression.GZIP.get_cat(), oldforward, forward, reverse, oldreverse, FileCompression.GZIP.get_cat(), oldreverse, reverse);
 			domagic = false;
 			dashj = true;
 		}

@@ -483,7 +483,7 @@ namespace AutoQIIME {
 		public string get_cat() {
 			switch (this) {
 			case FileCompression.GZIP :
-				return "zcat";
+				return "gunzip -c";
 			case FileCompression.BZIP :
 				return "bzcat";
 			default :
