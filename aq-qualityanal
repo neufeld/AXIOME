@@ -14,6 +14,9 @@ qualityanal: $(QABASETARGETS)
 %.xystat %.posnhist: %.fastq.gz
 	aq-qualhisto -f $< > $*.xystat 2> $*.posnhist
 
+%.xystat %.posnhist: %.fastq
+	aq-qualhisto -f $< > $*.xystat 2> $*.posnhist
+
 %.nmatrix: %.xystat
 	awk '{c[int($$1/100),int($$2/100)]++; n[int($$1/100), int($$2/100)] += $$3; if (maxx < int($$1/100)) {maxx = int($$1/100);} if (maxy < int($$2/100)) {maxy = int($$2/100);}} END {for (x = 0;x<maxx;x++) { for (y = 0; y < maxy; y++) { printf (" %f", c[x,y] == 0 ? 0 : n[x,y]/c[x,y]);} printf("\n");}}' $< > $@
 

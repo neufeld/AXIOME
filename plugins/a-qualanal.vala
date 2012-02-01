@@ -19,7 +19,7 @@ class AutoQIIME.Analyses.QualityAnalysis : RuleProcessor {
 	}
 	public override bool process(Xml.Node *definition, Output output) {
 		output.add_target("qualityanal");
-		output["FASTQFILES"] = "$(SEQSOURCES)";
+		output["FASTQFILES"] = "$(basename $(basename $(filter %.fastq.bz2 %.fastq.gz, $(SEQSOURCES))))";
 		return true;
 	}
 }
