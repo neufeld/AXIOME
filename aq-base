@@ -11,9 +11,11 @@ alpha_div/alpha_rarefaction_plots/rarefaction_plots.html: otu_table.txt mapping.
 	test ! -d alpha_div || rm -r alpha_div
 	$(QIIME_PREFIX)alpha_rarefaction.py -i otu_table.txt -m mapping.txt -p custom_parameters.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div
 
+OTU_PICKING_METHOD ?= cdhit
+
 # Default custom parameters file
 define CUSTOM_PARAMETERS
-pick_otus:otu_picking_method cdhit
+pick_otus:otu_picking_method $(OTU_PICKING_METHOD)
 pick_otus:clustering_algorithm furthest
 pick_otus:max_cdhit_memory 400
 pick_otus:refseqs_fp
