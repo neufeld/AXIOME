@@ -243,6 +243,7 @@ namespace AutoQIIME {
 		 * (i.e., all the def tags)
 		 */
 		public HashMap<string, string> vars { get; private set; }
+		Set<string> pcoa;
 		Set<string> summarized_otus;
 		StringBuilder targets = new StringBuilder();
 		ArrayList<Xml.Doc*> doc_list;
@@ -257,6 +258,7 @@ namespace AutoQIIME {
 			seqrule = new StringBuilder();
 			seqrule.printf("\ttest ! -f seq.fasta || rm seq.fasta\n");
 			seqsources = new StringBuilder();
+			pcoa = new HashSet<string>();
 			summarized_otus = new HashSet<string>();
 			targets = new StringBuilder();
 			vars = new HashMap<string, string>();
@@ -380,6 +382,20 @@ namespace AutoQIIME {
 					makerules.append(@"otu_table_summarized_$(taxname)$(flavour).txt: otu_table$(flavour).txt\n\t$$(QIIME_PREFIX)summarize_taxa.py -i otu_table$(flavour).txt -L $(taxindex) -o otu_table_summarized_$(taxname)$(flavour).txt -a\n\n");
 				}
 			}
+		}
+
+		/**
+		 * Generate beta-diversity (Unifrac PCOA) analysis
+		 *
+		 * This assumes the OTU has already been generated.
+		 */
+		public void make_pcoa(string flavour) {
+			if (flavour in pcoa) {
+				return;
+			}
+			pcoa.add(flavour);
+			makerules.append(@"beta_div$(flavour)/unweighted_unifrac_otu_table.txt beta_div$(flavour)/weighted_unifrac_otu_table.txt: otu_table$(flavour).txt seq.fasta_rep_set_aligned_pfiltered.tre\n\t$$(QIIME_PREFIX)beta_diversity.py -i otu_table$(flavour).txt -m weighted_unifrac,unweighted_unifrac -o beta_div$(flavour) -t seq.fasta_rep_set_aligned_pfiltered.tre\n\n");
+			makerules.append(@"beta_div_pcoa$(flavour)/pcoa_unweighted_unifrac_otu_table.txt beta_div_pcoa$(flavour)/pcoa_weighted_unifrac_otu_table.txt: beta_div$(flavour)/unweighted_unifrac_otu_table.txt beta_div$(flavour)/weighted_unifrac_otu_table.txt\n\t$$(QIIME_PREFIX)principal_coordinates.py -i beta_div$(flavour) -o beta_div_pcoa$(flavour)\n\n");
 		}
 
 		/**

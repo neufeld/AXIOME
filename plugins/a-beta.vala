@@ -66,6 +66,7 @@ class AutoQIIME.Analyses.BetaDiversity : RuleProcessor {
 			}
 		}
 
+		output.make_pcoa(flavour);
 		output.add_rule(@"prefs_$(taxname)$(flavour).txt: otu_table_summarized_$(taxname)$(flavour).txt\n\t$$(QIIME_PREFIX)make_prefs_file.py -i otu_table_summarized_$(taxname)$(flavour).txt  -m mapping.txt -k white -o prefs_$(taxname)$(flavour).txt\n\n");
 		output.add_rule(@"biplot_coords_$(taxname)$(flavour).txt: beta_div_pcoa$(flavour)/pcoa_weighted_unifrac_otu_table.txt prefs_$(taxname)$(flavour).txt otu_table_summarized_$(taxname)$(flavour).txt\n\ttest ! -d biplot$(taxname)$(flavour) || rm -rf biplot$(taxname)$(flavour)\n\t$$(QIIME_PREFIX)make_3d_plots.py -t otu_table_summarized_$(taxname)$(flavour).txt -i beta_div_pcoa$(flavour)/pcoa_weighted_unifrac_otu_table$(flavour).txt -m mapping.txt -p prefs_$(taxname)$(flavour).txt -o biplot$(taxname)$(flavour) --biplot_output_file biplot_coords_$(taxname)$(flavour).txt --n_taxa_keep=$(taxakeep)\n\n");
 		output.add_rule(@"biplot_$(taxname)$(flavour).svg: biplot_coords_$(taxname)$(flavour).txt mapping.extra\n\taq-biplot \"$(taxname)\" \"$(flavour)\"\n\n");

@@ -88,14 +88,6 @@ seq.fasta_rep_set_aligned_pfiltered.tre:seq.fasta_rep_set_aligned_pfiltered.fast
 otu_table.txt: picked_otus/seq_otus.txt rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt
 	$(QIIME_PREFIX)make_otu_table.py -i picked_otus/seq_otus.txt -t rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt -o otu_table.txt
 
-# Beta diversity analysis -- We are assuming that you want to do multiple beta diversity analysis, so you need to have a properly mangled OTU table
-beta_div%/unweighted_unifrac_otu_table.txt beta_div%/weighted_unifrac_otu_table.txt: seq.fasta_rep_set_aligned_pfiltered.tre otu_table%.txt
-	$(QIIME_PREFIX)beta_diversity.py -i otu_table$*.txt -m weighted_unifrac,unweighted_unifrac -o beta_div$* -t seq.fasta_rep_set_aligned_pfiltered.tre
-
-beta_div_pcoa%/pcoa_unweighted_unifrac_otu_table.txt beta_div_pcoa%/pcoa_weighted_unifrac_otu_table.txt: beta_div%/unweighted_unifrac_otu_table.txt beta_div%/weighted_unifrac_otu_table.txt
-	$(QIIME_PREFIX)principal_coordinates.py -i beta_div$* -o beta_div_pcoa$*
-
-
 otu_table_summarized_otu%.txt: otu_table%.txt
 	aq-pretendsummarize $< > $@
 
