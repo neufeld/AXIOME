@@ -1,4 +1,4 @@
-#!/usr/bin/env make -f
+#!/usr/bin/make -f
 # Make pretty heat maps about quality statistics in Illumina runs
 
 FASTQFILES ?= $(basename $(basename $(wildcard *.fastq.bz2) $(wildcard *.fastq.gz)))
