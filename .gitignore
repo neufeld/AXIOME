@@ -18,6 +18,7 @@ aq-marry-illumina-index
 aq-mkrepset
 aq-nmf
 aq-nmf-concordance
+aq-otuwithseqs
 aq-qualhisto
 aq-syntheticfastq
 aqxs
@@ -46,11 +47,13 @@ debian/autoqiime
 debian/autoqiime-dev
 debian/files
 debian/tmp
+fasta.c
 fmap.c
 fmap.h
 joinn.c
 libtool
 m4/
 mkrepset.c
+otuwithseqs.c
 plugins/*.c
 stamp-h1

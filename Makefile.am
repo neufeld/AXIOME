@@ -18,7 +18,6 @@ bin_SCRIPTS = \
 	aq-otuplothistogram \
 	aq-otusum \
 	aq-otutop \
-	aq-otuwithseqs \
 	aq-pca \
 	aq-pretendsummarize \
 	aq-qualityanal \
@@ -37,6 +36,7 @@ bin_PROGRAMS= \
 	aq-joinn \
 	aq-marry-illumina-index \
 	aq-mkrepset \
+	aq-otuwithseqs \
 	aq-qualhisto \
 	aq-syntheticfastq \
 	$(NULL)
@@ -120,8 +120,12 @@ aq_joinn_LDADD = $(GLIB_LIBS)
 aq_joinn_SOURCES = $(aq_joinn_VALASOURCES:.vala=.c)
 aq_mkrepset_CPPFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
 aq_mkrepset_LDADD = $(GLIB_LIBS) $(GEE_LIBS)
-aq_mkrepset_VALASOURCES = mkrepset.vala
+aq_mkrepset_VALASOURCES = mkrepset.vala fasta.vala
 aq_mkrepset_SOURCES = $(aq_mkrepset_VALASOURCES:.vala=.c)
+aq_otuwithseqs_CPPFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
+aq_otuwithseqs_LDADD = $(GLIB_LIBS) $(GEE_LIBS)
+aq_otuwithseqs_VALASOURCES = otuwithseqs.vala fasta.vala
+aq_otuwithseqs_SOURCES = $(aq_otuwithseqs_VALASOURCES:.vala=.c)
 autoqiime_CPPFLAGS = -DBINDIR=\"$(bindir)\" -DDATADIR=\"$(pkgdatadir)\" -DMODDIR=\"$(pkglibdir)\" $(GLIB_CFLAGS) $(GEE_CFLAGS) $(LIBXML_CFLAGS) $(GMODULE_CFLAGS) $(GIO_CFLAGS)
 autoqiime_LDADD = $(GLIB_LIBS) $(GEE_LIBS) $(LIBXML_LIBS) $(GMODULE_LIBS) $(GIO_LIBS)
 autoqiime_VALASOURCES = \
@@ -157,6 +161,9 @@ $(aq_joinn_SOURCES): $(aq_joinn_VALASOURCES)
 
 $(aq_mkrepset_SOURCES): $(aq_mkrepset_VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -g -C --pkg=gee-$(GEE_VER) --pkg=posix $(aq_mkrepset_VALASOURCES) && touch $@
+
+$(aq_otuwithseqs_SOURCES): $(aq_otuwithseqs_VALASOURCES)
+	$(VALAC) $(VALAFLAGS) -g -C --pkg=gee-$(GEE_VER) --pkg=posix $(aq_otuwithseqs_VALASOURCES) && touch $@
 
 fmap.c fmap.h: fmap.vala
 	$(VALAC) $(VALAFLAGS) -g -C -H fmap.h --pkg=gee-$(GEE_VER) fmap.vala && touch $@
