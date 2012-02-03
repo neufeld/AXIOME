@@ -30,6 +30,17 @@ namespace AutoQIIME {
 	}
 
 	/**
+	 * Checks if a file name contains things that will upset Make.
+	 */
+	public bool is_bad_filename(string filename) {
+		for(var it = 0; it < filename.length; it++) {
+			if (filename[it] == ' ' || filename[it] == '$' || filename[it] == '\\')
+				return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Convenience class for new sequence sources.
 	 *
 	 * To create a rule responsible for drawing sequences out of some entity (a file, program, or database), create a subclass.
@@ -199,17 +210,17 @@ namespace AutoQIIME {
 		SPECIES = 8,
 		STRAIN = 9;
 		public static TaxonomicLevel ? parse(string name) {
-		  var enum_class = (EnumClass) typeof(TaxonomicLevel).class_ref();
-		  var nick = name.down().replace("_", "-");
-		  unowned GLib.EnumValue ? enum_value = enum_class.get_value_by_nick(nick);
-		  if (enum_value != null) {
-		    TaxonomicLevel value = (TaxonomicLevel) enum_value.value;
-		    return value;
-		  }
-		  return null;
+			var enum_class = (EnumClass) typeof(TaxonomicLevel).class_ref();
+			var nick = name.down().replace("_", "-");
+			unowned GLib.EnumValue ? enum_value = enum_class.get_value_by_nick(nick);
+			if (enum_value != null) {
+				TaxonomicLevel value = (TaxonomicLevel) enum_value.value;
+				return value;
+			}
+			return null;
 		}
 		public string to_string() {
-		  return ((EnumClass) typeof (TaxonomicLevel).class_ref()).get_value(this).value_nick;
+			return ((EnumClass) typeof (TaxonomicLevel).class_ref()).get_value(this).value_nick;
 		}
 	}
 
@@ -361,8 +372,8 @@ namespace AutoQIIME {
 			if (otu_method != null) {
 				makefile.printf("OTU_PICKING_METHOD = %s\n", otu_method);
 			}
-			makefile.printf("SEQSOURCES = %s\n\nseq.fasta:$(SEQSOURCES)\n%s\n", seqsources.str, seqrule.str);
-			makefile.printf("%s\n.PHONY: all\n\ninclude %s/aq-base\n", makerules.str, BINDIR);
+			makefile.printf("SEQSOURCES =%s\n\nseq.fasta:$(SEQSOURCES)\n%s\n", seqsources.str, seqrule.str);
+			makefile.printf("%s.PHONY: all\n\ninclude %s/aq-base\n", makerules.str, BINDIR);
 			lookup.print_include(makefile);
 			makefile = null;
 			return true;
@@ -473,9 +484,9 @@ namespace AutoQIIME {
 					awkprint.append_printf(" && count%d < %d", sample.id, sample.limit);
 				}
 				awkprint.append_printf(") { print \">%d_\" NR \"\\n\" seq; count%d++; }", sample.id, sample.id);
-				awkcheck.append_printf("if (count%d == 0){print \"Library defined in %s:%d contributed no sequences. This is probably not what you want.\"; exit 1}", sample.id, sample.xml-> doc-> url, sample.xml-> line);
+				awkcheck.append_printf(" if (count%d == 0) { print \"Library defined in %s:%d contributed no sequences. This is probably not what you want.\"; exit 1; }", sample.id, sample.xml-> doc-> url, sample.xml-> line);
 			}
-			seqrule.append_printf("\t(%s | awk '/^>/ { if (seq) {%s } name = substr($$0, 2); seq = \"\"; } $$0 !~ /^>/ {seq = seq $$0; } END { if (seq) {%s } %s }' >> seq.fasta) 2>&1 | bzip2 > seq_%d.log.bz2\n\n", prep, awkprint.str, awkprint.str, awkcheck.str, sequence_preparations++);
+			seqrule.append_printf("\t(%s | awk '/^>/ { if (seq) {%s } name = substr($$0, 2); seq = \"\"; } $$0 !~ /^>/ { seq = seq $$0; } END { if (seq) {%s }%s }' >> seq.fasta) 2>&1 | bzip2 > seq_%d.log.bz2\n\n", prep, awkprint.str, awkprint.str, awkcheck.str, sequence_preparations++);
 		}
 		/**
 		 * Include and process another parsed XML document.
@@ -562,6 +573,7 @@ namespace AutoQIIME {
 			foreach (var rule in table.values) {
 				var file = rule.get_include();
 				if (file != null) {
+					assert(!is_bad_filename(file));
 					stream.printf("include %s\n", file);
 				}
 			}
@@ -776,7 +788,12 @@ namespace AutoQIIME {
 	}
 
 	bool process_document(string filename, RuleLookup lookup, Output output, bool is_root = false) {
-		Xml.Doc *doc = Parser.parse_file(filename);
+		var absfilename = realpath(filename);
+		if (absfilename == null) {
+			stderr.printf("%s: Cannot canonicalize path.\n", filename);
+		}
+
+		Xml.Doc *doc = Parser.parse_file(absfilename);
 		if (doc == null) {
 			stderr.printf("%s: unable to read or parse file\n", filename);
 			return false;
@@ -892,7 +909,17 @@ namespace AutoQIIME {
 			stderr.printf("Warning: Couldn't find the primers list in \"%s\".\n", DATADIR);
 		}
 
-		if (!process_document(args[1], lookup, output, true)) {
+		var absfilename = realpath(args[1]);
+		if (absfilename == null) {
+			stderr.printf("%s: Cannot canonicalize path.\n", args[1]);
+			return 1;
+		}
+		if (is_bad_filename(absfilename)) {
+			stderr.printf("%s: Filename will cause Make to cry.\n", args[1]);
+			return 1;
+		}
+
+		if (!process_document(absfilename, lookup, output, true)) {
 			return 1;
 		}
 

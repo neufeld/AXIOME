@@ -46,6 +46,10 @@ class AutoQIIME.Sources.PandaSource : BaseSource {
 			definition_error(definition, "Reverse file not specified.\n");
 			return false;
 		}
+		if (is_bad_filename(forward) || is_bad_filename(reverse)) {
+			definition_error(definition, "Filename will cause Make to cry.\n");
+			return false;
+		}
 		if (!FileUtils.test(reverse, FileTest.EXISTS)) {
 			definition_error(definition, "File does not exist.\n");
 			return false;

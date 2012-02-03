@@ -38,6 +38,10 @@ class AutoQIIME.Sources.FastaSource : BaseSource {
 			definition_error(definition, "FASTA file not specified.\n");
 			return false;
 		}
+		if (is_bad_filename(file)) {
+			definition_error(definition, "Filename will cause Make to cry.\n");
+			return false;
+		}
 		if (!FileUtils.test(file, FileTest.EXISTS)) {
 			definition_error(definition, "File \"%s\" does not exist.\n", file);
 			return false;

@@ -12,6 +12,7 @@ alpha_div/alpha_rarefaction_plots/rarefaction_plots.html: otu_table.txt mapping.
 	$(QIIME_PREFIX)alpha_rarefaction.py -i otu_table.txt -m mapping.txt -p custom_parameters.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div
 
 OTU_PICKING_METHOD ?= cdhit
+BLASTDB_NAME ?= "Unknown 16S Database"
 
 # Default custom parameters file
 define CUSTOM_PARAMETERS
@@ -100,7 +101,7 @@ rank_abundance/rank_abundance.pdf: otu_table.txt
 
 # Produce a BLAST database
 nr.nhr nr.nin nr.nsq: seq.fasta
-	formatdb -i seq.fasta -n nr -p F -t "$(BLASTDB_NAME)"
+	formatdb -i seq.fasta -n nr -p F -t $(BLASTDB_NAME)
 
 # Decorate OTU table with representative sequences
 otu_table_with_sequences.txt: seq.fasta_rep_set.fasta otu_table.txt

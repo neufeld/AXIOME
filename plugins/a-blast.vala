@@ -31,7 +31,7 @@ class AutoQIIME.Analyses.BlastDatabase : RuleProcessor {
 			}
 			title = @"$(name) 16S Sequence Library";
 		}
-		output.add_rulef("BLASTDB_NAME = %s\n\n", title);
+		output.add_rulef("BLASTDB_NAME = %s\n\n", Shell.quote(title).replace("$", "$$"));
 		return true;
 	}
 }

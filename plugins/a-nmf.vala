@@ -40,7 +40,7 @@ class AutoQIIME.Analyses.NonnegativeMatrixFactorization : RuleProcessor {
 	}
 	public override bool process(Xml.Node *definition, Output output) {
 		var degree = int.parse(definition-> get_prop("degree"));
-		if (degree < 2 || degree > 30) {
+		if (degree < 2 || degree > output.known_samples.size - 1) {
 			definition_error(definition, "The degree \"%s\" is not resonable for NMF.\n", definition-> get_prop("degree"));
 			return false;
 		}
