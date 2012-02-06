@@ -923,6 +923,11 @@ namespace AutoQIIME {
 			return 1;
 		}
 
+		if (output.known_samples.size == 0) {
+			stderr.printf("There are no samples specified.\n");
+			return 1;
+		}
+
 		/* Generate the Makefile and mapping.txt. */
 		stdout.printf("Generating mapping file...\n");
 		var state = output.generate_mapping();
