@@ -8,21 +8,25 @@ int main(string[] args) {
 	stderr.printf("Opening FASTA...\n");
 	var sequences = IndexedFasta.open(args[1]);
 	if (sequences == null) {
+		stderr.printf("Could not open %s: %s\n", args[1], strerror(errno));
 		return 1;
 	}
 	stderr.printf("Opening OTU table...\n");
 	var otu = FileStream.open(args[2], "r");
 	if (otu == null) {
+		stderr.printf("Could not open %s: %s\n", args[2], strerror(errno));
 		return 1;
 	}
 
 	string line;
 	long count = 0;
 	if ((line = otu.read_line()) == null) {
+		stderr.printf("OTU table ended prematurely.\n");
 		return 1;
 	}
 	stdout.printf("%s\n", line);
 	if ((line = otu.read_line()) == null) {
+		stderr.printf("OTU table ended prematurely.\n");
 		return 1;
 	}
 	stdout.printf("%s\tReprSequence\n", line);

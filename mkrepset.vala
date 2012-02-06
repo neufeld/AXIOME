@@ -8,11 +8,13 @@ int main(string[] args) {
 	stderr.printf("Opening FASTA...\n");
 	var sequences = IndexedFasta.open(args[1]);
 	if (sequences == null) {
+		stderr.printf("Could not open %s: %s\n", args[1], strerror(errno));
 		return 1;
 	}
 	stderr.printf("Opening Clusters...\n");
 	var clusters = FileStream.open(args[2], "r");
 	if (clusters == null) {
+		stderr.printf("Could not open %s: %s\n", args[2], strerror(errno));
 		return 1;
 	}
 
