@@ -40,6 +40,9 @@ class IndexedFasta {
 					state = IndexParsingState.SEQUENCE;
 					index[buffer.str] = new Count(this.file.tell());
 					buffer.truncate();
+					if (index.size % 1000000 == 0) {
+						stderr.printf("Indexed %ld sequences...\n", index.size);
+					}
 				} else if (c.isspace()) {
 					state = IndexParsingState.HEADER;
 				} else if (state == IndexParsingState.ID) {
@@ -53,6 +56,7 @@ class IndexedFasta {
 				break;
 			}
 		}
+		stderr.printf("Indexed %ld sequences...\n", index.size);
 	}
 
 	public static IndexedFasta ? open(string filename) {

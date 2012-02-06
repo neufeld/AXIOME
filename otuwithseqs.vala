@@ -17,6 +17,7 @@ int main(string[] args) {
 	}
 
 	string line;
+	long count = 0;
 	if ((line = otu.read_line()) == null) {
 		return 1;
 	}
@@ -32,6 +33,11 @@ int main(string[] args) {
 			continue;
 		}
 		stdout.printf("%s\t%s\n", line, sequences[parts[0]]);
+		count++;
+		if (count % 100000 == 0) {
+			stderr.printf("Married %ld sequences...\n", count);
+		}
 	}
+	stderr.printf("Married %ld sequences...\n", count);
 	return 0;
 }

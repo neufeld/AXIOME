@@ -17,6 +17,7 @@ int main(string[] args) {
 	}
 
 	string line;
+	long count = 0;
 	while ((line = clusters.read_line()) != null) {
 		var members = line.split("\t");
 		if (members.length < 2) {
@@ -47,6 +48,11 @@ int main(string[] args) {
 			}
 		}
 		stdout.printf(">%s\n%s\n", members[0], maxsequence);
+		count++;
+		if (count % 100000 == 0) {
+			stderr.printf("Summarized %ld clusters...\n", count);
+		}
 	}
+	stderr.printf("Summarized %ld clusters...\n", count);
 	return 0;
 }
