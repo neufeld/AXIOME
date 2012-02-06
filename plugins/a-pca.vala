@@ -18,11 +18,11 @@ class AutoQIIME.Analyses.PrincipalComponentAnalysis : RuleProcessor {
 	}
 	public override bool process(Xml.Node *definition, Output output) {
 		if (!output.vars.has_key("Colour") || output.vars["Colour"] != "s") {
-			definition_error(definition, "PCA requires there to be a \"Colour\" associated with each sample.\n");
+			definition_error(definition, "PCA requires there to be a \"Colour\" associated with each sample. Did you forget <def name=\"Colour\" type=\"s\"/>?\n");
 			return false;
 		}
 		if (!output.vars.has_key("Description") || output.vars["Description"] != "s") {
-			definition_error(definition, "PCA requires there to be a \"Description\" associated with each sample.\n");
+			definition_error(definition, "PCA requires there to be a \"Description\" associated with each sample. Did you forget <def name=\"Colour\" type=\"s\"/>?\n");
 			return false;
 		}
 
