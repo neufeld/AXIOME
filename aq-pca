@@ -1,4 +1,5 @@
 #!/usr/bin/env Rscript
+options(error = quote(dump.frames("pca-debug", TRUE)))
 
 print("Reading OTU table");
 otutable <- read.table("otu_table.txt", skip = 1, comment.char = "", header = TRUE, row.names = 1, sep = "\t");

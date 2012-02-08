@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
 # Turn QIIME biplot data into something that looks pretty
+options(error = quote(dump.frames("biplot-debug", TRUE)))
 # Scaling factor for arrow width
 arrowScale = 0.1
 # Load the mapping, the principle components, the biplot

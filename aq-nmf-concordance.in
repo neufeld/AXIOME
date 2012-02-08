@@ -3,6 +3,8 @@
 #  Xingpeng Jiang <xingpengjiang@gmail.com>
 #  Jonathan Dushoff <dushoff@mcmaster.ca>
 #  Andre Masella <andre@masella.name>
+options(error = quote(dump.frames("nmf-concordance-debug", TRUE)))
+
 kstart <- 2  # start rank
 nloop <- 100  # runs for each rank
 nmf.method <- "brunet" # NMF method

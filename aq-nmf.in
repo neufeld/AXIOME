@@ -3,6 +3,8 @@
 #  Xingpeng Jiang <xingpengjiang@gmail.com>
 #  Jonathan Dushoff <dushoff@mcmaster.ca>
 #  Andre Masella <andre@masella.name>
+options(error = quote(dump.frames("nmf-debug", TRUE)))
+
 K <- as.numeric(tail(commandArgs(),1))
 nloop <- 100
 
