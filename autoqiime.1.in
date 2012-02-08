@@ -1,5 +1,5 @@
 .\" Authors: Andre Masella
-.TH autoqiime 1 "October 2011" "1.2" "USER COMMANDS"
+.TH autoqiime 1 "Februrary 2012" "1.3" "USER COMMANDS"
 .SH NAME
 autoqiime \- Automation toolkit for QIIME
 .SH SYNOPSIS
@@ -111,6 +111,14 @@ for more information.
 \fB<nmf degree="\fIdegree\fB"/>\fR
 Do a non-negative matrix factorization of the data creating \fIdegree\fR bases, where this degree has been selected from the concordance plot generated above. For more information, see
 .BR aq-nmf (1).
+.TP
+\fB<duleg/>\fR
+Compute Dufrene-Legendre indicator species analysis in R. For more information, see
+.BR aq-duleg (1).
+.TP
+\fB<mrpp/>\fR
+Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities in R. For more information, see
+.BR aq-mrpp (1).
 .SH ENVIRONMENT VARIABLES
 .TP
 QIIME_PREFIX
@@ -132,8 +140,9 @@ The following are components used by AutoQIIME or supplemental tools:
 .BR aq-bubbleplot (1),
 .BR aq-cmplibs (1),
 .BR aq-count-n (1),
-.BR aq-demux-illumina (1),
 .BR aq-estimateq (1),
+.BR aq-duleg (1),
+.BR aq-demux-illumina (1),
 .BR aq-fasta-length (1),
 .BR aq-fastq2oldillumina (1),
 .BR aq-filter-fastq-known (1),
@@ -141,6 +150,7 @@ The following are components used by AutoQIIME or supplemental tools:
 .BR aq-libcontrib (1),
 .BR aq-marry-illumina-index (1),
 .BR aq-mkrepset (1),
+.BR aq-mrpp (1),
 .BR aq-nmf (1),
 .BR aq-nmf-concordance (1),
 .BR aq-oldillumina2fastq (1),

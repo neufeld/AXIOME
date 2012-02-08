@@ -1,0 +1,30 @@
+#!/usr/bin/env Rscript
+options(error = quote(dump.frames("duleg-debug", TRUE)))
+library(labdsv)
+
+print("Reading OTU table")
+rawtable <- read.table("otu_table.txt", skip = 1, 
+		comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+
+otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+
+print("Reading mapping");
+mapping <- t(read.table("mapping.txt", header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t"))
+
+# For non-numeric sample names, comment out the following line
+colnames(mapping) <- paste("X", colnames(mapping), sep = "");
+
+sink("duleg.txt", append = FALSE)
+sink()
+for (x in 1 : nrow(mapping)) {
+	name <- rownames(mapping)[x]
+	print(paste("Computing for", name))
+	dis.bc <- dsvdis(otutable, 'bray/curtis')
+	clust <- mapping[x,]
+	d <- indval(otutable, clust)
+	print("Saving")
+	sink("duleg.txt", append = TRUE)
+	print(paste("For", name))
+	summary(d)
+	sink()
+}

@@ -5,9 +5,11 @@ bin_SCRIPTS = \
 	aq-biplot \
 	aq-bubbleplot \
 	aq-cmplibs \
+	aq-duleg \
 	aq-fasta-length \
 	aq-inst-cran \
 	aq-libcontrib \
+	aq-mrpp \
 	aq-nmf \
 	aq-nmf-concordance \
 	aq-oldillumina2fastq \
@@ -55,6 +57,7 @@ man1_MANS = \
 	aq-cmplibs.1 \
 	aq-count-n.1 \
 	aq-demux-illumina.1 \
+	aq-duleg.1 \
 	aq-estimateq.1 \
 	aq-fasta-length.1 \
 	aq-fastq2oldillumina.1 \
@@ -64,6 +67,7 @@ man1_MANS = \
 	aq-libcontrib.1 \
 	aq-marry-illumina-index.1 \
 	aq-mkrepset.1 \
+	aq-mrpp.1 \
 	aq-nmf-concordance.1 \
 	aq-nmf.1 \
 	aq-oldillumina2fastq.1 \
@@ -135,7 +139,9 @@ autoqiime_VALASOURCES = \
 	plugins/a-alpha.vala \
 	plugins/a-beta.vala \
 	plugins/a-blast.vala \
+	plugins/a-duleg.vala \
 	plugins/a-libcmp.vala \
+	plugins/a-mrpp.vala \
 	plugins/a-nmf.vala \
 	plugins/a-pca.vala \
 	plugins/a-qualanal.vala \

@@ -134,4 +134,12 @@ biplot.pdf: mapping.txt otu_table.txt headers.txt
 nmf-concordance.pdf: otu_table.txt
 	aq-nmf-concordance
 
+# Duleg
+duleg.txt: otu_table.txt
+	aq-duleg
+
+# MRPP
+mrpp.pdf: otu_table.txt mapping.txt
+	aq-mrpp
+
 .PHONY: all alpha

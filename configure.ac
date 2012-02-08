@@ -6,7 +6,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.11 dist-bzip2])
 AM_MAINTAINER_MODE
 
-R_PKGS="gplots"
+R_PKGS="gplots vegan labdsv"
 AC_SUBST(R_PKGS)
 
 # Checks for programs.
