@@ -13,6 +13,7 @@ aq-demux-illumina
 aq-estimateq
 aq-fastq2oldillumina
 aq-filter-fastq-known
+aq-inst-cran
 aq-joinn
 aq-marry-illumina-index
 aq-mkrepset

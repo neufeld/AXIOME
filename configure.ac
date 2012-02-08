@@ -6,6 +6,9 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.11 dist-bzip2])
 AM_MAINTAINER_MODE
 
+R_PKGS="gplots"
+AC_SUBST(R_PKGS)
+
 # Checks for programs.
 AC_PROG_CC
 AM_PROG_CC_C_O
@@ -72,6 +75,7 @@ AC_CONFIG_FILES([
 	autoqiime.deps
 	aq-nmf
 	aq-nmf-concordance
+	aq-inst-cran
 	cover.ps
 	aqxs
 	]) 

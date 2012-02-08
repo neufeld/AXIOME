@@ -6,6 +6,7 @@ bin_SCRIPTS = \
 	aq-bubbleplot \
 	aq-cmplibs \
 	aq-fasta-length \
+	aq-inst-cran \
 	aq-libcontrib \
 	aq-nmf \
 	aq-nmf-concordance \
@@ -58,6 +59,7 @@ man1_MANS = \
 	aq-fasta-length.1 \
 	aq-fastq2oldillumina.1 \
 	aq-filter-fastq-known.1 \
+	aq-inst-cran.1 \
 	aq-joinn.1 \
 	aq-libcontrib.1 \
 	aq-marry-illumina-index.1 \

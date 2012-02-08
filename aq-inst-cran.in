@@ -1,0 +1,25 @@
+#!/bin/sh
+
+if [ "x$(which apt-get)" != x ]
+then
+	read -p "You seem to have a Debianish system. Do you want me to use cran2deb? [y/n] " USECRAN
+	if [ "$USECRAN" = y -o "$USECRAN" = Y ]
+	then
+		if ! grep "http://debian.cran.r-project.org/rep" /etc/apt/sources.list /etc/apt/sources.list.d/*.list
+		then
+			echo "deb http://debian.cran.r-project.org/rep cran2deb main" > /etc/apt/source.list.d/cran2deb.list && \
+			wget -O- http://debian.cran.r-project.org/key.asc | apt-key add - && \
+			apt-get update || echo "Failed to add cran2deb." && exit 1
+		fi
+		for each in @R_PKGS@
+		do
+			apt-get install r-cran-${each}
+		done
+		exit 0
+	fi
+fi
+
+for each in @R_PKGS@
+do
+	echo "install.packages(\"${each}\");" | R --no-save -q
+done

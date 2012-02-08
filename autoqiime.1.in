@@ -6,7 +6,10 @@ autoqiime \- Automation toolkit for QIIME
 .B autoqiime
 .I input.aq
 .SH DESCRIPTION
-AutoQIIME is a way of automating tedious and error-prone analysis with the QIIME toolkit. Given a file of input data and analyses, it generates a \fBMakefile\fR to perform the analyses.
+AutoQIIME is a way of automating tedious and error-prone analysis with the QIIME toolkit. Given a file of input data and analyses, it generates a \fBMakefile\fR to perform the analyses. Some analyses make use of
+.BR R (1)
+and additional R packages may need to be installed from CRAN. This can be done using
+.BR aq-inst-cran (1).
 .SH OPTIONS
 .TP
 input.aq
@@ -118,6 +121,8 @@ Full path to the alignment Infernal model, usually \fBseed.16s.reference_model.s
 .SH SEE ALSO
 \fB@prefix@/share/doc/@PACKAGE@/sample.aq\fR,
 \fB@prefix@/share/@PACKAGE@/primers.lst\fR,
+.BR aqxs (1),
+.BR aq-inst-cran (1),
 .BR pandaseq (1),
 .BR make (1).
 

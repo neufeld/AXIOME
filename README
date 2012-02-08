@@ -6,6 +6,9 @@ Tools for making QIIME easier to use.
 You'll need to install this package with:
 	./autogen.sh && ./configure && make && make install
 
+You will need to install several R packages which are dependencies. This can be done by calling:
+	aq-inst-cran
+
 And then you should read sample.aq and man autoqiime
 
 If you would like a printable manual, in this directory run:
