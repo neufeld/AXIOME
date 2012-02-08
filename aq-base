@@ -135,7 +135,7 @@ nmf-concordance.pdf: otu_table.txt
 	aq-nmf-concordance
 
 # Duleg
-duleg.txt: otu_table.txt
+duleg.txt: otu_table.txt mapping.txt
 	aq-duleg
 
 # MRPP
