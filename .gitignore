@@ -59,4 +59,5 @@ m4/
 mkrepset.c
 otuwithseqs.c
 plugins/*.c
+sample.aq
 stamp-h1

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<autoqiime version="1.2">
+<autoqiime version="@VERSION@">
 	<!-- Definitions -->
 	<!-- First, we must specify all the types of data we intend to associate with our data. For instance, if we collected the collected the samples from different times, or different environment, or different substrates, then we define those here. Each definition can have a type. The type "d" is a decimal number, the type "i" is an integer, the type "s" is for text. If absent, the type is assumed to be "s". -->
 	<def name="pH" type="d"/>
@@ -26,24 +26,30 @@
 	<!-- Analyses -->
 	<!-- Do a basic alpha diversity analysis (i.e., QIIME's Chao1 curves) -->
 	<alpha/>
-	<!-- Make a rank-abundance plot -->
-	<rankabundance/>
-	<!-- Compare libraries on a plot to see if one is a superset of another. This is useful if you have a sample which is a subsample of another library. -->
-	<compare level="class"/>
 	<!-- Do a QIIME beta diversity analysis and produce biplots and bubble plots. You can specify the taxonomic level for the analysis. -->
 	<beta level="class"/>
 	<!-- The parameter "size" allows you to rarefy the library to a particular size, or "auto" to use the smallest sample size. Specifying taxa can limit the number of taxa the appear in the biplot. The default is 10. You can specify "all" if desired. -->
 	<beta level="class" size="auto" taxa="50"/>
-	<!-- Produce some data on the quality of the *raw* reads. -->
-	<qualityanal/>
 	<!-- Build a BLAST database over the sequences -->
 	<blast/>
-	<!-- Produce an OTU table with the representatives sequences -->
-	<withseqs/>
-	<!-- Do chimera checking with UCHIME. Since the parameters vary based on the type of DNA, you can specify profile="v3" to use different parameters -->
-	<uchime/>
+	<!-- Compare libraries on a plot to see if one is a superset of another. This is useful if you have a sample which is a subsample of another library. -->
+	<compare level="class"/>
+	<!-- Compute Dufrene-Legendre indicator species analysis over the variables provided above -->
+	<duleg/>
+	<!-- Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities over the variables provided above -->
+	<mrpp/>
 	<!-- Do principal components in R using the numeric variables supplied in the “def” entries -->
 	<pca/>
-	<!-- TODO: NMF -->
-	<!-- TODO: Mike's rare lineage finder -->
+	<!-- Produce some data on the quality of the *raw* reads. -->
+	<qualityanal/>
+	<!-- Create a concordance plot for non-negative matrix factorization. The actual NMF analysis, done below, requires a degree and a concordance plot is needed which will show the suitability of a particular degree for the data. The degrees that appear as local minima in the concordance plot are suitable to try for NMF analysis.-->
+	<nmf-concordance/>
+	<!-- Do a non-negative matrix factorization of the data creating 3 bases, where this degree has been selected from the concordance plot generated above.-->
+	<nmf degree="3"/>
+.	<!-- Make a rank-abundance plot -->
+	<rankabundance/>
+	<!-- Do chimera checking with UCHIME. Since the parameters vary based on the type of DNA, you can specify profile="v3" to use different parameters -->
+	<uchime/>
+	<!-- Produce an OTU table with the representatives sequences -->
+	<withseqs/>
 </autoqiime>

@@ -77,6 +77,7 @@ AC_CONFIG_FILES([
 	aq-nmf-concordance
 	aq-inst-cran
 	cover.ps
+	sample.aq
 	aqxs
 	]) 
 AC_OUTPUT
