@@ -1,8 +1,8 @@
 using Gee;
 
-enum IndexParsingState { MAYBE, ID, HEADER, SEQUENCE }
+public enum IndexParsingState { MAYBE, ID, HEADER, SEQUENCE }
 
-class Count {
+public class Count {
 
 	public long val;
 
@@ -14,7 +14,7 @@ class Count {
 
 }
 
-class IndexedFasta {
+public class IndexedFasta {
 	FileStream file;
 	HashMap<string, Count> index;
 	private IndexedFasta(owned FileStream file) {

@@ -126,12 +126,12 @@ aq_joinn_LDADD = $(GLIB_LIBS)
 aq_joinn_SOURCES = $(aq_joinn_VALASOURCES:.vala=.c)
 aq_mkrepset_CPPFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
 aq_mkrepset_LDADD = $(GLIB_LIBS) $(GEE_LIBS)
-aq_mkrepset_VALASOURCES = mkrepset.vala fasta.vala
-aq_mkrepset_SOURCES = $(aq_mkrepset_VALASOURCES:.vala=.c)
+aq_mkrepset_VALASOURCES = mkrepset.vala fasta.vapi
+aq_mkrepset_SOURCES = $(aq_mkrepset_VALASOURCES:.vala=.c) fasta.c
 aq_otuwithseqs_CPPFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
 aq_otuwithseqs_LDADD = $(GLIB_LIBS) $(GEE_LIBS)
-aq_otuwithseqs_VALASOURCES = otuwithseqs.vala fasta.vala
-aq_otuwithseqs_SOURCES = $(aq_otuwithseqs_VALASOURCES:.vala=.c)
+aq_otuwithseqs_VALASOURCES = otuwithseqs.vala fasta.vapi
+aq_otuwithseqs_SOURCES = $(aq_otuwithseqs_VALASOURCES:.vala=.c) fasta.c
 autoqiime_CPPFLAGS = -DBINDIR=\"$(bindir)\" -DDATADIR=\"$(pkgdatadir)\" -DMODDIR=\"$(pkglibdir)\" $(GLIB_CFLAGS) $(GEE_CFLAGS) $(LIBXML_CFLAGS) $(GMODULE_CFLAGS) $(GIO_CFLAGS)
 autoqiime_LDADD = $(GLIB_LIBS) $(GEE_LIBS) $(LIBXML_LIBS) $(GMODULE_LIBS) $(GIO_LIBS)
 autoqiime_VALASOURCES = \
@@ -175,6 +175,9 @@ $(aq_otuwithseqs_SOURCES): $(aq_otuwithseqs_VALASOURCES)
 
 fmap.c fmap.h: fmap.vala
 	$(VALAC) $(VALAFLAGS) -g -C -H fmap.h --pkg=gee-$(GEE_VER) fmap.vala && touch $@
+
+fasta.vapi fasta.c fasta.h: fasta.vala
+	$(VALAC) $(VALAFLAGS) -g -C -H fasta.h --vapi=fasta.vapi --pkg=gee-$(GEE_VER) --pkg=posix fasta.vala && touch $@
 
 AutoQIIMEManual.pdf: $(man1_MANS)
 	(cat cover.ps; groff -Tps -mandoc -fN $^) | ps2pdf - > $@

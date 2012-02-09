@@ -49,6 +49,8 @@ debian/autoqiime-dev
 debian/files
 debian/tmp
 fasta.c
+fasta.h
+fasta.vapi
 fmap.c
 fmap.h
 joinn.c
