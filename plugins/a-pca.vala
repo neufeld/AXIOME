@@ -37,7 +37,8 @@ class AutoQIIME.Analyses.PrincipalComponentAnalysis : RuleProcessor {
 			}
 		}
 		if (!hasnumeric) {
-			definition_error(definition, "You should probably have at least one numeric variable over which to do PCA.\n");
+			definition_error(definition, "You should have at least one numeric variable (i.e., type=\"d\" or type=\"i\") over which to do PCA.\n");
+			return false;
 		}
 		output.add_target("biplot.pdf");
 		return true;

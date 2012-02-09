@@ -66,10 +66,8 @@ class AutoQIIME.Sources.PandaSource : BaseSource {
 		/* How we process this file depends on what version of CASAVA created the FASTQ files. The old ones need to be converted. We also need to know if they are bzipped so we can give the -j option to PANDAseq. */
 		var version = definition-> get_prop("version");
 		if (version == null) {
-			definition_error(definition, "No version specified. I'm going to assume you have the latest version.\n");
-			domagic = true;
-			convert = false;
-			dashsix = false;
+			definition_error(definition, "No CASAVA version specified.\n");
+			return false;
 		} else if (version == "1.3") {
 			domagic = false;
 			convert = true;
@@ -83,10 +81,8 @@ class AutoQIIME.Sources.PandaSource : BaseSource {
 			convert = false;
 			dashsix = false;
 		} else {
-			definition_error(definition, "The version \"%s\" is not one that I recognise. You should probably do something about that. Until then, I'm going to make some assumptions.\n", version);
-			domagic = true;
-			convert = false;
-			dashsix = false;
+			definition_error(definition, "The version \"%s\" is not one that I recognise.\n", version);
+			return false;
 		}
 
 		if (convert) {
