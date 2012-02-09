@@ -11,6 +11,9 @@ class AutoQIIME.Analyses.DuLegStats : RuleProcessor {
 	public override unowned string ? get_include() {
 		return null;
 	}
+	public override version introduced_version() {
+		return version(1, 3);
+	}
 	public override bool is_only_once() {
 		return true;
 	}

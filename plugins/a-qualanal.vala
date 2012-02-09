@@ -14,6 +14,9 @@ class AutoQIIME.Analyses.QualityAnalysis : RuleProcessor {
 	public override unowned string ? get_include() {
 		return include;
 	}
+	public override version introduced_version() {
+		return version(1, 1);
+	}
 	public override bool is_only_once() {
 		return true;
 	}

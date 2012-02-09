@@ -41,6 +41,44 @@ namespace AutoQIIME {
 	}
 
 	/**
+	 * Structure for describing versions of AutoQIIME
+	 */
+	public struct version {
+		int major;
+		int minor;
+		public version(int major, int minor) {
+			this.major = major;
+			this.minor = minor;
+		}
+		internal static bool parse(string str, out version result) {
+			result = version(0, 0);
+			var parts = str.split(".");
+			if (parts.length != 2) {
+				return false;
+			}
+			var major = int.parse(parts[0]);
+			var minor = int.parse(parts[1]);
+			if (major < 0 || minor < 0) {
+				return false;
+			}
+			result = version(major, minor);
+			return true;
+		}
+		internal bool older_than(version other) {
+			return this.major < other.major || this.major == other.major && this.minor < other.minor;
+		}
+		public string to_string() {
+			return @"$(major).$(minor)";
+		}
+		internal void update(version other) {
+			if (this.older_than(other)) {
+				this.major = other.major;
+				this.minor = other.minor;
+			}
+		}
+	}
+
+	/**
 	 * Convenience class for new sequence sources.
 	 *
 	 * To create a rule responsible for drawing sequences out of some entity (a file, program, or database), create a subclass.
@@ -179,6 +217,10 @@ namespace AutoQIIME {
 		 * Path to a file that must be included in the Makefile.
 		 */
 		public abstract unowned string ? get_include();
+		/**
+		 * What version of AutoQIIME was this feature introduced in?
+		 */
+		public abstract version introduced_version();
 		/**
 		 * Can this directive be included multiple times in a configuration file?
 		 */
@@ -678,6 +720,9 @@ namespace AutoQIIME {
 		public override unowned string ? get_include() {
 			return null;
 		}
+		public override version introduced_version() {
+			return version(1, 0);
+		}
 		public override bool is_only_once() {
 			return false;
 		}
@@ -791,6 +836,7 @@ namespace AutoQIIME {
 		var absfilename = realpath(filename);
 		if (absfilename == null) {
 			stderr.printf("%s: Cannot canonicalize path.\n", filename);
+			return false;
 		}
 
 		Xml.Doc *doc = Parser.parse_file(absfilename);
@@ -803,20 +849,31 @@ namespace AutoQIIME {
 		if (root == null) {
 			stderr.printf("%s: no data in file\n", filename);
 			return false;
-			delete doc;
 		}
 
-		var version = root->get_prop("version");
-		if (version == null) {
-			stderr.printf("%s: has no version. I'll assume it's meant for this version.\n", filename);
-		} else if (double.parse(version) > double.parse(VERSION)) {
-			stderr.printf("%s: has a version newer than this version of AutoQIIME. I take no responsibility for any errors.\n", filename);
+		var version_str = root->get_prop("version");
+		if (version_str == null) {
+			stderr.printf("%s: has no version. You must provide a version.\n", filename);
+			delete doc;
+			return false;
 		}
+
+		version file_version;
+		if (!version.parse(version_str, out file_version)) {
+			stderr.printf("%s: Unrecognizable version. Should be X.Y, but is %s", filename, version_str);
+			delete doc;
+			return false;
+		}
+		if (autoqiime_version.older_than(file_version)) {
+			stderr.printf("%s: requires a version newer (%s) than this version of AutoQIIME (%s).\n", filename, file_version.to_string(), autoqiime_version.to_string());
+			return false;
+		}
+		var max_version = version(0, 0);
 
 		if (is_root) {
 			var method = root->get_prop("otu-method");
 			if (method != null) {
-				switch (method) {
+				switch (method.down()) {
 					case "cdhit":
 					case "cd-hit":
 						output.otu_method = "cdhit";
@@ -852,11 +909,21 @@ namespace AutoQIIME {
 				delete doc;
 				return false;
 			}
+			var rule_version = rule.introduced_version();
+			if (file_version.older_than(rule_version)) {
+				stderr.printf("%s: %d: The directive \"%s\" is requires at least AutoQIIME %s but this file specifies that it only needs version %s.\n", filename, iter-> line, iter-> name, rule_version.to_string(), file_version.to_string());
+				delete doc;
+				return false;
+			}
+			max_version.update(rule_version);
 			if (!rule.process(iter, output)) {
 				stderr.printf("%s: %d: The directive \"%s\" is malformed.\n", filename, iter-> line, iter-> name);
 				delete doc;
 				return false;
 			}
+		}
+		if (max_version.older_than(file_version)) {
+			stderr.printf("%s: claims to requires AutoQIIME %s, but it only uses features from %s.\n", filename, file_version.to_string(), max_version.to_string());
 		}
 		output.add_doc(doc);
 		return true;
@@ -865,7 +932,10 @@ namespace AutoQIIME {
 	[CCode(cname = "register_plugin_types")]
 	extern void register_plugin_types();
 
+	version autoqiime_version;
+
 	int main(string[] args) {
+		assert(version.parse(VERSION, out autoqiime_version));
 		if (args.length != 2) {
 			stderr.printf("Usage: %s config.aq\n", args[0]);
 			return 1;

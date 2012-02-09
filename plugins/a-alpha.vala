@@ -13,6 +13,9 @@ class AutoQIIME.Analyses.AlphaDiversity : RuleProcessor {
 	public override unowned string ? get_include() {
 		return null;
 	}
+	public override version introduced_version() {
+		return version(1, 1);
+	}
 	public override bool is_only_once() {
 		return true;
 	}
