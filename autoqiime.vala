@@ -347,6 +347,7 @@ namespace AutoQIIME {
 			mapping.append_c('\n');
 			extra.append_c('\n');
 			headers.append_c('\n');
+			var result = true;
 			foreach (var sample in samples) {
 				mapping.append_printf("%d", sample.id);
 				extra.append_printf("%d", sample.id);
@@ -355,6 +356,7 @@ namespace AutoQIIME {
 					if (prop == null) {
 						stderr.printf("%s: %d: Missing attribute %s.\n", sample.xml-> doc-> url, sample.xml-> line, entry.key);
 						(entry.key == "Colour" || entry.key == "Description" ? extra : mapping).append_printf("\t");
+						result = false;
 					} else {
 						if (entry.key == "Colour" || entry.key == "Description") {
 							extra.append_printf("\t%s", prop);
@@ -375,7 +377,7 @@ namespace AutoQIIME {
 				mapping.append_c('\n');
 				extra.append_c('\n');
 			}
-			return update_if_different("mapping.txt", mapping.str) && update_if_different("mapping.extra", extra.str) && update_if_different("headers.txt", headers.str);
+			return update_if_different("mapping.txt", mapping.str) && update_if_different("mapping.extra", extra.str) && update_if_different("headers.txt", headers.str) && result;
 		}
 
 		bool update_if_different(string filename, string newcontents) {
