@@ -97,7 +97,8 @@ otu_table_summarized_otu%.txt: otu_table%.txt
 # Produce a rank-abundance plot
 rank_abundance/rank_abundance.pdf: otu_table.txt
 	test ! -d rank_abundance || rm -r rank_abundance
-	$(QIIME_PREFIX)plot_rank_abundance_graph.py -i otu_table.txt -s '*' -o rank_abundance
+	$(QIIME_PREFIX)plot_rank_abundance_graph.py -i otu_table.txt -s "$$(awk -F "\t" 'NR == 2 { printf("%s", $$2); for (i = 3; i < NF; i++) { printf(",%s", $$i); } printf("\n"); exit; }' otu_table.txt)" -o rank_abundance
+	mv rank_abundance/rank_abundance_cols*.pdf rank_abundance/rank_abundance.pdf
 
 # Produce a BLAST database
 nr.nhr nr.nin nr.nsq: seq.fasta
