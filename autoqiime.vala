@@ -32,12 +32,8 @@ namespace AutoQIIME {
 	/**
 	 * Checks if a file name contains things that will upset Make.
 	 */
-	public bool is_bad_filename(string filename) {
-		for(var it = 0; it < filename.length; it++) {
-			if (filename[it] == ' ' || filename[it] == '$' || filename[it] == '\\')
-				return true;
-		}
-		return false;
+	public bool is_valid_filename(string filename) {
+		return Regex.match_simple("^[A-Za-z0-9/_.:+=%~@{}\\[\\]-]+$", filename);
 	}
 
 	/**
@@ -617,7 +613,7 @@ namespace AutoQIIME {
 			foreach (var rule in table.values) {
 				var file = rule.get_include();
 				if (file != null) {
-					assert(!is_bad_filename(file));
+					assert(is_valid_filename(file));
 					stream.printf("include %s\n", file);
 				}
 			}
@@ -986,8 +982,8 @@ namespace AutoQIIME {
 			stderr.printf("%s: Cannot canonicalize path.\n", args[1]);
 			return 1;
 		}
-		if (is_bad_filename(absfilename)) {
-			stderr.printf("%s: Filename will cause Make to cry.\n", args[1]);
+		if (!is_valid_filename(absfilename)) {
+			stderr.printf("%s: Filename might break Make. Please remove the weird characters in the path.\n", absfilename);
 			return 1;
 		}
 

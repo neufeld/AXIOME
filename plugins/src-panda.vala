@@ -49,7 +49,7 @@ class AutoQIIME.Sources.PandaSource : BaseSource {
 			definition_error(definition, "Reverse file not specified.\n");
 			return false;
 		}
-		if (is_bad_filename(forward) || is_bad_filename(reverse)) {
+		if (!is_valid_filename(forward) || !is_valid_filename(reverse)) {
 			definition_error(definition, "Filename will cause Make to cry.\n");
 			return false;
 		}

@@ -41,7 +41,7 @@ class AutoQIIME.Sources.FastaSource : BaseSource {
 			definition_error(definition, "FASTA file not specified.\n");
 			return false;
 		}
-		if (is_bad_filename(file)) {
+		if (!is_valid_filename(file)) {
 			definition_error(definition, "Filename will cause Make to cry.\n");
 			return false;
 		}
