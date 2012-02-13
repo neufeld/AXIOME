@@ -851,7 +851,7 @@ namespace AutoQIIME {
 
 		var version_str = root->get_prop("version");
 		if (version_str == null) {
-			stderr.printf("%s: has no version. You must provide a version.\n", filename);
+			stderr.printf("%s: the version of AutoQIIME required is not specified. If in doubt, try <autoqiime version=\"%s\">.\n", filename, autoqiime_version.to_string());
 			delete doc;
 			return false;
 		}
@@ -921,7 +921,7 @@ namespace AutoQIIME {
 			}
 		}
 		if (max_version.older_than(file_version)) {
-			stderr.printf("%s: claims to requires AutoQIIME %s, but it only uses features from %s.\n", filename, file_version.to_string(), max_version.to_string());
+			stderr.printf("%s: Warning: claims to require AutoQIIME %s, but it only uses features from %s.\n", filename, file_version.to_string(), max_version.to_string());
 		}
 		output.add_doc(doc);
 		return true;
