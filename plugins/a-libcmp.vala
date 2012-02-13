@@ -28,7 +28,7 @@ class AutoQIIME.Analyses.LibraryComparison : RuleProcessor {
 		var taxname = taxlevel.to_string();
 		output.make_summarized_otu(taxlevel, "");
 		output.add_target("correlation_%s.pdf".printf(taxname));
-		output.add_rulef("correlation_%s.pdf: otu_table_summarized_%s.txt mapping.extra\n\taq-cmplibs %s\n\n", taxname, taxname, taxname);
+		output.add_rulef("correlation_%s.pdf: otu_table_summarized_%s.txt mapping.extra\n\t@echo Comparing libraries at %s-level...\n\t$(V)aq-cmplibs %s\n\n", taxname, taxname, taxname, taxname);
 		return true;
 	}
 }

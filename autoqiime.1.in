@@ -23,7 +23,7 @@ Included is a sample configuration file with all possible analyses enabled. The 
 
 .B <?xml version="1.0"?>
 .br
-.B <autoqiime version="@VERSION@" \fR[\fBotu-method="\fImethod\fB"\fR]\fB>
+.B <autoqiime version="@VERSION@" \fR[\fBotu-method="\fImethod\fB"\fR]\fB \fR[\fBverbose="\fIvalue\fB"\fR]\fB>
 .br
 .I Definitions
 .br
@@ -33,7 +33,7 @@ Included is a sample configuration file with all possible analyses enabled. The 
 .br
 .B </autoqiime>
 
-The version is used to check that a file is not newer than the version of AutoQIIME being used. The method used to pick OTUs can also be defined. Currently, that is \fBuclust\fR, or \fBcdhit\fR, the default.
+The version is used to check that a file is not newer than the version of AutoQIIME being used. The method used to pick OTUs can also be defined. Currently, that is \fBuclust\fR, or \fBcdhit\fR, the default. By default, AutoQIIME will try to be quiet and hide the (ugly) commands used to do the analysis. If you wish to see them, set \fBverbose="true"\fR or run \fBmake V=\fR.
 
 Definitions are a list of properties associated with the samples. These are usual physical or chemical information such as sampling time, pH, temperature, humidity, and location. As many properties as needed can be specified and each property can have a type so that incorrect information cannot be entered (e.g., enforcing that "year" be a whole number).
 

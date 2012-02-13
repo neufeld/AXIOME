@@ -6,6 +6,8 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.11 dist-bzip2])
 AM_MAINTAINER_MODE
 
+AM_SILENT_RULES([yes])
+
 R_PKGS="gplots vegan labdsv"
 AC_SUBST(R_PKGS)
 
