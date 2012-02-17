@@ -852,6 +852,11 @@ namespace AutoQIIME {
 			stderr.printf("%s: no data in file\n", filename);
 			return false;
 		}
+		if (root-> name != "autoqiime") {
+			stderr.printf("%s: the included file's root element is \"%s\" rather than \"autoqiime\". Are you sure this is an AutoQIIME file?\n", filename, root-> name);
+			delete doc;
+			return false;
+		}
 
 		var version_str = root->get_prop("version");
 		if (version_str == null) {
