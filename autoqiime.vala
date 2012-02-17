@@ -873,6 +873,7 @@ namespace AutoQIIME {
 		}
 		if (autoqiime_version.older_than(file_version)) {
 			stderr.printf("%s: requires a version newer (%s) than this version of AutoQIIME (%s).\n", filename, file_version.to_string(), autoqiime_version.to_string());
+			delete doc;
 			return false;
 		}
 		var max_version = version(0, 0);
