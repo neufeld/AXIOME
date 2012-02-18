@@ -23,8 +23,8 @@ class AutoQIIME.Sources.PandaSource : BaseSource {
 			definition_error(sample, "No tag specified.\n");
 			return null;
 		}
-		if (tag.length != 6) {
-			definition_error(sample, "Tag is not 6 characters.\n");
+		if (tag.length != 6 && tag.length != 8) {
+			definition_error(sample, "Tag is not 6 or 8 characters.\n");
 			return null;
 		}
 		if (!is_sequence(tag)) {

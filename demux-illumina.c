@@ -6,6 +6,7 @@
 #include<error.h>
 #endif
 #include<fcntl.h>
+#include<stdbool.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include<sys/stat.h>
@@ -17,6 +18,7 @@
 #include "fmap.h"
 #include "config.h"
 #include "kseq.h"
+#include "parser.h"
 
 /* Function pointers for file I/O such that we can deal with compressed files. */
 void *(*fileopen) (char *, char *) = (void *(*)(char *, char *))gzopen;
@@ -53,25 +55,30 @@ KSEQ_INIT(void *, fileread)
 int main(int argc, char **argv)
 {
 	int c;
-	int bzip = 0;
+	bool bzip = false;
 	char *filename = NULL;
 	void *file;
 	kseq_t *seq;
 	int len;
 	int n = 0;
+	bool no_n = false;
+	seqidentifier id;
 	g_type_init();
 	files_init();
 	/* Process command line arguments. */
-	while ((c = getopt(argc, argv, "jf:")) != -1) {
+	while ((c = getopt(argc, argv, "jf:n")) != -1) {
 		switch (c) {
 		case 'j':
 			fileopen = (void *(*)(char *, char *))BZ2_bzopen;
 			fileread = (int (*)(void *, void *, int))bzread;
 			fileclose = (int (*)(void *))BZ2_bzclose;
-			bzip = 1;
+			bzip = true;
 			break;
 		case 'f':
 			filename = optarg;
+			break;
+		case 'n':
+			no_n = true;
 			break;
 		case '?':
 			if (optopt == (int)'f') {
@@ -94,7 +101,7 @@ int main(int argc, char **argv)
 
 	if (filename == NULL) {
 		fprintf(stderr,
-			"Usage: %s [-j] -f file.fastq tag1 tag2 ...\n\t-j\tInput files are bzipped.\n",
+			"Usage: %s [-j] [-n] -f file.fastq tag1 tag2 ...\n\t-j\tInput files are bzipped.\n\t-n\tDiscard sequences with Ns.\n",
 			argv[0]);
 		return 1;
 	}
@@ -125,32 +132,26 @@ int main(int argc, char **argv)
 		int index;
 		int ncount = 0;
 		FILE *f;
-		char *indextag;
 
 		n++;
-		for (index = 0; index < seq->seq.l; index++) {
-			if (seq->seq.s[index] == 'N') {
-				ncount++;
-				break;
+		if (no_n) {
+			for (index = 0; index < seq->seq.l; index++) {
+				if (seq->seq.s[index] == 'N') {
+					ncount++;
+					break;
+				}
+			}
+			if (ncount > 0) {
+				fprintf(stderr, "SKIP %s\n", seq->name.s);
+				continue;
 			}
 		}
-		if (ncount > 0) {
-			fprintf(stderr, "SKIP %s\n", seq->name.s);
+		if (seqid_parse(&id, seq->name.s) == 0) {
+			fprintf(stderr, "BAD HEADER %s\n", seq->name.s);
 			continue;
 		}
-
-		for (index = 0; index < seq->name.l; index++) {
-			if (seq->name.s[index] == '#') {
-				break;
-			}
-		}
-		indextag = seq->name.s + index + 1;
-		if (index + 7 >= seq->name.l) {
-			continue;
-		}
-		indextag[6] = '\0';
-		if (!files_write(indextag, ">%s_%d\n%s\n", indextag, n, seq->seq.s)) {
-			fprintf(stderr, "EBADF %s\n", indextag);
+		if (!files_write(id.tag, ">%s_%d\n%s\n", id.tag, n, seq->seq.s)) {
+			fprintf(stderr, "EBADF %s\n", id.tag);
 		}
 	}
 	kseq_destroy(seq);

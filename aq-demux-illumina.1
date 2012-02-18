@@ -5,6 +5,9 @@ aq-demux-illumina \- Separate Illumina FASTQ reads by index tag and discard any 
 .SH SYNOPSIS
 .B aq-demux-illumina
 [
+.B \-n
+] 
+[
 .B \-j
 ] 
 .B \-f 
@@ -20,6 +23,9 @@ The FASTQ file to be examined.
 \-j
 The input file is compressed with
 .BR bzip (1).
+.TP
+\-n
+Reject any sequences with uncalled bases (Ns).
 .TP
 tag
 An Illumina tag to extract.

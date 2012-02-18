@@ -43,6 +43,7 @@ int main(int argc, char **argv)
 	void *file;
 	kseq_t *seq;
 	int len;
+	int taglen;
 	int i, j;
 	int count = 0;
 	int totalmismatches = 0;
@@ -85,15 +86,16 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	for (i = optind; i < argc; i++) {
-		if (strlen(argv[i]) != 6) {
+	taglen = strlen(argv[optind]);
+	for (i = optind + 1; i < argc; i++) {
+		if (strlen(argv[i]) != taglen) {
 			fprintf(stderr,
-				"Primer %s is not of the right length.\n",
+				"Primer %s is not of the same length.\n",
 				argv[i]);
 			return 1;
 		}
 	}
-	printf("PRIMERS = %d\n", argc - optind);
+	printf("PRIMERS = %d\nTAGLEN = %d\n", argc - optind, taglen);
 
 	/* Open files and initialise FASTQ reader. */
 	file = fileopen(filename, "r");
@@ -104,7 +106,7 @@ int main(int argc, char **argv)
 	seq = kseq_init(file);
 
 	while ((len = kseq_read(seq)) >= 0) {
-		int bestmismatches = 6;
+		int bestmismatches = taglen;
 		seqidentifier id;
 		if (seqid_parse(&id, seq->name.s) == 0)
 			continue;
@@ -112,7 +114,11 @@ int main(int argc, char **argv)
 		for (i = optind; i < argc; i++) {
 			int mismatches = 0;
 			int k;
-			for (k = 0; k < 6; k++) {
+			if (strlen(id.tag) != taglen) {
+				printf("Tags specified are of length %d, but tag in file has length %d. Skipping.\n", taglen, (int)strlen(id.tag));
+				continue;
+			}
+			for (k = 0; k < taglen; k++) {
 				if (id.tag[k] != argv[i][k]) {
 					mismatches++;
 				}
@@ -125,8 +131,8 @@ int main(int argc, char **argv)
 		totalmismatches += bestmismatches;
 	}
 	kseq_destroy(seq);
-	printf("TOTAL = %d\nMISMATCHES = %d\nQ = %f\n", count * 6,
-	       totalmismatches, (1.0 * totalmismatches) / (count * 6));
+	printf("TOTAL = %d\nMISMATCHES = %d\nQ = %f\n", count * taglen,
+	       totalmismatches, (1.0 * totalmismatches) / (count * taglen));
 	if (fileclose(file) != Z_OK && bzip == 0) {
 		perror(filename);
 	}
