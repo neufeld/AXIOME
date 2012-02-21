@@ -26,7 +26,7 @@ typedef struct {
 	int tile;
 	int x;
 	int y;
-	char tag[8];
+	char tag[10];
 } seqidentifier;
 
 int seqid_parse(seqidentifier * id, char *input);

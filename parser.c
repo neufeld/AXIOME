@@ -51,11 +51,15 @@ int seqid_parse(seqidentifier * id, char *input)
 		input++;
 		id->y = value;
 		dest = id->tag;
+		*dest = '\0';
 		PARSE_CHUNK {
-			if (dest >= &id->tag[8])
+			if (dest >= &id->tag[10])
 				return 0;
 			*dest++ = (*input);
 			*dest = '\0';
+		}
+		if (id->tag[0] == '\0') {
+			return 0;
 		}
 		input++;
 		PARSE_INT;
@@ -101,11 +105,15 @@ int seqid_parse(seqidentifier * id, char *input)
 		input++;
 		/* control bits */
 		dest = id->tag;
+		*dest = '\0';
 		PARSE_CHUNK {
-			if (dest >= &id->tag[8])
+			if (dest >= &id->tag[10])
 				return 0;
 			*dest++ = (*input);
 			*dest = '\0';
+		}
+		if (id->tag[0] == '\0') {
+			return 0;
 		}
 		return mate;
 	}
