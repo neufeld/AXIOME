@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 options(error = quote(dump.frames("duleg-debug", TRUE)))
-library(labdsv)
+library("labdsv")
 
 print("Reading OTU table")
 rawtable <- read.table("otu_table.txt", skip = 1, 

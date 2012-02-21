@@ -3,7 +3,7 @@
 #
 # Basically, take an OTU table of a particular flavour and plot each OTU at a point determine by the abundance in the two libraries. All such plots are squished into one PDF.
 options(error = quote(dump.frames("libcmp-debug", TRUE)))
-library(gplots)
+library("gplots")
 
 skipseq <- function(l) {
 	res <- rep("", l);

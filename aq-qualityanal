@@ -40,24 +40,24 @@ qualityanal: $(QABASETARGETS)
 
 %.n.pdf: %.nmatrix
 	@echo Plotting sequence uncalled base counts over the flow cell for $*...
-	$(V)@echo 'library(gplots); pdf("$@"); heatmap.2(as.matrix(read.table("$<")),Rowv=NA,Colv=NA, trace="none", density.info="none", col=topo.colors, labRow="", labCol=""); dev.off();' | R --no-save -q --slave
+	$(V)@echo 'library("gplots"); pdf("$@"); heatmap.2(as.matrix(read.table("$<")),Rowv=NA,Colv=NA, trace="none", density.info="none", col=topo.colors, labRow="", labCol=""); dev.off();' | R --no-save -q --slave
 %.b.pdf: %.bmatrix
 	@echo Plotting sequence read mask lengths over the flow cell for $*...
-	$(V)echo 'library(gplots); pdf("$@"); heatmap.2(as.matrix(read.table("$<")),Rowv=NA,Colv=NA, trace="none", density.info="none", col=topo.colors, labRow="", labCol=""); dev.off();' | R --no-save -q --slave
+	$(V)echo 'library("gplots"); pdf("$@"); heatmap.2(as.matrix(read.table("$<")),Rowv=NA,Colv=NA, trace="none", density.info="none", col=topo.colors, labRow="", labCol=""); dev.off();' | R --no-save -q --slave
 %.q.pdf: %.qmatrix
 	@echo Plotting sequence quality over the flow cell for $*...
-	$(V)echo 'library(gplots); pdf("$@"); heatmap.2(as.matrix(read.table("$<")),Rowv=NA,Colv=NA, trace="none", density.info="none", col=topo.colors, labRow="", labCol=""); dev.off();' | R --no-save -q --slave
+	$(V)echo 'library("gplots"); pdf("$@"); heatmap.2(as.matrix(read.table("$<")),Rowv=NA,Colv=NA, trace="none", density.info="none", col=topo.colors, labRow="", labCol=""); dev.off();' | R --no-save -q --slave
 %.cnt.pdf: %.cntmatrix
 	@echo Plotting sequence density over the flow cell for $*...
-	$(V)echo 'library(gplots); pdf("$@"); heatmap.2(as.matrix(read.table("$<")),Rowv=NA,Colv=NA, trace="none", density.info="none", col=topo.colors, labRow="", labCol=""); dev.off();' | R --no-save -q --slave
+	$(V)echo 'library("gplots"); pdf("$@"); heatmap.2(as.matrix(read.table("$<")),Rowv=NA,Colv=NA, trace="none", density.info="none", col=topo.colors, labRow="", labCol=""); dev.off();' | R --no-save -q --slave
 
 %.qposn.pdf: %.posnhist
 	@echo Plot of base quality locations in sequences for $*...
-	$(V)echo 'library(gplots); pdf("$@"); d <- read.table("$<"); plotCI(d$$V1, d$$V2, uiw = d$$V3, xlab = "Position (nt)", ylab="Quality Score"); dev.off();' | R --no-save -q --slave
+	$(V)echo 'library("gplots"); pdf("$@"); d <- read.table("$<"); plotCI(d$$V1, d$$V2, uiw = d$$V3, xlab = "Position (nt)", ylab="Quality Score"); dev.off();' | R --no-save -q --slave
 
 %.nposn.pdf: %.posnhist
 	@echo Plot of locations of Ns in sequences for $*...
-	$(V)echo 'library(gplots); pdf("$@"); d <- read.table("$<"); plot(d$$V1, d$$V4, xlab = "Position (nt)", ylab="N Count"); dev.off();' | R --no-save -q --slave
+	$(V)echo 'library("gplots"); pdf("$@"); d <- read.table("$<"); plot(d$$V1, d$$V4, xlab = "Position (nt)", ylab="N Count"); dev.off();' | R --no-save -q --slave
 
 clean:
 	$(V)rm -f $(TARGETS) $(BASETARGETS) 
