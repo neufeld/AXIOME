@@ -8,7 +8,7 @@ Homepage: http://github.com/neufeld/qiimetools
 
 Package: autoqiime
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, gawk, make, r-base, r-cran-gplots, bzip2, gzip (> 1.1)
+Depends: ${shlibs:Depends}, ${misc:Depends}, gawk, make, r-base, r-cran-gplots, bzip2, gzip (>= 1.1)
 Recommends: pandaseq, blast2, gnuplot
 Description: QIIME automation toolkit
  AutoQIIME is a set of tools for making QIIME <http://qiime.sourceforge.net>
