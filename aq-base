@@ -13,12 +13,12 @@ alpha_div/alpha_rarefaction_plots/rarefaction_plots.html: otu_table.txt mapping.
 	$(V)$(QIIME_PREFIX)alpha_rarefaction.py -i otu_table.txt -m mapping.txt -p custom_parameters.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div
 
 OTU_PICKING_METHOD ?= cdhit
+ALIGN_METHOD ?= infernal
 BLASTDB_NAME ?= "Unknown 16S Database"
 V ?= @
 
 # Default custom parameters file
 define CUSTOM_PARAMETERS
-pick_otus:otu_picking_method $(OTU_PICKING_METHOD)
 pick_otus:clustering_algorithm furthest
 pick_otus:max_cdhit_memory 400
 pick_otus:refseqs_fp
@@ -36,7 +36,6 @@ pick_otus:suppress_presort_by_abundance_uclust
 pick_otus:suppress_new_clusters
 pick_rep_set:rep_set_picking_method most_abundant
 pick_rep_set:sort_by otu
-align_seqs:alignment_method infernal
 align_seqs:pairwise_alignment_method uclust
 align_seqs:blast_db
 align_seqs:min_length 100
@@ -70,7 +69,7 @@ custom_parameters.txt:
 picked_otus/seq_otus.txt: seq.fasta custom_parameters.txt
 	@echo Picking OTUs...
 	@test ! -d picked_otus || rm -r picked_otus
-	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -m $$(grep 'pick_otus:otu_picking_method' custom_parameters.txt | cut -f 2 -d " ") -o picked_otus -M 4096
+	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -m $(OTU_PICKING_METHOD) -o picked_otus -M 4096
 
 seq.fasta_rep_set.fasta: picked_otus/seq_otus.txt seq.fasta
 	@echo Picking represntative set...
@@ -79,7 +78,7 @@ seq.fasta_rep_set.fasta: picked_otus/seq_otus.txt seq.fasta
 aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
 	@echo Aligning representative sequences...
 	@test ! -d aligned || rm -r aligned
-	$(V)$(QIIME_PREFIX)align_seqs.py -o aligned -m infernal -t $$INFERNAL_MODEL -i seq.fasta_rep_set.fasta
+	$(V)$(QIIME_PREFIX)align_seqs.py -o aligned -m $(ALIGN_METHOD) -t $$INFERNAL_MODEL -i seq.fasta_rep_set.fasta
 
 rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt: seq.fasta_rep_set.fasta
 	@echo Assigning taxonomy...

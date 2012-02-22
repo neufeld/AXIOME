@@ -262,6 +262,40 @@ namespace AutoQIIME {
 		}
 	}
 
+	enum AlignMethod {
+		INFERNAL,
+		MUSCLE,
+		PYNAST;
+
+		internal static AlignMethod? parse(string method) {
+
+				switch (method.down()) {
+					case "infernal":
+						return INFERNAL;
+					case "muscle":
+						return MUSCLE;
+					case "pynast":
+						return PYNAST;
+					default:
+						return null;
+			}
+		}
+
+		internal void print(FileStream makefile) {
+			switch (this) {
+				case AlignMethod.INFERNAL:
+					makefile.printf("ALIGN_METHOD = infernal\n");
+					break;
+				case AlignMethod.MUSCLE:
+					makefile.printf("ALIGN_METHOD = muscle\n");
+					break;
+				case AlignMethod.PYNAST:
+					makefile.printf("ALIGN_METHOD = pynast\n");
+					break;
+			}
+		}
+	}
+
 	/**
 	 * Output processor responsible for collecting all information needed to generate the Makefile and mapping.txt
 	 */
@@ -287,6 +321,7 @@ namespace AutoQIIME {
 		int sequence_preparations;
 		string sourcefile;
 		internal string? otu_method;
+		internal AlignMethod alignmethod;
 		/**
 		 * The defined variables and their types.
 		 *
@@ -416,6 +451,7 @@ namespace AutoQIIME {
 			if (verbose) {
 				makefile.printf("V = \n");
 			}
+			alignmethod.print(makefile);
 			makefile.printf("SEQSOURCES =%s\n\nseq.fasta:$(SEQSOURCES)\n%s\n", seqsources.str, seqrule.str);
 			makefile.printf("%s.PHONY: all\n\ninclude %s/aq-base\n", makerules.str, BINDIR);
 			lookup.print_include(makefile);
@@ -894,6 +930,21 @@ namespace AutoQIIME {
 						return false;
 				}
 			}
+
+			var alignmethod = root->get_prop("align-method");
+			if (alignmethod != null) {
+				var val = AlignMethod.parse(alignmethod);
+				if (val == null) {
+					stderr.printf("%s: Unknown alignment method \"%s\".\n", filename, alignmethod);
+					delete doc;
+					return false;
+				}
+				output.alignmethod = val;
+			} else {
+				// Set default to Infernal
+				output.alignmethod = AlignMethod.INFERNAL;
+			}
+
 			var verbose = root->get_prop("verbose");
 			if (verbose != null) {
 				switch (verbose.down()) {
