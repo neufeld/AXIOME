@@ -1,3 +1,30 @@
+autoqiime (1.3~ppa0) natty; urgency=low
+
+  * Allow picking alignment method through .aq file.
+  * Make all code deal with 8nt tags
+  * Require Vala 0.14 to fix memory leak
+  * Be far more pedantic with files names and versions
+  * Converted a bunch of warnings to errors
+  * Added Dufrene-Legendre and Multi Response Permutation Procedure analyses
+  * Fixed PCA biplot plotting issues
+  * Complain loudly if there are no samples
+  * Laundry list of Make-vulnerabilities fixed
+  * Fixed error where otutable was undefined in NMF
+  * Added check for empty libraries when generating seq.fasta
+  * Check compression for old Illumina format
+  * Added OTU picking method parameter
+  * Fixed bug causing invalid targets in quality anal
+  * Fixed issues with beta diversity rules
+  * Changed "env make" to make to support -f properly
+  * Added QIIME_PREFIX for special installations such as MacQIIME or BioLinux.
+  * Added a module system
+  * Fixed assign_taxonomy output directory for QIIME 1.4.0
+  * BLAST databases can now include titles
+  * Added NMF support
+  * Fixed various XML memory issues
+
+ -- Andre Masella <andre@masella.name>  Wed, 22 Feb 2012 13:21:46 -0500
+
 autoqiime (1.2) lucid natty oneiric; urgency=low
 
   * Added manual pages for all utilities

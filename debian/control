@@ -8,7 +8,7 @@ Homepage: http://github.com/neufeld/qiimetools
 
 Package: autoqiime
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, gawk, make, r-base, r-cran-gplots, bzip2, gzip
+Depends: ${shlibs:Depends}, ${misc:Depends}, gawk, make, r-base, r-cran-gplots, bzip2, gzip (> 1.1)
 Recommends: pandaseq, blast2, gnuplot
 Description: QIIME automation toolkit
  AutoQIIME is a set of tools for making QIIME <http://qiime.sourceforge.net>
@@ -17,7 +17,7 @@ Description: QIIME automation toolkit
 
 Package: autoqiime-dev
 Architecture: any
-Depends: ${misc:Depends}, autoqiime (= ${binary:Version}), valac (>= 0.12), libgee-dev, libxml2-dev
+Depends: ${misc:Depends}, autoqiime (= ${binary:Version}), valac (>= 0.14), libgee-dev, libxml2-dev
 Description: QIIME automation toolkit -- Plugin Development
  AutoQIIME is a set of tools for making QIIME <http://qiime.sourceforge.net>
  easier to manage by automating error-prone tasks and walking through
