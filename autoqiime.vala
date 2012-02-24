@@ -377,7 +377,7 @@ namespace AutoQIIME {
 				}
 			}
 			mapping.append_c('\n');
-			extra.append_c('\n');
+			extra.append("\tFile\tLine\n");
 			headers.append_c('\n');
 			var result = true;
 			foreach (var sample in samples) {
@@ -407,7 +407,7 @@ namespace AutoQIIME {
 					}
 				}
 				mapping.append_c('\n');
-				extra.append_c('\n');
+				extra.append_printf("\t%s\t%d\n", sample.xml->doc->url, sample.xml->line);
 			}
 			return update_if_different("mapping.txt", mapping.str) && update_if_different("mapping.extra", extra.str) && update_if_different("headers.txt", headers.str) && result;
 		}
