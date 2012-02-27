@@ -109,9 +109,13 @@ rank_abundance/rank_abundance.pdf: otu_table.txt
 	mv rank_abundance/rank_abundance_cols*.pdf rank_abundance/rank_abundance.pdf
 
 # Produce a BLAST database
-nr.nhr nr.nin nr.nsq: seq.fasta
-	@echo Creaing BLAST database...
-	$(V)formatdb -i seq.fasta -n nr -p F -t $(BLASTDB_NAME)
+nr.nhr nr.nin nr.nsq: seq.fasta_rep_set.fasta
+	@echo Creaing non-redundant BLAST database...
+	$(V)formatdb -i seq.fasta_rep_set.fasta -n nr -p F -t $(BLASTDB_NAME)" Non-Redundant"
+
+r.nhr r.nin r.nsq: seq.fasta
+	@echo Creaing redundant BLAST database...
+	$(V)formatdb -i seq.fasta -n r -p F -t $(BLASTDB_NAME)
 
 # Decorate OTU table with representative sequences
 otu_table_with_sequences.txt: seq.fasta_rep_set.fasta otu_table.txt

@@ -24,6 +24,9 @@ class AutoQIIME.Analyses.BlastDatabase : RuleProcessor {
 		output.add_target("nr.nhr");
 		output.add_target("nr.nin");
 		output.add_target("nr.nsq");
+		output.add_target("r.nhr");
+		output.add_target("r.nin");
+		output.add_target("r.nsq");
 		output.add_target("blast");
 		output.add_rulef("blast: Makefile\n\t@echo Producing BLAST script...\n\t@echo '#!/bin/sh' > blast\n\t@echo blastall -p blastn -d \\'%s/nr\\' '\"$$@\"' >> blast\n\t@chmod a+x blast\n\n", Shell.quote(realpath(output.dirname)));
 		var title = definition->get_prop("title");
