@@ -54,7 +54,7 @@ class AutoQIIME.Sources.PandaSource : BaseSource {
 			return false;
 		}
 		if (!FileUtils.test(reverse, FileTest.EXISTS)) {
-			definition_error(definition, "File does not exist.\n");
+			definition_error(definition, "File \"%s\" does not exist.\n", reverse);
 			return false;
 		}
 
