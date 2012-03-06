@@ -457,7 +457,7 @@ namespace AutoQIIME {
 				makefile.printf("V = \n");
 			}
 			alignmethod.print(makefile);
-			makefile.printf("SEQSOURCES =%s\n\nseq.fasta:$(SEQSOURCES)\n%s\n", seqsources.str, seqrule.str);
+			makefile.printf("SEQSOURCES =%s\n\nseq.fasta: $(SEQSOURCES)\n%s\n", seqsources.str, seqrule.str);
 			makefile.printf("%s.PHONY: all\n\ninclude %s/aq-base\n", makerules.str, BINDIR);
 			lookup.print_include(makefile);
 			makefile = null;
@@ -564,7 +564,7 @@ namespace AutoQIIME {
 			var awkprint = new StringBuilder();
 			var awkcheck = new StringBuilder();
 			foreach (var sample in samples) {
-				awkprint.append_printf("if (name ~ /%s/", sample.tag);
+				awkprint.append_printf(" if (name ~ /%s/", sample.tag);
 				if (sample.limit > 0) {
 					awkprint.append_printf(" && count%d < %d", sample.id, sample.limit);
 				}
