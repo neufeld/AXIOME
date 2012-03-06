@@ -3,8 +3,29 @@ AutoQIIME
 
 Tools for making QIIME easier to use.
 
+To build AutoQIIME, you'll need:
+	Vala <https://live.gnome.org/Vala>
+	Gee <https://live.gnome.org/Libgee>
+	libxml2 <http://xmlsoft.org/>
+	file <http://www.darwinsys.com/file/>
+	bzip2 <http://www.bzip.org/>
+
+and their dependencies (zlib, glib).
+
+On Debian/Ubuntu, you can install these using:
+	apt-get install valac libgee-dev libxml2-dev libmagic-dev libbz2-dev
+
 You'll need to install this package with:
 	./autogen.sh && ./configure && make && make install
+
+To run AutoQIIME, you'll additionally need:
+	QIIME 1.3+ <http://qiime.org/>
+	R
+	GNU make <http://www.gnu.org/software/make/>
+
+Some functions require:
+	PANDAseq <http://github.com/neufeld/pandaseq>
+	NCBI blast2 <http://blast.ncbi.nlm.nih.gov>
 
 You will need to install several R packages which are dependencies. This can be done by calling:
 	aq-inst-cran
@@ -12,5 +33,5 @@ You will need to install several R packages which are dependencies. This can be 
 And then you should read sample.aq and man autoqiime
 
 If you would like a printable manual, in this directory run:
-	./mkmanual
-to generate AutoQIIMEManual.pdf
+	make AutoQIIMEManual.pdf
+This requires GNU roff (groff).
