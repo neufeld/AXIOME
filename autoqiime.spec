@@ -21,7 +21,6 @@ Requires:       gawk
 Requires:       make
 Requires:       bzip2
 Requires:       gzip
-Requires:       gnuplot
 Requires:       R-core
 
 %description
