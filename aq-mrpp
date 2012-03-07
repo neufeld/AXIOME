@@ -19,6 +19,12 @@ layout(matrix(1:2, nr = 1))
 pdf("mrpp.pdf")
 for (x in 1 : nrow(mapping)) {
 	name <- rownames(mapping)[x]
+	fac.len <- length(levels(factor(as.matrix(mapping[x,])))) 
+	if (fac.len < 2 || fac.len >= ncol(mapping)) {
+		print(paste("Ignoring", name, "because all values are identical/different."))
+		next
+	}
+
 	print(paste("Computing MRPP for", name))
 	otutable.mrpp <- mrpp(otutable, mapping[x,])
 

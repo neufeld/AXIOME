@@ -12,10 +12,17 @@ print("Reading header");
 interest <- read.table("headers.txt")[1,] == "TRUE";
 print("Computing PCA");
 
+for(i in 0 : length(interest)) {
+	if (interest[i] && length(levels(factor(as.matrix(mapping[, i])))) == 1) {
+		interest[i] <- FALSE
+		print(paste("Ignoring", colnames(mapping)[i], "because all values are identical."))
+	}
+}
 newmapping <- t(mapping[,interest]);
 
 # For non-numeric sample names, comment out the following line
-colnames(newmapping) <- paste("X", colnames(newmapping), sep = "");
+colnames(newmapping) <- paste("X", rownames(mapping), sep = "");
+rownames(newmapping) <- colnames(mapping)[interest];
 
 d <- rbind(otutable[,seq(1,ncol(otutable)-1)], newmapping);
 p <- prcomp(t(d), scale = TRUE);
@@ -34,7 +41,7 @@ contrib <- apply(p$rotation, 1, function(x) {sqrt(sum(x[1:2]^2));});
 
 # What variables (rows) do you want to display as arrows?
 #useful <- contrib > (mean(contrib) + 2*sd(contrib));
-useful <- rownames(newmapping);
-
-# This will fail if useful selects no rows
-biplot(p$x[, c("PC1", "PC2")], p$rotation[useful, c("PC1", "PC2")], xlabs = extra[, "Description"], asp = p$sdev[2]/p$sdev[1]);
+useful <- colnames(mapping)[interest];
+if (length(useful) > 1) {
+	biplot(p$x[, c("PC1", "PC2")], p$rotation[useful, c("PC1", "PC2")], xlabs = extra[, "Description"], asp = p$sdev[2]/p$sdev[1]);
+}
