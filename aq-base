@@ -163,7 +163,7 @@ duleg.txt: otu_table.txt mapping.txt
 	$(V)aq-duleg
 
 # MRPP
-mrpp.pdf: otu_table.txt mapping.txt
+mrpp.txt mrpp.pdf: otu_table.txt mapping.txt
 	@echo Computing Multi Response Permutation Procedure...
 	$(V)aq-mrpp
 

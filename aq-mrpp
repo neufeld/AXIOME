@@ -17,6 +17,8 @@ colnames(mapping) <- paste("X", colnames(mapping), sep = "");
 def.par <- par(no.readonly = TRUE)
 layout(matrix(1:2, nr = 1))
 pdf("mrpp.pdf")
+sink("mrpp.txt", append = FALSE)
+sink()
 for (x in 1 : nrow(mapping)) {
 	name <- rownames(mapping)[x]
 	fac.len <- length(levels(factor(as.matrix(mapping[x,])))) 
@@ -27,6 +29,11 @@ for (x in 1 : nrow(mapping)) {
 
 	print(paste("Computing MRPP for", name))
 	otutable.mrpp <- mrpp(otutable, mapping[x,])
+
+	sink("mrpp.txt", append = TRUE)
+	print(otutable.mrpp)
+	print(paste("T statistic : ", (otutable.mrpp$delta - otutable.mrpp$E.delta) / sd(otutable.mrpp$boot.deltas)))
+	sink()
 
 	print("Computing meta MDS")
 	plot(otutable.ord <- metaMDS(otutable), type = "text", display = "sites", main = paste("MDS for", name))

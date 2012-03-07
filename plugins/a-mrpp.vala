@@ -19,6 +19,7 @@ class AutoQIIME.Analyses.MRPPGraphs : RuleProcessor {
 	}
 	public override bool process(Xml.Node *definition, Output output) {
 		output.add_target("mrpp.pdf");
+		output.add_target("mrpp.txt");
 		return true;
 	}
 }
