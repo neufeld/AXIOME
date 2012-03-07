@@ -31,5 +31,6 @@ for (x in 1 : nrow(mapping)) {
 	sink("duleg.txt", append = TRUE)
 	print(paste("For", name))
 	summary(d)
+	print(d)
 	sink()
 }
