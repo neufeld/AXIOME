@@ -1,0 +1,62 @@
+#!/usr/bin/env Rscript
+options(error = quote(dump.frames("mrpp-unifrac-debug", TRUE)))
+library("vegan")
+library("labdsv")
+
+flavour <- tail(commandArgs(), 1);
+
+print("Reading Unifrac distances")
+dist <- as.matrix(read.table(paste("beta_div", flavour, "/weighted_unifrac_otu_table", flavour, ".txt", sep = "")))
+
+print("Reading mapping");
+mapping <- t(read.table("mapping.txt", header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t"))
+mapping.extra <- read.table("mapping.extra", header = TRUE, 
+    comment.char = "", row.names = "X.SampleID", sep = "\t")
+
+# For non-numeric sample names, comment out the following line
+colnames(mapping) <- paste("X", colnames(mapping), sep = "");
+
+def.par <- par(no.readonly = TRUE)
+layout(matrix(1:2, nr = 1))
+pdf(paste("mrpp-unifrac", flavour, ".pdf", sep = ""))
+mrpp.txt <- paste("mrpp-unifrac", flavour, ".txt", sep = "")
+sink(mrpp.txt, append = FALSE)
+sink()
+
+dist.pco <- pco(dist)
+plot(dist.pco$points, main = "PCoA", xlab = "PC1", ylab = "PC2")
+for (v in 1:nrow(dist.pco$points)) {
+		x <- as.numeric(rownames(dist.pco$points)[v]) + 1
+   	text(dist.pco$points[v, 1], dist.pco$points[v, 2], mapping.extra[x, "Description"])
+}
+
+rownames(dist) <- colnames(dist) <- mapping.extra[, "Description"]
+
+for (x in 1 : nrow(mapping)) {
+	name <- rownames(mapping)[x]
+	fac.len <- length(levels(factor(as.matrix(mapping[x,])))) 
+	if (fac.len < 2 || fac.len >= ncol(mapping)) {
+		print(paste("Ignoring", name, "because all values are identical/different."))
+		next
+	}
+
+	print(paste("Computing MRPP for", name))
+	dist.mrpp <- mrpp(dist, mapping[x,])
+
+	sink(mrpp.txt, append = TRUE)
+	print(dist.mrpp)
+	print(paste("T statistic : ", (dist.mrpp$delta - dist.mrpp$E.delta) / sd(dist.mrpp$boot.deltas)))
+	sink()
+
+	print("Computing meta MDS")
+	plot(dist.ord <- metaMDS(dist), type = "text", display = "sites", main = paste("MDS for", name))
+	ordihull(dist.ord, mapping[x,])
+
+	with(dist.mrpp, {
+		print("Producing histogram")
+		fig.dist <- hist(boot.deltas, xlim = range(c(delta,boot.deltas)), main = paste("Test of Differences Among", name, "Groups"))
+		abline(v = delta); 
+		text(delta, 2*mean(fig.dist$counts), adj = -0.5, expression(bold(delta)), cex=1.5 )
+	})
+	par(def.par)
+}

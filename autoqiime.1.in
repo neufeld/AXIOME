@@ -117,6 +117,11 @@ Make a rank-abundance plot using QIIME.
 \fB<uchime \fR[\fBprofile="\fIprofile\fB"\fR]\fB/>\fR
 Do chimera checking with UCHIME. Since the parameters vary based on the type of DNA, you can specify certain \fIprofile\fR to be one of \fBv3-stringent\fR, or \fBv3-relaxed\fR.
 .TP
+\fB<unifrac-mrpp \fR[\fBlevel="\fIlevel\fB"\fR]\fB/>\fR
+Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities in R. For more information, see
+.BR aq-mrpp-unifrac (1).
+The library may be rarefied to a particular by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect.
+.TP
 \fB<withseqs/>\fR
 Produce an OTU table with the representatives sequences in a final column.
 .SH ENVIRONMENT VARIABLES

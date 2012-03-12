@@ -1,0 +1,12 @@
+.\" Authors: Andre Masella
+.TH aq-mrpp-unifrac 1 "February 2012" "1.3" "USER COMMANDS"
+.SH NAME 
+aq-mrpp-unifrac \- Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities in R using the Unifrac distance matrix.
+.SH SYNOPSIS
+.B aq-mrpp
+.I flavour
+.SH DESCRIPTION
+Multiple Response Permutation Procedure (MRPP) provides a test of whether there is a significant difference between two or more groups of sampless. Samples are group based on all provided variables from the \fBmapping.txt\fR file. For each variable, two plots are produced: a multi-dimensional scaling and histogram of the differences among groups. This is done using the \fBvegan\fR R package. Unifrac distances are used between samples and must be provided from QIIME in a \fBbeta_div\fIflavour\fB/weighted_unifrac_otu_table\fIflavour\fB.txt\fR.
+.SH SEE ALSO
+.BR autoqiime (1),
+.BR aq-mrpp (1).

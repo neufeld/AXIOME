@@ -10,6 +10,7 @@ bin_SCRIPTS = \
 	aq-inst-cran \
 	aq-libcontrib \
 	aq-mrpp \
+	aq-mrpp-unifrac \
 	aq-nmf \
 	aq-nmf-concordance \
 	aq-oldillumina2fastq \
@@ -68,6 +69,7 @@ man1_MANS = \
 	aq-marry-illumina-index.1 \
 	aq-mkrepset.1 \
 	aq-mrpp.1 \
+	aq-mrpp-unifrac.1 \
 	aq-nmf-concordance.1 \
 	aq-nmf.1 \
 	aq-oldillumina2fastq.1 \
@@ -147,6 +149,7 @@ autoqiime_VALASOURCES = \
 	plugins/a-qualanal.vala \
 	plugins/a-rankabundance.vala \
 	plugins/a-uchime.vala \
+	plugins/a-unifrac_mrpp.vala \
 	plugins/a-withseqs.vala \
 	plugins/src-fasta.vala \
 	plugins/src-panda.vala \
