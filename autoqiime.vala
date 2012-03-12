@@ -329,6 +329,7 @@ namespace AutoQIIME {
 		 */
 		public HashMap<string, string> vars { get; private set; }
 		Set<string> pcoa;
+		Set<int> rareified;
 		Set<string> summarized_otus;
 		StringBuilder targets = new StringBuilder();
 		ArrayList<Xml.Doc*> doc_list;
@@ -345,6 +346,7 @@ namespace AutoQIIME {
 			seqrule.printf("\t@echo Building sequence set...\n\t@test ! -f seq.fasta || rm seq.fasta\n");
 			seqsources = new StringBuilder();
 			pcoa = new HashSet<string>();
+			rareified = new HashSet<int>();
 			summarized_otus = new HashSet<string>();
 			targets = new StringBuilder();
 			vars = new HashMap<string, string>();
@@ -450,6 +452,7 @@ namespace AutoQIIME {
 			}
 			makefile.printf("\n\nall: Makefile mapping.txt otu_table.txt %s\n\n", targets.str);
 			makefile.printf("Makefile mapping.txt: %s\n\t@echo Updating analyses to be run...\n\t$(V)autoqiime $<\n\n", sourcefile);
+			makefile.printf("otu_table_auto.txt: otu_table.txt\n\t@echo Rareifying OTU table to smallet library size...\n\t$(V)$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt %s -d $$(awk -F '\t' 'NR == 1 { } NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; } } } NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; } } END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest; }' otu_table.txt)\n\n", is_version_at_least(1, 3) ? "" : "--lineages_included");
 			if (otu_method != null) {
 				makefile.printf("OTU_PICKING_METHOD = %s\n", otu_method);
 			}
@@ -482,6 +485,17 @@ namespace AutoQIIME {
 					makerules.append(@"otu_table_summarized_$(taxname)$(flavour).txt: otu_table$(flavour).txt\n\t@echo Summarizing OTU table $(flavour) to $(taxname)-level...\n\t$$(V)$$(QIIME_PREFIX)summarize_taxa.py -i otu_table$(flavour).txt -L $(taxindex) -o otu_table_summarized_$(taxname)$(flavour).txt -a\n\n");
 				}
 			}
+		}
+
+		/**
+		 * Generate rareified OTU tables
+		 */
+		public void make_rarefied(int size) {
+			if (size in rareified) {
+				return;
+			}
+			rareified.add(size);
+			makerules.append(@"otu_table_$(size).txt: otu_table.txt\n\tRareifying OTU table to $(size) sequences...\n\t$$(V)$$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt -d $(size) $(is_version_at_least(1, 3) ? "" : "--lineages_included")\n\n");
 		}
 
 		/**

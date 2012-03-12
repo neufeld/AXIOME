@@ -33,7 +33,6 @@ class AutoQIIME.Analyses.BetaDiversity : RuleProcessor {
 			flavour = "";
 		} else if (size == "auto") {
 			flavour = "_auto";
-			output.add_rulef("otu_table_auto.txt: otu_table.txt\n\t@echo Rareifying OTU table to smallet library size...\n\t$(V)$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt %s -d $$(awk -F '\t' 'NR == 1 { } NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; } } } NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; } } END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest; }' otu_table.txt)\n\n", is_version_at_least(1, 3) ? "" : "--lineages_included");
 		} else {
 			int v = int.parse(size);
 			if (v < 1) {
@@ -41,7 +40,7 @@ class AutoQIIME.Analyses.BetaDiversity : RuleProcessor {
 				return false;
 			}
 			flavour = "_%d".printf(v);
-			output.add_rulef("otu_table_%d.txt: otu_table.txt\n\tRareifying OTU table to %d sequences...\n\t$(V)$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt -d %d %s\n\n", v, v, v, is_version_at_least(1, 3) ? "" : "--lineages_included");
+			output.make_rarefied(v);
 		}
 
 		string taxname;
