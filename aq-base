@@ -66,10 +66,24 @@ custom_parameters.txt:
 	@echo "$$CUSTOM_PARAMETERS" > custom_parameters.txt
 
 # Build basic data from sequences
+ifeq ($(OTU_PICKING_METHOD),raw-uclust)
+sorted.fasta: seq.fasta
+	@echo Sorting sequences...
+	$(V)uclust --mergesort $< --output $@
+
+seq.uc: sorted.fasta
+	@echo Picking OTUs using uclust without QIIME...
+	$(V)uclust --id 0.97 --input sorted.fasta --uc seq.uc
+
+picked_otus/seq_otus.txt: seq.uc
+	@test -d picked_otus || mkdir -p picked_otus
+	@awk '$$1 == "S" { a[$$2] = "\t" $$9; if ($$2 > m) { m = $$2; } } $$1 == "H" { a[$$2] = (a[$$2] "\t" $$9); } END { for (i = 0; i < m; i++) { print i a[i]; }}' $< > $@
+else
 picked_otus/seq_otus.txt: seq.fasta custom_parameters.txt
-	@echo Picking OTUs...
+	@echo Picking OTUs using QIIME and $(OTU_PICKING_METHOD)...
 	@test ! -d picked_otus || rm -r picked_otus
 	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -m $(OTU_PICKING_METHOD) -o picked_otus -M 4096
+endif
 
 seq.fasta_rep_set.fasta: picked_otus/seq_otus.txt seq.fasta
 	@echo Picking represntative set...
@@ -125,7 +139,7 @@ otu_table_with_sequences.txt: seq.fasta_rep_set.fasta otu_table.txt
 # Do chimera checking with UCHIME
 sorted%.fasta: seq%.fasta
 	@echo Sorting sequences in library $*...
-	$(V)uclust --sort $< --output $@
+	$(V)uclust --mergesort $< --output $@
 
 seq%.fasta: seq.fasta
 	@echo Splitting out library $*...

@@ -944,6 +944,10 @@ namespace AutoQIIME {
 					case "uclust":
 						output.otu_method = "uclust";
 						break;
+					case "raw-uclust":
+					case "rawuclust":
+						output.otu_method = "raw-uclust";
+						break;
 					default:
 						stderr.printf("%s: Unknown OTU picking method \"%s\".\n", filename, method);
 						return false;

@@ -33,7 +33,7 @@ Included is a sample configuration file with all possible analyses enabled. The 
 .br
 .B </autoqiime>
 
-The version is used to check that a file is not newer than the version of AutoQIIME being used. The method used to pick OTUs can also be defined. Currently, that is \fBuclust\fR, or \fBcdhit\fR, the default. By default, AutoQIIME will try to be quiet and hide the (ugly) commands used to do the analysis. If you wish to see them, set \fBverbose="true"\fR or run \fBmake V=\fR. The alignment method used can be specified with \fBalign-method\fR as one of \fBinfernal\fR, \fBmuscle\fR, and \fBpynast\fR; the default is \fBinfernal\fR.
+The version is used to check that a file is not newer than the version of AutoQIIME being used. The method used to pick OTUs can also be defined. Currently, that is \fBuclust\fR, or \fBcdhit\fR, the default. They can also be prefixed by \fBraw-\fR to call them directly instead of using \fBpick_otus.py\fR from QIIME. By default, AutoQIIME will try to be quiet and hide the (ugly) commands used to do the analysis. If you wish to see them, set \fBverbose="true"\fR or run \fBmake V=\fR. The alignment method used can be specified with \fBalign-method\fR as one of \fBinfernal\fR, \fBmuscle\fR, and \fBpynast\fR; the default is \fBinfernal\fR.
 
 Definitions are a list of properties associated with the samples. These are usual physical or chemical information such as sampling time, pH, temperature, humidity, and location. As many properties as needed can be specified and each property can have a type so that incorrect information cannot be entered (e.g., enforcing that "year" be a whole number).
 
