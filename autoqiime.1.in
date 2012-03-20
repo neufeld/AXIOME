@@ -74,8 +74,8 @@ Since read files are often multiplexed, multiple samples can be specified. For e
 \fB<alpha/>\fR
 Do a basic alpha diversity analysis (i.e., QIIME's Chao1 curves).
 .TP
-\fB<beta \fR[\fBlevel="\fIlevel\fB"\fR]\fB \fR[\fBsize="\fIsize\fB"\fR]\fB \fR[\fBtaxa="\fIdepth\fB"\fR]\fB/>\fR
-Do a QIIME beta diversity analysis and produce biplots and bubble plots. QIIME normally uses summarised taxa for the plots, so the taxonomic level can be specified; if it is omitted, OTUs are used instead. The library may be rarefied to a particular by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect. Specifying \fItaxa\fR can limit the number of taxa the appear in the biplot; the default is 10 and \fBall\fR can specified if desired.
+\fB<beta \fR[\fBlevel="\fIlevel\fB"\fR]\fB \fR[\fBsize="\fIsize\fB"\fR]\fB \fR[\fBtaxa="\fIdepth\fB"\fR]\fB \fR[\fBbackground="\fIcolour\fB"\fR]\fB/>\fR
+Do a QIIME beta diversity analysis and produce biplots and bubble plots. QIIME normally uses summarised taxa for the plots, so the taxonomic level can be specified; if it is omitted, OTUs are used instead. The library may be rarefied to a particular by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect. Specifying \fItaxa\fR can limit the number of taxa the appear in the biplot; the default is 10 and \fBall\fR can specified if desired. The background colour can also be specified using the \fBbackground\fR attribute. The colour is interpreted by QIIME. The default is \fBwhite\fR, despite \fBblack\fR seeming to be the popular choice.
 .TP
 \fB<blast \fR[\fBtitle="\fItitle\fB"\fR]\fB/>\fR
 Build a BLAST database over the sequences. This requires
