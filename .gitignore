@@ -16,6 +16,7 @@ aq-filter-fastq-known
 aq-inst-cran
 aq-joinn
 aq-marry-illumina-index
+aq-marry-otu-names
 aq-mkrepset
 aq-nmf
 aq-nmf-concordance
@@ -56,6 +57,7 @@ fmap.h
 joinn.c
 libtool
 m4/
+marry-otu.c
 mkrepset.c
 otuwithseqs.c
 plugins/*.c

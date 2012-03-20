@@ -40,6 +40,7 @@ bin_PROGRAMS= \
 	aq-filter-fastq-known \
 	aq-joinn \
 	aq-marry-illumina-index \
+	aq-marry-otu-names \
 	aq-mkrepset \
 	aq-otuwithseqs \
 	aq-qualhisto \
@@ -128,6 +129,10 @@ aq_joinn_CPPFLAGS = $(GLIB_CFLAGS)
 aq_joinn_VALASOURCES = joinn.vala
 aq_joinn_LDADD = $(GLIB_LIBS)
 aq_joinn_SOURCES = $(aq_joinn_VALASOURCES:.vala=.c)
+aq_marry_otu_names_CPPFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
+aq_marry_otu_names_VALASOURCES = marry-otu.vala
+aq_marry_otu_names_LDADD = $(GLIB_LIBS) $(GEE_LIBS)
+aq_marry_otu_names_SOURCES = $(aq_marry_otu_names_VALASOURCES:.vala=.c)
 aq_mkrepset_CPPFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
 aq_mkrepset_LDADD = $(GLIB_LIBS) $(GEE_LIBS)
 aq_mkrepset_VALASOURCES = mkrepset.vala
@@ -172,6 +177,9 @@ autoqiime.vapi autoqiime.h $(autoqiime_SOURCES): $(autoqiime_VALASOURCES)
 
 $(aq_joinn_SOURCES): $(aq_joinn_VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -g -C  $(aq_joinn_VALASOURCES) && touch $@
+
+$(aq_marry_otu_names_VALASOURCES:.vala=.c): $(aq_marry_otu_names_VALASOURCES)
+	$(VALAC) $(VALAFLAGS) -g -C --pkg=gee-$(GEE_VER) $(aq_marry_otu_names_VALASOURCES) && touch $@
 
 $(aq_mkrepset_VALASOURCES:.vala=.c): $(aq_mkrepset_VALASOURCES) fasta.vapi
 	$(VALAC) $(VALAFLAGS) -g -C --pkg=gee-$(GEE_VER) --pkg=posix $(aq_mkrepset_VALASOURCES) fasta.vapi && touch $@

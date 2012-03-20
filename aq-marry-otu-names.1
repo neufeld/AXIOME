@@ -1,0 +1,23 @@
+.\" Authors: Andre Masella
+.TH aq-marry-otu-names 1 "March 2012" "1.4" "USER COMMANDS"
+.SH NAME 
+aq-marry-otu-names \- Retitle the columns in an OTU table to be what you wanted them to be in the firstplace
+.SH SYNOPSIS
+.B aq-marry-otu-names
+.I otu_table.txt
+.I mapping.txt
+.I column
+.SH DESCRIPTION
+QIIME unhelpfully forces all of the sample identifiers to be numeric. When exporting, this program allows a table to be reconstructed that actually has meaningful sample names.
+.SH OPTIONS
+.TP
+otu_table.txt
+The OTU table to unfrack.
+.TP
+mapping.txt
+The mapping file containing the useful information (perhaps \fBmapping.extra\fR to get \fBDescription\fR).
+.TP
+column
+The name of the column to use. (Perhaps \fBDescription\fR).
+.SH SEE ALSO
+.BR autoqiime (1).
