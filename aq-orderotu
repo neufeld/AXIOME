@@ -1,0 +1,28 @@
+#!/usr/bin/awk -f
+
+BEGIN {
+	FS = "\t";
+}
+NR == 1 { print }
+
+NR == 2 {
+	for (i = 0; i < (NF - 2); i++) {
+		a[i] = "x" i " " i;
+	}
+	n = asort(a);
+	for(x = 1; x <= n; x++) {
+		split(a[x], f, " ");
+		z[f[2]] = x - 1;
+	}
+}
+
+NR > 1 {
+	printf("%s", $1);
+	for (i = 0; i < (NF - 2); i++) {
+		printf("\t%s", $(2 + z[i]));
+	}
+
+	printf("\t%s\n", $NF);
+}
+
+

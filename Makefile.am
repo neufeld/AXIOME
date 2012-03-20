@@ -14,6 +14,7 @@ bin_SCRIPTS = \
 	aq-nmf \
 	aq-nmf-concordance \
 	aq-oldillumina2fastq \
+	aq-orderotu \
 	aq-otu2lnotu \
 	aq-otu2pcord \
 	aq-otubinner \
@@ -73,6 +74,7 @@ man1_MANS = \
 	aq-nmf-concordance.1 \
 	aq-nmf.1 \
 	aq-oldillumina2fastq.1 \
+	aq-orderotu.1 \
 	aq-otu2lnotu.1 \
 	aq-otu2pcord.1 \
 	aq-otubinner.1 \
