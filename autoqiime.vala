@@ -948,6 +948,12 @@ namespace AutoQIIME {
 					case "rawuclust":
 						output.otu_method = "raw-uclust";
 						break;
+					case "raw-cdhit":
+					case "rawcdhit":
+					case "raw-cd-hit":
+					case "rawcd-hit":
+						output.otu_method = "raw-cdhit";
+						break;
 					default:
 						stderr.printf("%s: Unknown OTU picking method \"%s\".\n", filename, method);
 						return false;

@@ -79,10 +79,21 @@ picked_otus/seq_otus.txt: seq.uc
 	@test -d picked_otus || mkdir -p picked_otus
 	@awk '$$1 == "S" { a[$$2] = "\t" $$9; if ($$2 > m) { m = $$2; } } $$1 == "H" { a[$$2] = (a[$$2] "\t" $$9); } END { for (i = 0; i < m; i++) { print i a[i]; }}' $< > $@
 else
+ifeq ($(OTU_PICKING_METHOD),raw-cdhit)
+picked_otus/cd-hit-out.clstr: seq.fasta
+	@echo Generating cluster file using cdhit...
+	@test -d picked_otus || mkdir -p picked_otus
+	$(V)cdhit-est -i seq.fasta -o picked_otus/cd-hit-out -c 0.97 -M 6144 -T 0 -B 1 > picked_otus/cd-hit.output 2>&1
+
+picked_otus/seq_otus.txt: picked_otus/cd-hit-out.clstr
+	@echo Converting cdhit cluster file to proper format...
+	@awk '{ ORS="" } { if (/>Cluster/) { if ( NR != 1 ) { print "\n"; } print $$2; } else { print "\t"; gsub(/\.\.\./,""); print substr($$3,2); }}' $< > $@
+else
 picked_otus/seq_otus.txt: seq.fasta custom_parameters.txt
 	@echo Picking OTUs using QIIME and $(OTU_PICKING_METHOD)...
 	@test ! -d picked_otus || rm -r picked_otus
 	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -m $(OTU_PICKING_METHOD) -o picked_otus -M 4096
+endif
 endif
 
 seq.fasta_rep_set.fasta: picked_otus/seq_otus.txt seq.fasta
