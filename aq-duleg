@@ -25,7 +25,7 @@ for (x in 1 : nrow(mapping)) {
 	}
 	print(paste("Computing for", name))
 	dis.bc <- dsvdis(otutable, 'bray/curtis')
-	clust <- mapping[x,]
+	clust <- mapping[x, rownames(otutable)]
 	d <- indval(otutable, clust)
 	print("Saving")
 	sink("duleg.txt", append = TRUE)

@@ -28,7 +28,8 @@ for (x in 1 : nrow(mapping)) {
 	}
 
 	print(paste("Computing MRPP for", name))
-	otutable.mrpp <- mrpp(otutable, mapping[x,])
+	m <- mapping[x, rownames(otutable)]
+	otutable.mrpp <- mrpp(otutable, m)
 
 	sink("mrpp.txt", append = TRUE)
 	print(otutable.mrpp)
@@ -37,7 +38,7 @@ for (x in 1 : nrow(mapping)) {
 
 	print("Computing meta MDS")
 	plot(otutable.ord <- metaMDS(otutable), type = "text", display = "sites", main = paste("MDS for", name))
-	ordihull(otutable.ord, mapping[x,])
+	ordihull(otutable.ord, m)
 
 	with(otutable.mrpp, {
 		print("Producing histogram")
@@ -48,5 +49,5 @@ for (x in 1 : nrow(mapping)) {
 	par(def.par)
 	print("Computing mean distances")
 	otutable.bc <- vegdist(otutable)
-	tryCatch(plot(meandist(otutable.bc, mapping[x,]), main = paste("Mean distances for", name)), error = function() next)
+	tryCatch(plot(meandist(otutable.bc, m), main = paste("Mean distances for", name)), error = function() next)
 }
