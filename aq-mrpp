@@ -32,6 +32,7 @@ for (x in 1 : nrow(mapping)) {
 	otutable.mrpp <- mrpp(otutable, m)
 
 	sink("mrpp.txt", append = TRUE)
+	print(paste("MRPP for", name))
 	print(otutable.mrpp)
 	print(paste("T statistic : ", (otutable.mrpp$delta - otutable.mrpp$E.delta) / sd(otutable.mrpp$boot.deltas)))
 	sink()
