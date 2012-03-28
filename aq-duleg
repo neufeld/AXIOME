@@ -31,6 +31,11 @@ for (x in 1 : nrow(mapping)) {
 	sink("duleg.txt", append = TRUE)
 	print(paste("For", name))
 	summary(d)
-	print(d)
 	sink()
+	write.table(d$indcls, file = paste("duleg", name, "_indcls.txt", sep =""));
+	write.table(d$indval, file = paste("duleg", name, "_indval.txt", sep =""));
+	write.table(d$maxcls, file = paste("duleg", name, "_maxcls.txt", sep =""));
+	write.table(d$pval, file = paste("duleg", name, "_pval.txt", sep =""));
+	write.table(d$relabu, file = paste("duleg", name, "_relabu.txt", sep =""));
+	write.table(d$relfrq, file = paste("duleg", name, "_relfrq.txt", sep =""));
 }
