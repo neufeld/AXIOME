@@ -61,7 +61,7 @@ To separate out multiple samples in each file, \fIregex\fR specifies a regular e
 .BR regex (7),
 and any sequences with FASTA headers matching that regular expression will be associated with that sample. To match all sequences, specify \fBregex="."\fR. If the sequences have a keyword, specifying it should be sufficient. For instance, all the sequences starting with \fBSALT\fR by specifying \fBregex="^SALT"\fR or only sequences with a numeric identifier by saying \fBregex="^[0-9]*$"\fR.
 .TP
-\fB<panda forward="\fIforward.fastq\fB" reverse="\fIreverse.fastq\fB" version="\fIversion\fB" \fR[\fBfprimer="\fIACT...\fB"\fR]\fB \fR[\fBrprimer="\fITAG...\fB"\fR]\fB \fR[\fBfprimer="\fIACT...\fB"\fR]\fB>\fR...\fB</panda>\fR
+\fB<panda forward="\fIforward.fastq\fB" reverse="\fIreverse.fastq\fB" version="\fIversion\fB" \fR[\fBfprimer="\fIACT...\fB"\fR]\fB \fR[\fBrprimer="\fITAG...\fB"\fR]\fB \fR[\fBfprimer="\fIACT...\fB"\fR]\fB \fR[\fBthreshold="\fIthreshold\fB"\fR]\fB>\fR...\fB</panda>\fR
 Assemble sequences using PANDAseq, if installed. Two files, the forward and reverse reads, must be supplied and they may be compressed with
 .BR gzip "(1) or"
 .BR bzip2 (1).
