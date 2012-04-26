@@ -69,6 +69,7 @@ man1_MANS = \
 	aq-joinn.1 \
 	aq-libcontrib.1 \
 	aq-marry-illumina-index.1 \
+	aq-marry-otu-names.1 \
 	aq-mkrepset.1 \
 	aq-mrpp.1 \
 	aq-mrpp-unifrac.1 \
