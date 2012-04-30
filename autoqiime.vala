@@ -462,7 +462,8 @@ namespace AutoQIIME {
 			alignmethod.print(makefile);
 			makefile.printf("SEQSOURCES =%s\n\nseq.fasta: $(SEQSOURCES)\n%s", seqsources.str, seqrule.str);
 			//Print out the stats for the sample file
-			makefile.printf("\t$(V)awk '{ if (NR > 1) { if (min == \"\") { min = max = $$3 }; if ( $$3 > max ) { max = $$3 }; if ( $$3 < min ) { min = $$3 }; total += $$3; count += 1 } } END { print \"\\nAverage Sequences Contributed: \" total/count \"\\nSmallest Sequences Contributed: \" min \"\\nLargest Sequences Contributed: \" max >> \"sample_reads.log\" }' sample_reads.log\n\n");
+			makefile.printf("\t$(V)awk '{ if (NR == 1) { print \"Sample\\tBarcode\\tSequences Contributed\\n\" } if (min == \"\") { min = max = $$3 }; if ( $$3 > max ) { max = $$3 }; if ( $$3 < min ) { min = $$3 }; total += $$3; count += 1; print; } END { print \"\\nAverage Sequences Contributed: \" total/count \"\\nSmallest Sequences Contributed: \" min \"\\nLargest Sequences Contributed: \" max }' sample_reads_temp.log > sample_reads.log\n\n");
+			makefile.printf("\t$(V)rm sample_reads_temp.log\n\n");
 			makefile.printf("%s.PHONY: all\n\ninclude %s/aq-base\n", makerules.str, BINDIR);
 			lookup.print_include(makefile);
 			makefile = null;
@@ -585,11 +586,8 @@ namespace AutoQIIME {
 					awkprint.append_printf(" && count%d < %d", sample.id, sample.limit);
 				}
 				awkprint.append_printf(") { print \">%d_\" NR \"\\n\" seq; count%d++; }", sample.id, sample.id);
-				awkcheck.append_printf(" if (count%d == 0) { print \"Library defined in %s:%d contributed no sequences. This is probably not what you want.\" > \"/dev/stderr\"; exit 1; } else { print", sample.id, sample.xml-> doc-> url, sample.xml-> line);
-				if (sample.id == 0) {
-					awkcheck.append_printf(" \"Sample\\tBarcode\\tSequences Contributed\\n\" ");
-				}
-				awkcheck.append_printf(" \"%d\\t%s\\t\" count%d >> \"sample_reads.log\" }", sample.id, sample.tag, sample.id);
+				awkcheck.append_printf(" if (count%d == 0) { print \"Library defined in %s:%d contributed no sequences. This is probably not what you want.\" > \"/dev/stderr\"; exit 1; } else { ", sample.id, sample.xml-> doc-> url, sample.xml-> line);
+				awkcheck.append_printf("print \"%d\\t%s\\t\" count%d >> \"sample_reads_temp.log\" }", sample.id, sample.tag, sample.id);
 			}
 			seqrule.append_printf("\t$(V)(%s | awk '/^>/ { if (seq) {%s } name = substr($$0, 2); seq = \"\"; } $$0 !~ /^>/ { seq = seq $$0; } END { if (seq) {%s }%s }' >> seq.fasta) 2>&1 | bzip2 > seq_%d.log.bz2\n\n", prep, awkprint.str, awkprint.str, awkcheck.str, sequence_preparations++);
 		}
