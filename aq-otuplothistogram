@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
 pdf("otu-hist.pdf")
-otu.file <- tail(commandArgs(), 1)
+otu.file <- tail(commandArgs(trailingOnly = TRUE), 1)
 
 plot (read.table(pipe(paste("aq-otuhistogram", otu.file, "| sort -n"))), log = "xy", xlab = "OTU Size (Sequences)", ylab = "Frequency")

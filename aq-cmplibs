@@ -16,7 +16,7 @@ skipseq <- function(l) {
 	res;
 }
 
-levelname <- tail(commandArgs(), 1);
+levelname <- tail(commandArgs(trailingOnly = TRUE), 1);
 otutable <- read.table(paste("otu_table_summarized_", levelname, ".txt", sep=""), 
     header = T, sep = "\t")
 mapping <- read.table("mapping.extra", header = TRUE, 

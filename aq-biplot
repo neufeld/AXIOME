@@ -5,8 +5,8 @@ options(error = quote(dump.frames("biplot-debug", TRUE)))
 arrowScale = 0.1
 # Load the mapping, the principle components, the biplot
 #   vectors, and the OTUs for the plot
-levelname <- tail(commandArgs(), 2)[1];
-flavour <- tail(commandArgs(), 1);
+levelname <- tail(commandArgs(trailingOnly = TRUE), 2)[1];
+flavour <- tail(commandArgs(trailingOnly = TRUE), 1);
 mapping <- read.table("mapping.extra", header = TRUE, 
     comment.char = "", row.names = "X.SampleID", sep = "\t")
 pcoa <- read.table(paste("beta_div_pcoa", flavour, "/pcoa_weighted_unifrac_otu_table", flavour, ".txt", sep = ""), 

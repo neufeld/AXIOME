@@ -3,7 +3,7 @@ options(error = quote(dump.frames("mrpp-unifrac-debug", TRUE)))
 library("vegan")
 library("labdsv")
 
-flavour <- tail(commandArgs(), 1);
+flavour <- tail(commandArgs(trailingOnly = TRUE), 1);
 
 print("Reading Unifrac distances")
 dist <- as.matrix(read.table(paste("beta_div", flavour, "/weighted_unifrac_otu_table", flavour, ".txt", sep = "")))

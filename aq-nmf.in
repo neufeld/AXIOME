@@ -5,7 +5,7 @@
 #  Andre Masella <andre@masella.name>
 options(error = quote(dump.frames("nmf-debug", TRUE)))
 
-K <- as.numeric(tail(commandArgs(),1))
+K <- as.numeric(tail(commandArgs(trailingOnly = TRUE),1))
 nloop <- 100
 
 source("@prefix@/share/@PACKAGE@/nmf.R")
