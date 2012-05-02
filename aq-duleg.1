@@ -1,10 +1,10 @@
 .\" Authors: Andre Masella
-.TH aq-duleg 1 "February 2012" "1.3" "USER COMMANDS"
+.TH aq-duleg 1 "April 2012" "1.3" "USER COMMANDS"
 .SH NAME 
 aq-duleg \- Compute Dufrene-Legendre indicator species analysis in R
 .SH SYNOPSIS
-.B aq-duleg
+.B aq-duleg \fBp\fR
 .SH DESCRIPTION
-Calculates the indicator value (fidelity and relative abundance) of species in clusters or types. This is done using the \fBlabdsv\fR R package. Bray-Curtis distances are used between samples.
+Calculates the indicator value (fidelity and relative abundance) of species in clusters or types. This is done using the \fBlabdsv\fR R package. Bray-Curtis distances are used between samples. Parameter \fBp\fR provides a p-value cutoff for output (must be less than 1).
 .SH SEE ALSO
 .BR autoqiime (1).

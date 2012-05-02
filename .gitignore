@@ -60,6 +60,7 @@ m4/
 marry-otu.c
 mkrepset.c
 otuwithseqs.c
+otudulegmerge.c
 plugins/*.c
 sample.aq
 stamp-h1

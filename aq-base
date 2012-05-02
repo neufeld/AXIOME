@@ -182,11 +182,6 @@ nmf-concordance.pdf: otu_table.txt
 	@echo Making concordance plot...
 	$(V)aq-nmf-concordance
 
-# Duleg
-duleg.txt: otu_table.txt mapping.txt
-	@echo Computing Dufrene-Legendre stats...
-	$(V)aq-duleg
-
 # MRPP
 mrpp.txt mrpp.pdf: otu_table.txt mapping.txt
 	@echo Computing Multi Response Permutation Procedure...

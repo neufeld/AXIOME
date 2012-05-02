@@ -87,9 +87,9 @@ pointing to the appropriate database. The database may optionally be given a fri
 \fB<compare level="\fIlevel\fB"/>\fR
 Compare libraries on a plot to see if one is a superset of another. This is useful if one sample which is (possibly) a subsample of another. This uses summarised taxa, not OTUs, so the taxonomic level for the analysis must be specified.
 .TP
-\fB<duleg/>\fR
-Compute Dufrene-Legendre indicator species analysis in R. For more information, see
-.BR aq-duleg (1).
+\fB<duleg \fR[\fBp="\fIplimit\fB"\fR]\fB/>\fR
+Compute Dufrene-Legendre indicator species analysis in R using optional parameter \fIp\fR as p-value cut-off (default is 0.05). For more information, see
+.BR aq-duleg (1), aq-otudulegmerge (1).
 .TP
 \fB<mrpp/>\fR
 Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities in R. For more information, see

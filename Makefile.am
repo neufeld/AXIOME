@@ -43,6 +43,7 @@ bin_PROGRAMS= \
 	aq-marry-otu-names \
 	aq-mkrepset \
 	aq-otuwithseqs \
+	aq-otudulegmerge \
 	aq-qualhisto \
 	aq-syntheticfastq \
 	$(NULL)
@@ -86,6 +87,7 @@ man1_MANS = \
 	aq-otusum.1 \
 	aq-otutop.1 \
 	aq-otuwithseqs.1 \
+	aq-otudulegmerge.1 \
 	aq-pca.1 \
 	aq-pretendsummarize.1 \
 	aq-qualhisto.1 \
@@ -142,6 +144,10 @@ aq_otuwithseqs_CPPFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
 aq_otuwithseqs_LDADD = $(GLIB_LIBS) $(GEE_LIBS)
 aq_otuwithseqs_VALASOURCES = otuwithseqs.vala
 aq_otuwithseqs_SOURCES = $(aq_otuwithseqs_VALASOURCES:.vala=.c) fasta.c
+aq_otudulegmerge_CPPFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
+aq_otudulegmerge_LDADD = $(GLIB_LIBS) $(GEE_LIBS)
+aq_otudulegmerge_VALASOURCES = otudulegmerge.vala
+aq_otudulegmerge_SOURCES = $(aq_otudulegmerge_VALASOURCES:.vala=.c)
 autoqiime_CPPFLAGS = -DBINDIR=\"$(bindir)\" -DDATADIR=\"$(pkgdatadir)\" -DMODDIR=\"$(pkglibdir)\" $(GLIB_CFLAGS) $(GEE_CFLAGS) $(LIBXML_CFLAGS) $(GMODULE_CFLAGS) $(GIO_CFLAGS)
 autoqiime_LDADD = $(GLIB_LIBS) $(GEE_LIBS) $(LIBXML_LIBS) $(GMODULE_LIBS) $(GIO_LIBS)
 autoqiime_VALAFLAGS = --vapidir=. --pkg=config --pkg=libmagic --pkg=gee-$(GEE_VER) --pkg=libxml-2.0 --pkg=gmodule-2.0 --pkg=gio-2.0
@@ -184,6 +190,9 @@ $(aq_marry_otu_names_VALASOURCES:.vala=.c): $(aq_marry_otu_names_VALASOURCES)
 
 $(aq_mkrepset_VALASOURCES:.vala=.c): $(aq_mkrepset_VALASOURCES) fasta.vapi
 	$(VALAC) $(VALAFLAGS) -g -C --pkg=gee-$(GEE_VER) --pkg=posix $(aq_mkrepset_VALASOURCES) fasta.vapi && touch $@
+
+$(aq_otudulegmerge_VALASOURCES:.vala=.c): $(aq_otudulegmerge_VALASOURCES)
+	$(VALAC) $(VALAFLAGS) -g -C --pkg=gee-$(GEE_VER) $(aq_otudulegmerge_VALASOURCES) && touch $@
 
 $(aq_otuwithseqs_VALASOURCES:.vala=.c): $(aq_otuwithseqs_VALASOURCES) fasta.vapi
 	$(VALAC) $(VALAFLAGS) -g -C --pkg=gee-$(GEE_VER) --pkg=posix $(aq_otuwithseqs_VALASOURCES) fasta.vapi && touch $@

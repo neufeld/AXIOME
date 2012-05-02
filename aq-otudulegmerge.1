@@ -1,0 +1,22 @@
+.\" Authors: Andre Masella
+.TH aq-otudulegmerge 1 "May 2012" "1.3" "USER COMMANDS"
+.SH NAME 
+aq-otudulegmerge \- Merge OTU table data with Dufrene Legendre analysis data
+.SH SYNOPSIS
+.B aq-otudulegmerge
+.I duleg.txt
+.I otu_table_with_sequences.txt
+.SH DESCRIPTION
+For each category in the Dufrene Legendre analysis, generate a tab separated csv file which contains the OTU information (including predicted taxonomy and sequence) as well as cluster number, indicator value and probability.
+.SH OPTIONS
+.TP
+duleg.txt
+The output of
+.B aq-duleg
+which contains the summary of the analysis, ex. "duleg_005.txt".
+.TP
+otu_table_with_sequences.txt
+The OTU table with sequence data added, produced by
+.B aq-otuqithseqs.
+.SH SEE ALSO
+.BR autoqiime (1), aq-duleg (1), aq-otuwithseqs (1).
