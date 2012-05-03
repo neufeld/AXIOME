@@ -43,8 +43,7 @@ int main(string[] args) {
 
 		//Set up the output filename
 		string outName = args[1];
-		outName = outName.split(".")[0];
-		outName = outName + "_" + category + ".xls";
+		outName = outName + "_" + category + ".tab";
 		//Open the file for writing
 		var outFile = FileStream.open(outName, "w");
 
