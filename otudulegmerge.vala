@@ -17,8 +17,15 @@ int main(string[] args) {
 	var map = new HashMap<string, string> ();
 	string line;
 	string category;
+	Regex spacekiller = null;
+	//Regex for use later to filter out Duleg table info
+	try {
+		spacekiller = new Regex("[ ]+");
+	} catch (RegexError e) {
+		warning("%s", e.message);
+	}
 
-	// While duleg file is not EOF
+	//While duleg file is not EOF
 	while ( !duleg.eof() ) {
 
 		//Clear the map (necessary for each category)
@@ -43,6 +50,8 @@ int main(string[] args) {
 
 		//Set up the output filename
 		string outName = args[1];
+		//Take base filename, and peel off the extension
+		outName = Filename.display_basename(outName)[0:-4];
 		outName = outName + "_" + category + ".tab";
 		//Open the file for writing
 		var outFile = FileStream.open(outName, "w");
@@ -56,19 +65,18 @@ int main(string[] args) {
 
 		//While we are reading nonempty lines
 		while ( (line = duleg.read_line()) != "" ) {
-			try {
 				//Using regex, change out any number of spaces between objects for a semicolon delimiter
-				var spacekiller = new Regex("[ ]+");
-				delimed = spacekiller.replace(line, -1, 0, ";");
-			} catch (RegexError e) {
-				warning("%s", e.message);
-			}
+				try {
+					delimed = spacekiller.replace(line, -1, 0, "\t");
+				} catch (RegexError e) {
+					warning("%s", e.message);
+				}
 			//Split up our new string
-			parts = delimed.split(";");
+			parts = delimed.split("\t");
 			//Get the sequence id by stripping the X from it
 			id = parts[0].replace("X","");
 			//For each sequence id, store the duleg information in a ; delimited string
-			map.set(id, delimed.splice(0,delimed.index_of(";")+1));
+			map[id] = delimed.splice(0,delimed.index_of("\t")+1);
 
 		}
 
@@ -80,15 +88,16 @@ int main(string[] args) {
 		}
 
 		//Skip the header
-		otu.read_line();
+		if ( (line = otu.read_line()) == null ) {
+			stderr.printf("Malformed OTU table, missing header line\n");
+			return 1;
+		}
+
 		//Read the next line
 		line = otu.read_line();
 
 		//Output the line same as it was, but add duleg info
 		outFile.printf("%s\tCluster\tIndicatorValue\tProbability\n", line);
-
-		string duleginfo;
-		string[] duleginfoarray;
 
 		//For each line in the otutable, if we find the sequence in our duleg
 		//indicator species results, then print corresponding duleg info and
@@ -101,9 +110,7 @@ int main(string[] args) {
 			}
 
 			if (map.has_key(parts[0])) {
-				duleginfo = map.get(parts[0]);
-				duleginfoarray = duleginfo.split(";");
-				outFile.printf("%s\t%s\t%s\t%s\n", line, duleginfoarray[0], duleginfoarray[1], duleginfoarray[2]);
+				outFile.printf("%s\t%s\n", line, map[parts[0]]);
 			}
 		  }
 	  }
