@@ -58,7 +58,7 @@ for (x in 1 : nrow(mapping)) {
 	sink(paste("duleg_", pstr, ".txt", sep=""), append = TRUE)
 	print(paste("For", name))
 	#Run a summary using our p cutoff value supplied via command line argument
-	summary(d, p=plimit, too.many=1000000, digits=3)
+	summary(d, p=plimit, too.many=1000000, digits=5)
 	sink()
 	
 	write.table(d$indcls, file = paste("duleg_", pstr, "_", name, "_indcls.txt", sep =""));
