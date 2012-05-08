@@ -1,0 +1,61 @@
+#!/usr/bin/env Rscript
+
+#Pull in arguments
+args <- commandArgs(trailingOnly = TRUE)
+
+#Should have exactly one argument, if not, complain
+if (length(args) > 1) {
+  print("Error: Only one parameter required (distance method). Options are: manhattan, euclidean, canberra, bray, kulczynski, jaccard, gower, altGower, morisita, horn, mountford, raup , binomial, chao or cao.")
+  q()
+}
+
+#Grab the method
+dmethod = args[1];
+
+#If not specified, default to bray-curtis
+if (is.na(dmethod)) {
+	dmethod <- "bray";
+}
+
+library("vegan")
+library("ape")
+options(error = quote(dump.frames("pca-debug", TRUE)))
+
+print("Reading OTU table");
+otutable <- read.table("otu_table.txt", skip = 1, comment.char = "", header = TRUE, row.names = 1, sep = "\t");
+print("Reading mapping");
+mapping <- read.table("mapping.txt", header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t")
+print("Reading mapping extra");
+extra <- read.table("mapping.extra", header = TRUE,
+    comment.char = "", row.names = "X.SampleID", sep = "\t")
+interest <- read.table("headers.txt")[1,] == "TRUE";
+
+print("Computing PCoA");
+
+for(i in 0 : length(interest)) {
+  if (interest[i] && length(levels(factor(as.matrix(mapping[, i])))) == 1) {
+    interest[i] <- FALSE
+    print(paste("Ignoring", colnames(mapping)[i], "because all values are identical."))
+  }
+}
+newmapping <- t(mapping[,interest]);
+
+# For non-numeric sample names, comment out the following line
+colnames(newmapping) <- paste("X", rownames(mapping), sep = "");
+rownames(newmapping) <- colnames(mapping)[interest];
+
+cvar <- otutable[,seq(1,ncol(otutable)-1)];
+d <- vegdist(t(cvar), method=dmethod);
+pdf(paste("pcoa-",dmethod,"-biplot.pdf",sep=""));
+
+print("Making MDS Plot");
+
+p <- pcoa(d);
+plot(p$vectors[,1:2], main = paste("PCoA ordination\nMethod: '", dmethod, "'", sep=""), col = as.matrix(extra[ ,"Colour"]));
+text(x = p$vectors[,"Axis.1"], y = p$vectors[,"Axis.2"], adj = c(-0.2,0.5), labels = extra[, "Description"], col = as.matrix(extra[ ,"Colour"]));
+
+useful <- colnames(mapping)[interest];
+if ( length(useful) > 1 ) {
+	print("Making biplot");
+	biplot(p, t(newmapping[useful,]), xlabs = extra[, "Description"]);
+}

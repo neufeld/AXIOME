@@ -24,6 +24,7 @@ bin_SCRIPTS = \
 	aq-otusum \
 	aq-otutop \
 	aq-pca \
+	aq-pcoa \
 	aq-pretendsummarize \
 	aq-qualityanal \
 	aq-rareotuwithlineage \
@@ -89,6 +90,7 @@ man1_MANS = \
 	aq-otuwithseqs.1 \
 	aq-otudulegmerge.1 \
 	aq-pca.1 \
+	aq-pcoa.1 \
 	aq-pretendsummarize.1 \
 	aq-qualhisto.1 \
 	aq-qualityanal.1 \
@@ -161,6 +163,7 @@ autoqiime_VALASOURCES = \
 	plugins/a-mrpp.vala \
 	plugins/a-nmf.vala \
 	plugins/a-pca.vala \
+	plugins/a-pcoa.vala \
 	plugins/a-qualanal.vala \
 	plugins/a-rankabundance.vala \
 	plugins/a-uchime.vala \
