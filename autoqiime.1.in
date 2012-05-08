@@ -1,5 +1,5 @@
-.\" Authors: Andre Masella
-.TH autoqiime 1 "Februrary 2012" "1.3" "USER COMMANDS"
+.\" Authors: Andre Masella, Michael Hall
+.TH autoqiime 1 "May 2012" "1.3" "USER COMMANDS"
 .SH NAME
 autoqiime \- Automation toolkit for QIIME
 .SH SYNOPSIS
@@ -107,6 +107,10 @@ Do a non-negative matrix factorization of the data creating \fIdegree\fR bases, 
 \fB<pca/>\fR
 Perform principal components in R using the numeric variables supplied in the definitions. While QIIME's biplots use Unifrac distances, this PCA uses the taxa information and any numeric supplemental information.
 .TP
+\fB<pcoa [method="\fImethod\fB"]/>\fR
+Perform principal coordinate analysis in R using one of the following options: "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao" or "cao". If no method supplied, defaults to Bray-Curtis ("bray"). Plots a MDS plot, and if there are 2 or more numerical properties, it will plot a biplot. See
+.BR aq-pcoa (1).
+.TP
 \fB<qualityanal/>\fR
 Produce some data on the quality of the raw Illumina reads. This only applies to reads specified to PANDAseq. For more information, see
 .BR aq-qualityanal (1).
@@ -169,6 +173,7 @@ The following are components used by AutoQIIME or supplemental tools:
 .BR aq-otutop (1),
 .BR aq-otuwithseqs (1),
 .BR aq-pca (1),
+.BR aq-pcoa (1),
 .BR aq-pretendsummarize (1),
 .BR aq-qualhisto (1),
 .BR aq-qualityanal (1),
