@@ -14,8 +14,61 @@ int main(string[] args) {
 		return 1;
 	}
 
-	var map = new HashMap<string, string> ();
+	//Open up the otutable
+	stderr.printf("Opening OTU table...\n");
+	var otu = FileStream.open(args[2], "r");
+	if (otu == null) {
+		stderr.printf("Could not open %s: %s\n", args[2], strerror(errno));
+		return 1;
+	}
+
+	//Store the otutable in a hashmap, with each of the columns items in the ArrayList<string>
+	var otumap = new HashMap<int, ArrayList> ();
+
+	//Store a hashmap that we put in the sample index, and it outputs
+	//the corresponding index in the otumap ArrayList
+	//This is because QIIME is stupid and orders things lexicographically, and we don't like that
+	var lex2num = new HashMap<int, int> ();
+
 	string line;
+	string[] linesplit;
+	//Skip the header
+	if ( (line = otu.read_line()) == null ) {
+		stderr.printf("Malformed OTU table, missing header line\n");
+		return 1;
+	}
+
+	//Read the next line
+	line = otu.read_line();
+	linesplit = line.split("\t");
+
+	//Set the hashmap that keeps track of where the sample ids have their information stored in the ArrayList
+	int i = 1;
+	int index;
+	while ( linesplit[i] != "Consensus Lineage" ) {
+		index = int.parse(linesplit[i]);
+		lex2num[index] = i;
+		i++;
+	}
+
+	//Read into the otumap using the species index as key
+	//the values from the OTU map
+	while ((line = otu.read_line()) != null) {
+		linesplit = line.split("\t");
+		if (linesplit.length == 0) {
+			stderr.printf("Malformed line: %s\n", line);
+			continue;
+		}
+		index = int.parse(linesplit[0]);
+		var list = new ArrayList<string> ();
+		//Add each of the columns of the otutable to the ist array
+		for ( i = 0; i < linesplit.length; i++ ) {
+			list.add(linesplit[i]);
+		}
+		//Add the list array to the hashmap
+		otumap[index] = list;
+	}
+
 	string category;
 	Regex spacekiller = null;
 	//Regex for use later to filter out Duleg table info
@@ -28,8 +81,7 @@ int main(string[] args) {
 	//While duleg file is not EOF
 	while ( !duleg.eof() ) {
 
-		//Clear the map (necessary for each category)
-		map.clear();
+		//Clear the category to look for next one
 		category = null;
 
 		//Search for a category
@@ -56,16 +108,30 @@ int main(string[] args) {
 		//Open the file for writing
 		var outFile = FileStream.open(outName, "w");
 
-		//Read header line
+		//Print output header
+		outFile.printf("#OTU ID\t");
+
+		//Print out the sample ID values in numerical order
+		i = 0;
+		while ( lex2num.has_key(i) ) {
+			outFile.printf(i.to_string() + "\t");
+			i++;
+		}
+
+		outFile.printf("Sum\tConsensus Lineage\tReprSequence\tCluster\tIndicator Value\tProbability\n");
+
+		//Read duleg header line
 		duleg.read_line();
 
 		string delimed = null;
 		string[] parts;
-		string id;
+		int id;
+		int sum;
+		ArrayList<string> otuinfo;
 
 		//While we are reading nonempty lines
 		while ( (line = duleg.read_line()) != "" ) {
-				//Using regex, change out any number of spaces between objects for a semicolon delimiter
+				//Using regex, change out any number of spaces between objects for a tab delimiter
 				try {
 					delimed = spacekiller.replace(line, -1, 0, "\t");
 				} catch (RegexError e) {
@@ -74,47 +140,31 @@ int main(string[] args) {
 			//Split up our new string
 			parts = delimed.split("\t");
 			//Get the sequence id by stripping the X from it
-			id = parts[0].replace("X","");
-			//For each sequence id, store the duleg information in a ; delimited string
-			map[id] = delimed.splice(0,delimed.index_of("\t")+1);
+			id = int.parse(parts[0].replace("X",""));
 
-		}
-
-		//Open up the otutable (done once for each category)
-		var otu = FileStream.open(args[2], "r");
-		if (otu == null) {
-			stderr.printf("Could not open %s: %s\n", args[2], strerror(errno));
-			return 1;
-		}
-
-		//Skip the header
-		if ( (line = otu.read_line()) == null ) {
-			stderr.printf("Malformed OTU table, missing header line\n");
-			return 1;
-		}
-
-		//Read the next line
-		line = otu.read_line();
-
-		//Output the line same as it was, but add duleg info
-		outFile.printf("%s\tCluster\tIndicatorValue\tProbability\n", line);
-
-		//For each line in the otutable, if we find the sequence in our duleg
-		//indicator species results, then print corresponding duleg info and
-		//otu table info to our new outfile
-		while ((line = otu.read_line()) != null) {
-			parts = line.split("\t");
-			if (parts.length == 0) {
-				stderr.printf("Malformed line: %s\n", line);
-				continue;
+			//Print the information from the otumap
+			if ( otumap.has_key(id) ) {
+				otuinfo = otumap[id];
+				outFile.printf(otuinfo[0] + "\t");
+			} else {
+				stderr.printf("Error: sample id %d in duleg analysis file not found in OTU table.\n", id);
+				return 1;
 			}
 
-			if (map.has_key(parts[0])) {
-				outFile.printf("%s\t%s\n", line, map[parts[0]]);
+			//Print, in NUMERICAL (not stupid lexicographic) order the sample abundances
+			i = 0;
+			sum = 0;
+			while ( lex2num.has_key(i) ) {
+				outFile.printf(otuinfo[lex2num[i]] + "\t");
+				sum = sum + int.parse(otuinfo[lex2num[i]]);
+				i++;
 			}
-		  }
-	  }
+			//Print out sum column, remaining otu table info, then duleg info
+			outFile.printf("%d\t%s\t%s\t%s\n", sum, otuinfo[i+1], otuinfo[i+2], delimed.splice(0,delimed.index_of("\t")+1));
+		}
+	}
 
-	  stderr.printf("Premature exit, malformed duleg file...\n");
-	  return 1;
-  }
+  stderr.printf("Premature exit, malformed duleg file...\n");
+  return 1;
+
+}
