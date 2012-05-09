@@ -2,6 +2,15 @@
 
 options(error = quote(dump.frames("duleg-debug", TRUE)))
 
+pkgTest <- function(x)
+{
+        if (!require(x,character.only = TRUE))
+        {
+                install.packages(x,dep=TRUE)
+                if(!require(x,character.only = TRUE)) stop("Package not found")
+        }
+}
+
 #Pull in arguments
 args <- commandArgs(trailingOnly = TRUE)
 
@@ -21,7 +30,7 @@ if ( plimit <= 0 || plimit >= 1 ) {
 }
 
 #Load the labdsv library
-library("labdsv")
+pkgTest("labdsv")
 
 #Read in and format otu table
 print("Reading OTU table")

@@ -1,7 +1,17 @@
 #!/usr/bin/env Rscript
 options(error = quote(dump.frames("mrpp-unifrac-debug", TRUE)))
-library("vegan")
-library("labdsv")
+
+pkgTest <- function(x)
+{
+        if (!require(x,character.only = TRUE))
+        {
+                install.packages(x,dep=TRUE)
+                if(!require(x,character.only = TRUE)) stop("Package not found")
+        }
+}
+
+pkgTest("vegan")
+pkgTest("labdsv")
 
 flavour <- tail(commandArgs(trailingOnly = TRUE), 1);
 

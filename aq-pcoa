@@ -3,6 +3,15 @@
 #Pull in arguments
 args <- commandArgs(trailingOnly = TRUE)
 
+pkgTest <- function(x)
+{
+        if (!require(x,character.only = TRUE))
+        {
+                install.packages(x,dep=TRUE)
+                if(!require(x,character.only = TRUE)) stop("Package not found")
+        }
+}
+
 #Should have exactly one argument, if not, complain
 if (length(args) > 1) {
   print("Error: Only one parameter required (distance method). Options are: manhattan, euclidean, canberra, bray, kulczynski, jaccard, gower, altGower, morisita, horn, mountford, raup , binomial, chao or cao.")
@@ -17,8 +26,8 @@ if (is.na(dmethod)) {
 	dmethod <- "bray";
 }
 
-library("vegan")
-library("ape")
+pkgTest("vegan")
+pkgTest("ape")
 options(error = quote(dump.frames("pca-debug", TRUE)))
 
 print("Reading OTU table");

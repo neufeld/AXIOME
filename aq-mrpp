@@ -1,6 +1,16 @@
 #!/usr/bin/env Rscript
 options(error = quote(dump.frames("mrpp-debug", TRUE)))
-library("vegan")
+
+pkgTest <- function(x)
+{
+        if (!require(x,character.only = TRUE))
+        {
+                install.packages(x,dep=TRUE)
+                if(!require(x,character.only = TRUE)) stop("Package not found")
+        }
+}
+
+pkgTest("vegan")
 
 print("Reading OTU table")
 rawtable <- read.table("otu_table.txt", skip = 1, 
