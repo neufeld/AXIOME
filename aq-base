@@ -122,6 +122,10 @@ otu_table.txt: picked_otus/seq_otus.txt rdp_assigned_taxonomy/seq.fasta_rep_set_
 	@echo Making OTU table...
 	$(V)$(QIIME_PREFIX)make_otu_table.py -i picked_otus/seq_otus.txt -t rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt -o otu_table.txt
 
+otu_table_ordered_columns.txt: otu_table.txt
+	@echo Creating OTU table with numerically ordered columns...
+	$(V)$(QIIME_PREFIX)aq-orderotu otu_table.txt > otu_table_ordered_columns.txt
+
 otu_table_summarized_otu%.txt: otu_table%.txt
 	@echo Summarizing OTUs $*...
 	$(V)aq-pretendsummarize $< > $@
@@ -173,7 +177,7 @@ chimeras%.uchime chimeras%.aln chimeras%.fasta: identities%.fasta
 	$(V)usearch --uchime $< --uchimeout chimeras$*.uchime --uchimealns chimeras$*.aln --chimeras chimeras$*.fasta $(UCHIMEFLAGS)
 
 # PCA with R
-biplot.pdf: mapping.txt otu_table.txt headers.txt
+biplot.pdf: mapping.txt otu_table_ordered_columns.txt headers.txt
 	@echo Making biplot...
 	$(V)aq-pca
 

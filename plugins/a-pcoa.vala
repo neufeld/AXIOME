@@ -43,7 +43,7 @@ class AutoQIIME.Analyses.PrincipalCoordinateAnalysis : RuleProcessor {
 		}
 
 		output.add_target("pcoa-%s-biplot.pdf".printf(method));
-		output.add_rulef("pcoa-%s-biplot.pdf: mapping.txt otu_table.txt headers.txt\n\t@echo Computing PCoA analysis using method '%s'\n\t$(V)aq-pcoa %s\n\n", method, method, method);
+		output.add_rulef("pcoa-%s-biplot.pdf: mapping.txt otu_table_ordered_columns.txt headers.txt\n\t@echo Computing PCoA analysis using method '%s'\n\t$(V)aq-pcoa %s\n\n", method, method, method);
 		return true;
 	}
 }

@@ -2,7 +2,7 @@
 options(error = quote(dump.frames("pca-debug", TRUE)))
 
 print("Reading OTU table");
-otutable <- read.table("otu_table.txt", skip = 1, comment.char = "", header = TRUE, row.names = 1, sep = "\t");
+otutable <- read.table("otu_table_ordered_columns.txt", skip = 1, comment.char = "", header = TRUE, row.names = 1, sep = "\t");
 print("Reading mapping");
 mapping <- read.table("mapping.txt", header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t")
 print("Reading mapping extra");
