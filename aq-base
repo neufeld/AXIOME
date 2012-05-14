@@ -122,20 +122,34 @@ otu_table.txt: picked_otus/seq_otus.txt rdp_assigned_taxonomy/seq.fasta_rep_set_
 	@echo Making OTU table...
 	$(V)$(QIIME_PREFIX)make_otu_table.py -i picked_otus/seq_otus.txt -t rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt -o otu_table.txt
 
+ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
+otu_table_ordered_columns.txt: otu_table.tab
+	@echo Creating OTU table with numerically ordered columns...
+	$(V)$(QIIME_PREFIX)aq-orderotu otu_table.tab > otu_table_ordered_columns.txt
+else
 otu_table_ordered_columns.txt: otu_table.txt
 	@echo Creating OTU table with numerically ordered columns...
 	$(V)$(QIIME_PREFIX)aq-orderotu otu_table.txt > otu_table_ordered_columns.txt
+endif
 
 otu_table_summarized_otu%.txt: otu_table%.txt
 	@echo Summarizing OTUs $*...
 	$(V)aq-pretendsummarize $< > $@
 
 # Produce a rank-abundance plot
+ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
+rank_abundance/rank_abundance.pdf: otu_table.txt otu_table.tab
+	@echo Plotting rank-abundance curves...
+	@test ! -d rank_abundance || rm -r rank_abundance
+	$(V)$(QIIME_PREFIX)plot_rank_abundance_graph.py -i otu_table.txt -s "$$(awk -F "\t" 'NR == 2 { printf("%s", $$2); for (i = 3; i < NF; i++) { printf(",%s", $$i); } printf("\n"); exit; }' otu_table.tab)" -o rank_abundance
+	mv rank_abundance/rank_abundance_cols*.pdf rank_abundance/rank_abundance.pdf
+else
 rank_abundance/rank_abundance.pdf: otu_table.txt
 	@echo Plotting rank-abundance curves...
 	@test ! -d rank_abundance || rm -r rank_abundance
 	$(V)$(QIIME_PREFIX)plot_rank_abundance_graph.py -i otu_table.txt -s "$$(awk -F "\t" 'NR == 2 { printf("%s", $$2); for (i = 3; i < NF; i++) { printf(",%s", $$i); } printf("\n"); exit; }' otu_table.txt)" -o rank_abundance
 	mv rank_abundance/rank_abundance_cols*.pdf rank_abundance/rank_abundance.pdf
+endif
 
 # Produce a BLAST database
 nr.nhr nr.nin nr.nsq: seq.fasta_rep_set.fasta
@@ -147,9 +161,15 @@ r.nhr r.nin r.nsq: seq.fasta
 	$(V)formatdb -i seq.fasta -n r -p F -t $(BLASTDB_NAME)
 
 # Decorate OTU table with representative sequences
+ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
+otu_table_with_sequences.txt: seq.fasta_rep_set.fasta otu_table.tab
+	@echo Adding sequences to OTU table...
+	$(V)aq-otuwithseqs seq.fasta_rep_set.fasta otu_table.tab > otu_table_with_sequences.txt
+else
 otu_table_with_sequences.txt: seq.fasta_rep_set.fasta otu_table.txt
 	@echo Adding sequences to OTU table...
 	$(V)aq-otuwithseqs seq.fasta_rep_set.fasta otu_table.txt > otu_table_with_sequences.txt
+endif
 
 # Do chimera checking with UCHIME
 sorted%.fasta: seq%.fasta
@@ -182,12 +202,12 @@ biplot.pdf: mapping.txt otu_table_ordered_columns.txt headers.txt
 	$(V)aq-pca
 
 # NMF Concordance
-nmf-concordance.pdf: otu_table.txt
+nmf-concordance.pdf: otu_table_ordered_columns.txt
 	@echo Making concordance plot...
 	$(V)aq-nmf-concordance
 
 # MRPP
-mrpp.txt mrpp.pdf: otu_table.txt mapping.txt
+mrpp.txt mrpp.pdf: otu_table_ordered_columns.txt mapping.txt
 	@echo Computing Multi Response Permutation Procedure...
 	$(V)aq-mrpp
 

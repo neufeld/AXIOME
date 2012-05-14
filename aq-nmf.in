@@ -19,7 +19,7 @@ if (is.na(K) || K < 2 || K > 20) {
 	
 }
 print("Reading OTU table")
-otutable <- read.table("otu_table.txt", skip = 1, 
+otutable <- read.table("otu_table_ordered_columns.txt", skip = 1, 
 		comment.char = "", header = TRUE, row.names = 1, sep = "\t")
 print("Reading mapping extra");
 extra <- read.table("mapping.extra", header = TRUE,

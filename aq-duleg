@@ -34,7 +34,7 @@ pkgTest("labdsv")
 
 #Read in and format otu table
 print("Reading OTU table")
-rawtable <- read.table("otu_table.txt", skip = 1, 
+rawtable <- read.table("otu_table_ordered_columns.txt", skip = 1, 
 		comment.char = "", header = TRUE, row.names = 1, sep = "\t")
 otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
 
