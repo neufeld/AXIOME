@@ -7,12 +7,12 @@ NR == 1 { print }
 
 NR == 2 {
 	for (i = 0; i < (NF - 2); i++) {
-		a[i] = "x" i " " i;
+		a[i] = "x" $(2+ i) " " $(2 + i);
 	}
-	n = asort(a);
-	for(x = 1; x <= n; x++) {
+	n = asort(a, c);
+	for(x = 0; x <= n; x++) {
 		split(a[x], f, " ");
-		z[f[2]] = x - 1;
+		z[f[2]] = x;
 	}
 }
 
