@@ -1,6 +1,6 @@
 int main(string[] args) {
 	if (args.length != 4) {
-		stderr.printf("Usage: %s otu_table.txt mapping.txt column\nReitle the columns of the OTU table given the column name in mapping.txt.\n", args[0]);
+		stderr.printf("Usage: %s otu_table.tab mapping.txt column\nRetitle the columns of the OTU table given the column name in mapping.txt.\n", args[0]);
 		return 1;
 	}
 

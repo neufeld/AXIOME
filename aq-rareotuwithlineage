@@ -2,7 +2,7 @@
 
 if [ $# != 2 ]
 then
-	echo Usage: $0 rareified_otu_table.txt otu_table.txt
+	echo Usage: $0 rareified_otu_table.txt otu_table.tab
 	exit 1
 fi
 

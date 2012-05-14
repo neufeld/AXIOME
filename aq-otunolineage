@@ -2,7 +2,7 @@
 
 if [ $# != 2 ]
 then
-	echo $0 rep_set.fasta otu_table.txt 1>&2
+	echo $0 rep_set.fasta otu_table.tab 1>&2
 	exit 1
 fi
 

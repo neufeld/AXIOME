@@ -4,12 +4,12 @@
 aq-pretendsummarize \- Produce a non-summarized OTU table
 .SH SYNOPSIS
 .B aq-pretendsummarize
-.I otu_table.txt
+.I otu_table.tab
 .SH DESCRIPTION
 QIIME's beta diversity analysis requires a summarized OTU table but there are various reasons to want to plot the original OTUs. Since the formats between the original OTU table and the summarized OTU table are different, this command creates an OTU table in the summarized format, but with the original data.
 .SH OPTIONS
 .TP
-otu_table.txt
-The original, unsummarized OTU table.
+otu_table.tab
+The original, unsummarized OTU table. Must be in tab delimited format, not BIOM format.
 .SH SEE ALSO
 .BR autoqiime (1).

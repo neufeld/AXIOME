@@ -5,7 +5,7 @@ aq-otunolineage \- Replaces the linage with a unique ID
 .SH SYNOPSIS
 .B aq-otunolineage
 .I rep_set.fasta
-.I otu_table.txt
+.I otu_table.tab
 .SH DESCRIPTION
 Replace the consensus linage for each sequence with the OTU identifier and the representative sequence.
 .SH OPTIONS
@@ -13,7 +13,7 @@ Replace the consensus linage for each sequence with the OTU identifier and the r
 rep_set.fasta
 The representative sequence set in FASTA corresponding to the supplied OTU table.
 .TP
-otu_table.txt
-The OTU table to which to add the identifiers.
+otu_table.tab
+The OTU table to which to add the identifiers. Must be in tab delimited format, not BIOM format.
 .SH SEE ALSO
 .BR autoqiime (1).

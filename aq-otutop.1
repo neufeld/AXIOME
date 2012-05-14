@@ -5,7 +5,7 @@ aq-otutop \- Keep top n taxa from an OTU table
 .SH SYNOPSIS
 .B aq-otutop
 .I n
-.I otu_table.txt
+.I otu_table.tab
 .SH DESCRIPTION
 Sort the taxa in an OTU table by size across all samples and output a limited number of taxa, starting with the largest.
 .SH OPTIONS
@@ -13,7 +13,7 @@ Sort the taxa in an OTU table by size across all samples and output a limited nu
 n
 The number of OTUs to keep
 .TP
-otu_table.txt
-The OTU table.
+otu_table.tab
+The OTU table. Must be in tab delimited format, not BIOM format.
 .SH SEE ALSO
 .BR autoqiime (1).

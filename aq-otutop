@@ -2,7 +2,7 @@
 
 if [ $# -ne 2 ]
 then
-	echo Keep top n taxa from an OTU table: $0 n otu_table.txt
+	echo Keep top n taxa from an OTU table: $0 n otu_table.tab
 	exit 1
 fi
 

@@ -2,7 +2,7 @@ using Gee;
 
 int main(string[] args) {
 	if (args.length != 3) {
-		stderr.printf("Usage: %s seq.fasta_rep_set.fasta otu_table.txt\n", args[0]);
+		stderr.printf("Usage: %s seq.fasta_rep_set.fasta otu_table.tab\n", args[0]);
 		return 1;
 	}
 	stderr.printf("Opening FASTA...\n");
