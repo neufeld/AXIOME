@@ -452,7 +452,7 @@ namespace AutoQIIME {
 			}
 			//Declare a variable that has our version number in it for Make to use
 			if ( is_version_at_least(1,5) ) {
-				makefile.printf("QIIME_GREATER_THAN_1_5 = TRUE\n\n");
+				makefile.printf("\n\nQIIME_GREATER_THAN_1_5 = TRUE");
 			}
 			makefile.printf("\n\nall: Makefile mapping.txt otu_table.txt %s\n\n", targets.str);
 			makefile.printf("Makefile mapping.txt: %s\n\t@echo Updating analyses to be run...\n\t$(V)autoqiime $<\n\n", sourcefile);
