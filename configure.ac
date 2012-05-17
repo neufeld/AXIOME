@@ -78,6 +78,7 @@ AC_CONFIG_FILES([
 	autoqiime.deps
 	aq-nmf
 	aq-nmf-concordance
+	aq-duleg
 	aq-inst-cran
 	cover.ps
 	sample.aq
