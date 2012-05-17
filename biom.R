@@ -46,7 +46,7 @@ BIOM2table <- function(filename) {
 	#Set the column names to the names given in each sample's id field
 	samplenames <- NULL
 	for ( i in 1:numsamples ) {
-		samplenames <- c(samplenames, paste('X', json$columns[[i]]$id, sep=""))
+		samplenames <- c(samplenames, json$columns[[i]]$id)
 	}
 	colnames(data) <- samplenames
 
@@ -58,7 +58,9 @@ BIOM2table <- function(filename) {
 	rownames(data) <- otunames
 	
 	#Sort the data numerically, then return it transposed (so samples are the rows, OTUs the columns)
-	data <- t(data[,sort.int(colnames(data))])
+	data <- data[,order(as.integer(colnames(data)))]
+	#Add "X"'s to each of the sample IDs, because apparently we do that
+	colnames(data) <- paste("X", colnames(data), sep="")
 
-	return(data)
+	return(t(data))
 }
