@@ -132,9 +132,19 @@ otu_table_ordered_columns.txt: otu_table.txt
 	$(V)$(QIIME_PREFIX)aq-orderotu otu_table.txt > otu_table_ordered_columns.txt
 endif
 
+otu_table%.tab: otu_table%.txt
+	@echo Creating legacy OTU table...
+	$(V)$(QIIME_PREFIX)convert_biom.py -b -i $< -o $@ --header_key=taxonomy --output_metadata_id=Consensus\ Lineage
+
+ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
+otu_table_summarized_otu%.txt: otu_table%.tab
+	@echo Summarizing OTUs $*...
+	$(V)aq-pretendsummarize $< > $@
+else
 otu_table_summarized_otu%.txt: otu_table%.txt
 	@echo Summarizing OTUs $*...
 	$(V)aq-pretendsummarize $< > $@
+endif
 
 # Produce a rank-abundance plot
 ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
