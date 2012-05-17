@@ -12,7 +12,7 @@ nmf.method <- "brunet" # NMF method
 source("@prefix@/share/@PACKAGE@/nmf.R")
 
 print("Reading OTU table")
-otutable <- read.table("otu_table.txt", skip = 1, 
+otutable <- read.table("otu_table_ordered_columns.txt", skip = 1, 
 		comment.char = "", header = TRUE, row.names = 1, sep = "\t")
 kend <- ncol(otutable) - 1   # end rank
 print("Computing")
