@@ -2,6 +2,7 @@ usr/bin/aq-*
 usr/bin/autoqiime
 usr/share/autoqiime/primers.lst
 usr/share/autoqiime/nmf.R
+usr/share/autoqiime/biom.R
 usr/share/doc/autoqiime/*
 usr/share/man/man1/autoqiime.1
 usr/share/man/man1/aq-*.1

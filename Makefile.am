@@ -103,6 +103,7 @@ man1_MANS = \
 docdir = $(datadir)/doc/@PACKAGE@
 dist_pkgdata_DATA = \
 	nmf.R \
+	biom.R \
 	primers.lst \
 	aq-module.vala \
 	plugins/sample.vala \
