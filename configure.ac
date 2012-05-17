@@ -79,6 +79,7 @@ AC_CONFIG_FILES([
 	aq-nmf
 	aq-nmf-concordance
 	aq-duleg
+	aq-mrpp
 	aq-inst-cran
 	cover.ps
 	sample.aq

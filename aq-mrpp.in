@@ -1,6 +1,8 @@
 #!/usr/bin/env Rscript
 options(error = quote(dump.frames("mrpp-debug", TRUE)))
 
+source("@prefix@/share/@PACKAGE@/biom.R")
+
 pkgTest <- function(x)
 {
         if (!require(x,character.only = TRUE))
@@ -10,13 +12,26 @@ pkgTest <- function(x)
         }
 }
 
+#Pull in arguments
+args <- commandArgs(trailingOnly = TRUE)
+
+#Search within args for the biom flags
+isBiomFile <- TRUE %in% (c("-B","-b","--biom", "--BIOM") %in% args)
+
+#Clear out any flags from the command arguments
+args <-args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM") ]
+
 pkgTest("vegan")
 
+#Read in and format otu table
 print("Reading OTU table")
-rawtable <- read.table("otu_table_ordered_columns.txt", skip = 1, 
-		comment.char = "", header = TRUE, row.names = 1, sep = "\t")
-
-otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+if ( isBiomFile ) {
+        otutable <- BIOM2table("otu_table.txt")
+} else {
+        rawtable <- read.table("otu_table.txt", skip = 1,
+        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+}
 
 print("Reading mapping");
 mapping <- t(read.table("mapping.txt", header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t"))

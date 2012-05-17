@@ -217,8 +217,14 @@ nmf-concordance.pdf: otu_table_ordered_columns.txt
 	$(V)aq-nmf-concordance
 
 # MRPP
-mrpp.txt mrpp.pdf: otu_table_ordered_columns.txt mapping.txt
+ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
+mrpp.txt mrpp.pdf: otu_table.txt mapping.txt
+	@echo Computing Multi Response Permutation Procedure...
+	$(V)aq-mrpp -B
+else
+mrpp.txt mrpp.pdf: otu_table.txt mapping.txt
 	@echo Computing Multi Response Permutation Procedure...
 	$(V)aq-mrpp
-
+endif
+	
 .PHONY: all alpha
