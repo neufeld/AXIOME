@@ -21,6 +21,9 @@ aq-mkrepset
 aq-nmf
 aq-nmf-concordance
 aq-duleg
+aq-pcoa
+aq-pca
+aq-mrpp
 aq-otuwithseqs
 aq-otudulegmerge
 aq-qualhisto

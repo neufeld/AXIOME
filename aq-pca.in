@@ -1,8 +1,28 @@
 #!/usr/bin/env Rscript
 options(error = quote(dump.frames("pca-debug", TRUE)))
 
-print("Reading OTU table");
-otutable <- read.table("otu_table_ordered_columns.txt", skip = 1, comment.char = "", header = TRUE, row.names = 1, sep = "\t");
+source("@prefix@/share/@PACKAGE@/biom.R")
+
+#Pull in arguments
+args <- commandArgs(trailingOnly = TRUE)
+
+#Search within args for the biom flags
+isBiomFile <- TRUE %in% (c("-B","-b","--biom", "--BIOM") %in% args)
+
+#Clear out any flags from the command arguments
+args <-args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM") ]
+
+#Read in and format otu table
+print("Reading OTU table")
+if ( isBiomFile ) {
+        otutable <- BIOM2table("otu_table.txt")
+} else {
+        rawtable <- read.table("otu_table.txt", skip = 1,
+        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+				otutable <- otutable[order(as.integer(sub("X","", rownames(otutable)))),]
+}
+
 print("Reading mapping");
 mapping <- read.table("mapping.txt", header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t")
 print("Reading mapping extra");
@@ -24,7 +44,7 @@ newmapping <- t(mapping[,interest]);
 colnames(newmapping) <- paste("X", rownames(mapping), sep = "");
 rownames(newmapping) <- colnames(mapping)[interest];
 
-d <- rbind(otutable[,seq(1,ncol(otutable)-1)], newmapping);
+d <- rbind(t(otutable), newmapping);
 p <- prcomp(t(d), scale = TRUE);
 
 pdf("biplot.pdf");

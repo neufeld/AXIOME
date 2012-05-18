@@ -80,6 +80,8 @@ AC_CONFIG_FILES([
 	aq-nmf-concordance
 	aq-duleg
 	aq-mrpp
+	aq-pca
+	aq-pcoa
 	aq-inst-cran
 	cover.ps
 	sample.aq

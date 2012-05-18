@@ -207,9 +207,15 @@ chimeras%.uchime chimeras%.aln chimeras%.fasta: identities%.fasta
 	$(V)usearch --uchime $< --uchimeout chimeras$*.uchime --uchimealns chimeras$*.aln --chimeras chimeras$*.fasta $(UCHIMEFLAGS)
 
 # PCA with R
-biplot.pdf: mapping.txt otu_table_ordered_columns.txt headers.txt
+ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
+biplot.pdf: mapping.txt otu_table.txt headers.txt
+	@echo Making biplot...
+	$(V)aq-pca -B
+else
+biplot.pdf: mapping.txt otu_table.txt headers.txt
 	@echo Making biplot...
 	$(V)aq-pca
+endif
 
 # NMF Concordance
 nmf-concordance.pdf: otu_table_ordered_columns.txt

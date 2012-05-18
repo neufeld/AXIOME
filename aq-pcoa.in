@@ -1,7 +1,16 @@
 #!/usr/bin/env Rscript
+options(error = quote(dump.frames("pcoa-debug", TRUE)))
+
+source("@prefix@/share/@PACKAGE@/biom.R")
 
 #Pull in arguments
 args <- commandArgs(trailingOnly = TRUE)
+
+#Search within args for the biom flags
+isBiomFile <- TRUE %in% (c("-B","-b","--biom", "--BIOM") %in% args)
+
+#Clear out any flags from the command arguments
+args <-args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM") ]
 
 pkgTest <- function(x)
 {
@@ -28,10 +37,20 @@ if (is.na(dmethod)) {
 
 pkgTest("vegan")
 pkgTest("ape")
-options(error = quote(dump.frames("pca-debug", TRUE)))
 
-print("Reading OTU table");
-otutable <- read.table("otu_table_ordered_columns.txt", skip = 1, comment.char = "", header = TRUE, row.names = 1, sep = "\t");
+#Read in and format otu table
+print("Reading OTU table")
+if ( isBiomFile ) {
+        otutable <- BIOM2table("otu_table.txt")
+} else {
+        rawtable <- read.table("otu_table.txt", skip = 1,
+        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+				#Sort numerically the samples
+				otutable <- otutable[order(as.integer(sub("X","", rownames(otutable)))),]
+
+}
+
 print("Reading mapping");
 mapping <- read.table("mapping.txt", header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t")
 print("Reading mapping extra");
@@ -53,8 +72,7 @@ newmapping <- t(mapping[,interest]);
 colnames(newmapping) <- paste("X", rownames(mapping), sep = "");
 rownames(newmapping) <- colnames(mapping)[interest];
 
-cvar <- otutable[,seq(1,ncol(otutable)-1)];
-d <- vegdist(t(cvar), method=dmethod);
+d <- vegdist(otutable, method=dmethod);
 pdf(paste("pcoa-",dmethod,"-biplot.pdf",sep=""));
 
 print("Making MDS Plot");
