@@ -9,6 +9,16 @@ K <- as.numeric(tail(commandArgs(trailingOnly = TRUE),1))
 nloop <- 100
 
 source("@prefix@/share/@PACKAGE@/nmf.R")
+source("@prefix@/share/@PACKAGE@/biom.R")
+
+#Pull in arguments
+args <- commandArgs(trailingOnly = TRUE)
+
+#Search within args for the biom flags
+isBiomFile <- TRUE %in% (c("-B","-b","--biom", "--BIOM") %in% args)
+
+#Clear out any flags from the command arguments
+args <-args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM") ]
 
 # Similarity threshold
 simiv <- 0.8
@@ -18,14 +28,23 @@ if (is.na(K) || K < 2 || K > 20) {
 	q("no", status = 1, runLast = FALSE)
 	
 }
+
+#Read in and format otu table
 print("Reading OTU table")
-otutable <- read.table("otu_table_ordered_columns.txt", skip = 1, 
-		comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+if ( isBiomFile ) {
+        otutable <- BIOM2table("otu_table.txt")
+} else {
+        rawtable <- read.table("otu_table.txt", skip = 1,
+        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+}
+
 print("Reading mapping extra");
 extra <- read.table("mapping.extra", header = TRUE,
     comment.char = "", row.names = "X.SampleID", sep = "\t")
+
 # Create a normalised matrix
-Z <- apply(otutable[, 1:(ncol(otutable) - 1)], 2, function(x) { x/sum(x) })
+Z <- apply(as.matrix(t(otutable)), 2, function(x) { x/sum(x) })
 print("Factoring...")
 best <- BestKLDiver(Z, K, nloop, nmf.method = "brunet", r.nmf = FALSE, difcon = 1e-12, ifseed = TRUE)
 K <- nrow(best$Hmatrix)

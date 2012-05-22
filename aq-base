@@ -122,16 +122,6 @@ otu_table.txt: picked_otus/seq_otus.txt rdp_assigned_taxonomy/seq.fasta_rep_set_
 	@echo Making OTU table...
 	$(V)$(QIIME_PREFIX)make_otu_table.py -i picked_otus/seq_otus.txt -t rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt -o otu_table.txt
 
-ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
-otu_table_ordered_columns.txt: otu_table.tab
-	@echo Creating OTU table with numerically ordered columns...
-	$(V)$(QIIME_PREFIX)aq-orderotu otu_table.tab > otu_table_ordered_columns.txt
-else
-otu_table_ordered_columns.txt: otu_table.txt
-	@echo Creating OTU table with numerically ordered columns...
-	$(V)$(QIIME_PREFIX)aq-orderotu otu_table.txt > otu_table_ordered_columns.txt
-endif
-
 otu_table%.tab: otu_table%.txt
 	@echo Creating legacy OTU table...
 	$(V)$(QIIME_PREFIX)convert_biom.py -b -i $< -o $@ --header_key=taxonomy --output_metadata_id=Consensus\ Lineage
@@ -218,9 +208,15 @@ biplot.pdf: mapping.txt otu_table.txt headers.txt
 endif
 
 # NMF Concordance
+ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
+nmf-concordance.pdf: otu_table_ordered_columns.txt
+	@echo Making concordance plot...
+	$(V)aq-nmf-concordance -B
+else
 nmf-concordance.pdf: otu_table_ordered_columns.txt
 	@echo Making concordance plot...
 	$(V)aq-nmf-concordance
+endif
 
 # MRPP
 ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)

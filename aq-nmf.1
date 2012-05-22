@@ -3,17 +3,20 @@
 .SH NAME 
 aq-nmf \- Perform non-negative matrix factorization in R
 .SH SYNOPSIS
-.B aq-nmf
+.B aq-nmf [-B]
 .I degree
 .SH DESCRIPTION
 Perform a non-negative matrix factorization using R. Non-negative matrix factorization is a technique to reduce high-dimensional data in fewer dimensions by construction bases with non-negative contributions to explain the data. Conceptually, this is similar to principal component analysis, as done with Unifrac or
 .BR aq-pca (1).
 However, in the case of PCA, the contribution of a particular OTU to a component can be negative, which is difficult, conceptually. In NMF, each OTU can only contribute positively (or not at all) to a basis, making for a more intuitive result. Moreover, it is easier to define which OTUs contribute to a basis.
 
-To operatore correctly, NMF analysis must know the number of bases needed to explain the data, that is the degree. The program
+To operate correctly, NMF analysis must know the number of bases needed to explain the data, that is the degree. The program
 .BR aq-nmf-concordance (1)
-will produce a plot to allow selection of the degrees to try. For each the degree specified, the file \fBbasis_taxa_\fIdegree\fB_\fIk\fB.txt\fR will be created where \fIk\fR will range from 1 to \fIdegree\fR.
+will produce a plot to allow selection of the degrees to try. For each the degree specified, the file \fBbasis_taxa_\fIdegree\fB_\fIk\fB.txt\fR will be created where \fIk\fR will range from 1 to \fIdegree\fR. Users of QIIME version 1.5.0 or greater must use the -B flag to specify the OTU table is in BIOM format.
 .SH OPTIONS
+.TP
+-B
+Use if using QIIME version 1.5.0 or higher. Specifies that the otu_table.txt file is in BIOM format.
 .TP
 degree
 The degree used for the factorization. This will be the number of bases in the analysis. To determine the degrees to use, use

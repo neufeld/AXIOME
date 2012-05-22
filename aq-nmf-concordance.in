@@ -10,13 +10,30 @@ nloop <- 100  # runs for each rank
 nmf.method <- "brunet" # NMF method
 
 source("@prefix@/share/@PACKAGE@/nmf.R")
+source("@prefix@/share/@PACKAGE@/biom.R")
 
+#Pull in arguments
+args <- commandArgs(trailingOnly = TRUE)
+
+#Search within args for the biom flags
+isBiomFile <- TRUE %in% (c("-B","-b","--biom", "--BIOM") %in% args)
+
+#Clear out any flags from the command arguments
+args <-args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM") ]
+
+#Read in and format otu table
 print("Reading OTU table")
-otutable <- read.table("otu_table_ordered_columns.txt", skip = 1, 
-		comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+if ( isBiomFile ) {
+        otutable <- BIOM2table("otu_table.txt")
+} else {
+        rawtable <- read.table("otu_table.txt", skip = 1,
+        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+}
+
 kend <- ncol(otutable) - 1   # end rank
 print("Computing")
-z <- apply(as.matrix(otutable[, 1:(ncol(otutable) - 1)]), 2, function(x) { x/sum(x) })
+z <- apply(as.matrix(t(otutable)), 2, function(x) { x/sum(x) })
 ad <- ConsensusFuzzyH(z, nmf.method = nmf.method, Rnmf = FALSE, kstart, kend, nloop, method = "square", ifseed = FALSE)
 
 print("Plotting")
