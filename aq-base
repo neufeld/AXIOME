@@ -209,11 +209,11 @@ endif
 
 # NMF Concordance
 ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
-nmf-concordance.pdf: otu_table_ordered_columns.txt
+nmf-concordance.pdf: otu_table.txt
 	@echo Making concordance plot...
 	$(V)aq-nmf-concordance -B
 else
-nmf-concordance.pdf: otu_table_ordered_columns.txt
+nmf-concordance.pdf: otu_table.txt
 	@echo Making concordance plot...
 	$(V)aq-nmf-concordance
 endif
