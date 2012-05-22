@@ -321,6 +321,7 @@ namespace AutoQIIME {
 		int sequence_preparations;
 		string sourcefile;
 		internal string? otu_method;
+		internal string? clust_ident;
 		internal AlignMethod alignmethod;
 		/**
 		 * The defined variables and their types.
@@ -467,6 +468,9 @@ namespace AutoQIIME {
 			}
 			if (otu_method != null) {
 				makefile.printf("OTU_PICKING_METHOD = %s\n", otu_method);
+			}
+			if (clust_ident != null) {
+				makefile.printf("CLUSTER_IDENT = %s\n", clust_ident);
 			}
 			if (verbose) {
 				makefile.printf("V = \n");
@@ -950,6 +954,15 @@ namespace AutoQIIME {
 		var max_version = version(0, 0);
 
 		if (is_root) {
+			var clust_ident = root->get_prop("cluster-identity");
+			if (clust_ident != null) {
+				double ident_val = double.parse(clust_ident);
+				if (ident_val >= 1 || ident_val <= 0) {
+					stderr.printf("%s: Clustering identity must be between 0 and 1. Identity given: \"%s\".\n", filename, clust_ident);
+					return false;
+				}
+				output.clust_ident = clust_ident;
+			}
 			var method = root->get_prop("otu-method");
 			if (method != null) {
 				switch (method.down()) {

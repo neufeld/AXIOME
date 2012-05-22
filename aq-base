@@ -13,6 +13,7 @@ alpha_div/alpha_rarefaction_plots/rarefaction_plots.html: otu_table.txt mapping.
 	$(V)$(QIIME_PREFIX)alpha_rarefaction.py -i otu_table.txt -m mapping.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div
 
 OTU_PICKING_METHOD ?= cdhit
+CLUSTER_IDENT ?= 0.97
 ALIGN_METHOD ?= infernal
 BLASTDB_NAME ?= "Unknown 16S Database"
 V ?= @
@@ -25,7 +26,7 @@ sorted.fasta: seq.fasta
 
 seq.uc: sorted.fasta
 	@echo Picking OTUs using uclust without QIIME...
-	$(V)uclust --id 0.97 --input sorted.fasta --uc seq.uc
+	$(V)uclust --id $(CLUSTER_IDENT) --input sorted.fasta --uc seq.uc
 
 picked_otus/seq_otus.txt: seq.uc
 	@test -d picked_otus || mkdir -p picked_otus
@@ -35,7 +36,7 @@ ifeq ($(OTU_PICKING_METHOD),raw-cdhit)
 picked_otus/cd-hit-out.clstr: seq.fasta
 	@echo Generating cluster file using cdhit...
 	@test -d picked_otus || mkdir -p picked_otus
-	$(V)cd-hit-est -i seq.fasta -o picked_otus/cd-hit-out -c 0.97 -B 1 > picked_otus/cd-hit.output 2>&1
+	$(V)cd-hit-est -i seq.fasta -o picked_otus/cd-hit-out -c $(CLUSTER_IDENT) -B 1 > picked_otus/cd-hit.output 2>&1
 
 picked_otus/seq_otus.txt: picked_otus/cd-hit-out.clstr
 	@echo Converting cdhit cluster file to proper format...
@@ -44,7 +45,7 @@ else
 picked_otus/seq_otus.txt: seq.fasta
 	@echo Picking OTUs using QIIME and $(OTU_PICKING_METHOD)...
 	@test ! -d picked_otus || rm -r picked_otus
-	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -m $(OTU_PICKING_METHOD) -o picked_otus -M 4096
+	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -s $(CLUSTER_IDENT) -m $(OTU_PICKING_METHOD) -o picked_otus -M 4096
 endif
 endif
 
