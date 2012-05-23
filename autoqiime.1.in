@@ -15,7 +15,7 @@ and additional R packages may need to be installed from CRAN. This can be done u
 input.aq
 The input XML configuration file.
 .SH WORKFLOW
-Normally, one creates a input file with a \fB.aq\fR extension. After running AutoQIIME, a directory with a \fB.qiime\fR extension will be created with \fBMakefile\fR, \fBmapping.txt\fR, \fBmapping.extra\fR and possibly others depending on the analyses selected. In this directory, invoking \fBmake\fR will analysis. Normally, each analysis is done in the order specified in the original file, but this can be overriden by invoking \fBmake \fItarget\fR where \fItarget\fR is the output file desired (e.g., \fBotu_table.txt\fR).
+Normally, one creates a input file with a \fB.aq\fR extension. After running AutoQIIME, a directory with a \fB.qiime\fR extension will be created with \fBMakefile\fR, \fBmapping.txt\fR, \fBmapping.extra\fR and possibly others depending on the analyses selected. In this directory, invoking \fBmake\fR will start the analyses. Normally, each analysis is done in the order specified in the original file, but this can be overriden by invoking \fBmake \fItarget\fR where \fItarget\fR is the output file desired (e.g., \fBotu_table.txt\fR).
 
 If \fBmake\fR is interrupted, invoking it again will continue, repeating only the last command. Furthermore, if input files are changed, \fBmake\fR will attempt to return the minimum number of commands needed to update the analysis. Sometimes, this does not work as expected and deleting \fBseq.fasta\fR will guarantee all files will be rebuilt.
 .SH CONFIGURATION FILE
@@ -75,7 +75,7 @@ Since read files are often multiplexed, multiple samples can be specified. For e
 Do a basic alpha diversity analysis (i.e., QIIME's Chao1 curves).
 .TP
 \fB<beta \fR[\fBlevel="\fIlevel\fB"\fR]\fB \fR[\fBsize="\fIsize\fB"\fR]\fB \fR[\fBtaxa="\fIdepth\fB"\fR]\fB \fR[\fBbackground="\fIcolour\fB"\fR]\fB/>\fR
-Do a QIIME beta diversity analysis and produce biplots and bubble plots. QIIME normally uses summarised taxa for the plots, so the taxonomic level can be specified; if it is omitted, OTUs are used instead. The library may be rarefied to a particular by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect. Specifying \fItaxa\fR can limit the number of taxa the appear in the biplot; the default is 10 and \fBall\fR can specified if desired. The background colour can also be specified using the \fBbackground\fR attribute. The colour is interpreted by QIIME. The default is \fBwhite\fR, despite \fBblack\fR seeming to be the popular choice.
+Do a QIIME beta diversity analysis and produce biplots and bubble plots. QIIME normally uses summarised taxa for the plots, so the taxonomic level can be specified; if it is omitted, OTUs are used instead. The library may be rarefied to a particular size by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect. Specifying \fItaxa\fR can limit the number of taxa that appear in the biplot; the default is 10 and \fBall\fR can be specified if desired. The background colour can also be specified using the \fBbackground\fR attribute. The colour is interpreted by QIIME. The default is \fBwhite\fR, despite \fBblack\fR seeming to be the popular choice.
 .TP
 \fB<blast \fR[\fBtitle="\fItitle\fB"\fR]\fB/>\fR
 Build a BLAST database over the sequences. This requires
@@ -96,7 +96,7 @@ Compute Multi Response Permutation Procedure of within- versus among-group dissi
 .BR aq-mrpp (1).
 .TP
 \fB<nmf-concordance/>\fR
-Create a concordance plot for non-negative matrix factorization. The actual NMF analysis, described below, requires a degree and a concordance plot is needed which will show the suitability of a particular degree for the data. The degrees that appear as local minima in the concordance plot are suitable to try for NMF analysis. See
+Create a concordance plot for non-negative matrix factorization. The actual NMF analysis, described below, requires a degree and a concordance plot will show the suitability of a particular degree for the data. The degrees that appear as local minima in the concordance plot are suitable to try for NMF analysis. See
 .BR aq-nmf-concordance (1)
 for more information.
 .TP
@@ -124,7 +124,7 @@ Do chimera checking with UCHIME. Since the parameters vary based on the type of 
 \fB<unifrac-mrpp \fR[\fBlevel="\fIlevel\fB"\fR]\fB/>\fR
 Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities in R. For more information, see
 .BR aq-mrpp-unifrac (1).
-The library may be rarefied to a particular by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect.
+The library may be rarefied to a particular size by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect.
 .TP
 \fB<withseqs/>\fR
 Produce an OTU table with the representatives sequences in a final column.
