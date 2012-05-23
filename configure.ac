@@ -8,7 +8,7 @@ AM_MAINTAINER_MODE
 
 AM_SILENT_RULES([yes])
 
-R_PKGS="gplots vegan labdsv"
+R_PKGS="gplots vegan labdsv rjson ape"
 AC_SUBST(R_PKGS)
 
 # Checks for programs.

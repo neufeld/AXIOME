@@ -22,6 +22,7 @@ To run AutoQIIME, you'll additionally need:
 	QIIME 1.3+ <http://qiime.org/>
 	R
 	GNU make <http://www.gnu.org/software/make/>
+	Gawk
 
 Some functions require:
 	PANDAseq <http://github.com/neufeld/pandaseq>
@@ -29,6 +30,8 @@ Some functions require:
 
 You will need to install several R packages which are dependencies. This can be done by calling:
 	aq-inst-cran
+
+NOTE: You will need to have a default CRAN mirror set in your Rprofile.site file for the aq-inst-cran script to work.
 
 And then you should read sample.aq and man autoqiime
 
