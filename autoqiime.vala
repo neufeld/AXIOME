@@ -344,7 +344,7 @@ namespace AutoQIIME {
 			makerules = new StringBuilder();
 			samples = new ArrayList<Sample>();
 			seqrule = new StringBuilder();
-			seqrule.printf("\t@echo Building sequence set...\n\t@test ! -f seq.fasta || rm seq.fasta\n");
+			seqrule.printf("\t@echo Building sequence set...\n\t@test -d logs || mkdir logs\n\t@test ! -f seq.fasta || rm seq.fasta\n");
 			seqsources = new StringBuilder();
 			pcoa = new HashSet<string>();
 			rareified = new HashSet<int>();
@@ -605,7 +605,7 @@ namespace AutoQIIME {
 				awkcheck.append_printf(" if (count%d == 0) { print \"Library defined in %s:%d contributed no sequences. This is probably not what you want.\" > \"/dev/stderr\"; exit 1; } else { ", sample.id, sample.xml-> doc-> url, sample.xml-> line);
 				awkcheck.append_printf("print \"%d\\t%s\\t\" count%d >> \"sample_reads_temp.log\" }", sample.id, sample.tag, sample.id);
 			}
-			seqrule.append_printf("\t$(V)(%s | awk '/^>/ { if (seq) {%s } name = substr($$0, 2); seq = \"\"; } $$0 !~ /^>/ { seq = seq $$0; } END { if (seq) {%s }%s }' >> seq.fasta) 2>&1 | bzip2 > seq_%d.log.bz2\n\n", prep, awkprint.str, awkprint.str, awkcheck.str, sequence_preparations++);
+			seqrule.append_printf("\t$(V)(%s | awk '/^>/ { if (seq) {%s } name = substr($$0, 2); seq = \"\"; } $$0 !~ /^>/ { seq = seq $$0; } END { if (seq) {%s }%s }' >> seq.fasta) 2>&1 | bzip2 > logs/seq_%d.log.bz2\n\n", prep, awkprint.str, awkprint.str, awkcheck.str, sequence_preparations++);
 		}
 		/**
 		 * Include and process another parsed XML document.

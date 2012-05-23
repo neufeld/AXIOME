@@ -88,9 +88,9 @@ class AutoQIIME.Sources.PandaSource : BaseSource {
 		if (convert) {
 			var oldforward = forward;
 			var oldreverse = reverse;
-			forward = "converted%x_1.fastq.bz2".printf(oldforward.hash());
-			reverse = "converted%x_2.fastq.bz2".printf(oldreverse.hash());
-			output.add_rule(@"$(forward): $(oldforward)\n\t@echo Coverting Illumina 1.3 file $(forward)...\n\t$$(V)$(FileCompression.for_file(oldforward).get_cat()) $(oldforward) | aq-oldillumina2fastq > $(forward)\n\n$(reverse): $(oldreverse)\n\t@echo Coverting Illumina 1.3 file $(forward)...\n\t$$(V)$(FileCompression.for_file(oldreverse).get_cat()) $(oldreverse) | aq-oldillumina2fastq > $(reverse)\n\n");
+			forward = "pandaseq/converted%x_1.fastq.bz2".printf(oldforward.hash());
+			reverse = "pandaseq/converted%x_2.fastq.bz2".printf(oldreverse.hash());
+			output.add_rule(@"$(forward): $(oldforward)\n\t@echo Coverting Illumina 1.3 file $(forward)...\n\t@test -d pandaseq || mkdir pandaseq\n\t$$(V)$(FileCompression.for_file(oldforward).get_cat()) $(oldforward) | aq-oldillumina2fastq > $(forward)\n\n$(reverse): $(oldreverse)\n\t@echo Coverting Illumina 1.3 file $(forward)...\n\t$$(V)$(FileCompression.for_file(oldreverse).get_cat()) $(oldreverse) | aq-oldillumina2fastq > $(reverse)\n\n");
 			domagic = false;
 			dashj = true;
 		}

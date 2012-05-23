@@ -21,14 +21,14 @@ class AutoQIIME.Analyses.BlastDatabase : RuleProcessor {
 	}
 	public override bool process(Xml.Node *definition, Output output) {
 
-		output.add_target("nr.nhr");
-		output.add_target("nr.nin");
-		output.add_target("nr.nsq");
-		output.add_target("r.nhr");
-		output.add_target("r.nin");
-		output.add_target("r.nsq");
-		output.add_target("blast");
-		output.add_rulef("blast: Makefile\n\t@echo Producing BLAST script...\n\t@echo '#!/bin/sh' > blast\n\t@echo blastall -p blastn -d \\'%s/nr\\' '\"$$@\"' >> blast\n\t@chmod a+x blast\n\n", Shell.quote(realpath(output.dirname)));
+		output.add_target("blastdbs/nr.nhr");
+		output.add_target("blastdbs/nr.nin");
+		output.add_target("blastdbs/nr.nsq");
+		output.add_target("blastdbs/r.nhr");
+		output.add_target("blastdbs/r.nin");
+		output.add_target("blastdbs/r.nsq");
+		output.add_target("blastdbs/blast");
+		output.add_rulef("blastdbs/blast: Makefile\n\t@echo Producing BLAST script...\n\t@test -d blastdbs || mkdir blastdbs\n\t@echo '#!/bin/sh' > blastdbs/blast\n\t@echo blastall -p blastn -d \\'%s/nr\\' '\"$$@\"' >> blastdbs/blast\n\t@chmod a+x blastdbs/blast\n\n", Shell.quote(realpath(output.dirname)));
 		var title = definition->get_prop("title");
 		if (title == null) {
 			var name = Path.get_basename(output.dirname);

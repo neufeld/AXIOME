@@ -61,8 +61,9 @@ V.m <- c(1:ncol(best$Hmatrix))
 lim <- 0.001
 Spe <- spectreorder(best$Hmatrix, L = 2, beta = c(0.001, 0.2), lim = lim)
 print("Writing basis taxa")
+dir.create("nmf", FALSE)
 for (k in 1:K) {
-	pfam.file <- file(paste("basis_taxa_", K, "_", k, ".txt", sep = ""), "w")
+	pfam.file <- file(paste("nmf/basis_taxa_", K, "_", k, ".txt", sep = ""), "w")
 		ix <- write.taxa.list(X = An, P = P, H = H, spw1 = spw1, 
 				labelnames = labelname, taxaid = otutable[, ncol(otutable)], pfams = otutable[, ncol(otutable)], 
 				ixv = Spe$V, k, pfam.file = pfam.file, 
@@ -73,7 +74,7 @@ for (k in 1:K) {
 		#lix0 = lix0 + lix
 		close(pfam.file)
 }
-pdf(paste("nmf_", K, ".pdf", sep = ""))
+pdf(paste("nmf/nmf_", K, ".pdf", sep = ""))
 nmfplot(Spe$HTH, extra[Spe$V, "Description"], extra[Spe$V, "Description"], cexaxis = 0.8)
 nmfplot(Spe$HTH, extra[Spe$V, "Description"], extra[Spe$V, "Description"], cexaxis = 0.8, cexayis = 0.5)
 nmfplot.h(best$Hmatrix[, Spe$V], taxa = paste("Basis taxa", 1:K), samples = extra[Spe$V, "Description"])

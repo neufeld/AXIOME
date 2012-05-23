@@ -105,13 +105,17 @@ rank_abundance/rank_abundance.pdf: otu_table.txt
 endif
 
 # Produce a BLAST database
-nr.nhr nr.nin nr.nsq: seq.fasta_rep_set.fasta
+blastdbs/nr.nhr blastdbs/nr.nin blastdbs/nr.nsq: seq.fasta_rep_set.fasta
 	@echo Creaing non-redundant BLAST database...
+	@test -d blastdbs || mkdir blastdbs
 	$(V)formatdb -i seq.fasta_rep_set.fasta -n nr -p F -t $(BLASTDB_NAME)" Non-Redundant"
+	$(V)mv nr.* blastdbs
 
-r.nhr r.nin r.nsq: seq.fasta
+blastdbs/r.nhr blastdbs/r.nin blastdbs/r.nsq: seq.fasta
 	@echo Creaing redundant BLAST database...
+	@test -d blastdbs || mkdir blastdbs
 	$(V)formatdb -i seq.fasta -n r -p F -t $(BLASTDB_NAME)
+	$(V)mv r.* blastdbs
 
 # Decorate OTU table with representative sequences
 ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
@@ -152,11 +156,11 @@ chimeras/chimeras%.uchime chimeras/himeras%.aln chimeras/chimeras%.fasta: chimer
 
 # PCA with R
 ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
-biplot.pdf: mapping.txt otu_table.txt headers.txt
+pca-biplot.pdf: mapping.txt otu_table.txt headers.txt
 	@echo Making biplot...
 	$(V)aq-pca -B
 else
-biplot.pdf: mapping.txt otu_table.txt headers.txt
+pca-biplot.pdf: mapping.txt otu_table.txt headers.txt
 	@echo Making biplot...
 	$(V)aq-pca
 endif

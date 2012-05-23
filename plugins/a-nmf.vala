@@ -50,11 +50,11 @@ class AutoQIIME.Analyses.NonnegativeMatrixFactorization : RuleProcessor {
 			definition_error(definition, "The degree \"%s\" is not resonable for NMF.\n", definition-> get_prop("degree"));
 			return false;
 		}
-		output.add_target("nmf_%d.pdf".printf(degree));
+		output.add_target("nmf/nmf_%d.pdf".printf(degree));
 		if ( is_version_at_least(1,5) ) {
-			output.add_rulef("nmf_%d.pdf: otu_table.txt mapping.extra\n\t@echo Computing NMF for degree %d...\n\t$(V)aq-nmf -B %d\n\n", degree, degree, degree);
+			output.add_rulef("nmf/nmf_%d.pdf: otu_table.txt mapping.extra\n\t@echo Computing NMF for degree %d...\n\t$(V)aq-nmf -B %d\n\n", degree, degree, degree);
 		} else  {
-			output.add_rulef("nmf_%d.pdf: otu_table.txt mapping.extra\n\t@echo Computing NMF for degree %d...\n\t$(V)aq-nmf %d\n\n", degree, degree, degree);
+			output.add_rulef("nmf/nmf_%d.pdf: otu_table.txt mapping.extra\n\t@echo Computing NMF for degree %d...\n\t$(V)aq-nmf %d\n\n", degree, degree, degree);
 		}
 	return true;
 	}

@@ -47,7 +47,7 @@ rownames(newmapping) <- colnames(mapping)[interest];
 d <- rbind(t(otutable), newmapping);
 p <- prcomp(t(d), scale = TRUE);
 
-pdf("biplot.pdf");
+pdf("pca-biplot.pdf");
 
 print("Making Scree plot");
 plot(p);
