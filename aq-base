@@ -125,29 +125,30 @@ otu_table_with_sequences.txt: seq.fasta_rep_set.fasta otu_table.txt
 endif
 
 # Do chimera checking with UCHIME
-sorted%.fasta: seq%.fasta
+chimeras/sorted%.fasta: chimeras/seq%.fasta
 	@echo Sorting sequences in library $*...
-	$(V)uclust --mergesort $< --output $@
+	$(V)uclust --quiet --mergesort $< --output $@
 
-seq%.fasta: seq.fasta
+chimeras/seq%.fasta: seq.fasta
 	@echo Splitting out library $*...
+	@test -d chimeras || mkdir chimeras
 	$(V)awk '/^>/ { if (name) { print name "\n" seq; } if ($$0 ~ /$*_/) { name = $$0; } else { name = ""; } seq = ""; } $$0 !~ /^>/ { seq = seq $$0; } END { if (name) { print name "\n" seq; } }' $< > $@
 
-identities%.uc: sorted%.fasta
+chimeras/identities%.uc: chimeras/sorted%.fasta
 	@echo Compacting sequences in library $*...
-	$(V)uclust --input $< --uc $@ --id 1
+	$(V)uclust --quiet --input $< --uc $@ --id 1
 
-identities%.awk: identities%.uc
+chimeras/identities%.awk: chimeras/identities%.uc
 	@echo Preparing chimeric sequence selector for library $*....
 	$(V)awk 'END {print "$$0 !~ /^>/"} $$1 == "C" {print "/^>"$$2"\\|/ { print \">"$$2";size="$$3"\"; }" }' $< > $@
 
-identities%.fasta: identities%.uc sorted%.fasta identities%.awk
+chimeras/identities%.fasta: chimeras/identities%.uc chimeras/sorted%.fasta chimeras/identities%.awk
 	@echo Selection chimeric sequence for library $*....
-	$(V)uclust --uc2fasta $< --input sorted$*.fasta --output /dev/stdout | awk -f identities$*.awk > $@
+	$(V)uclust --uc2fasta $< --input chimeras/sorted$*.fasta --output /dev/stdout --quiet | awk -f chimeras/identities$*.awk > $@
 
-chimeras%.uchime chimeras%.aln chimeras%.fasta: identities%.fasta
+chimeras/chimeras%.uchime chimeras/himeras%.aln chimeras/chimeras%.fasta: chimeras/identities%.fasta
 	@echo Checking for chimeric sequences in library $*...
-	$(V)usearch --uchime $< --uchimeout chimeras$*.uchime --uchimealns chimeras$*.aln --chimeras chimeras$*.fasta $(UCHIMEFLAGS)
+	$(V)usearch --uchime $< --uchimeout chimeras/chimeras$*.uchime --uchimealns chimeras/chimeras$*.aln --chimeras chimeras/chimeras$*.fasta --quiet $(UCHIMEFLAGS)
 
 # PCA with R
 ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)

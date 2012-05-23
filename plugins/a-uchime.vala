@@ -33,7 +33,7 @@ class AutoQIIME.Analyses.UchimeCheck : RuleProcessor {
 			}
 		}
 		foreach (var sample in output.known_samples) {
-			output.add_target("chimeras%d.uchime".printf(sample.id));
+			output.add_target("chimeras/chimeras%d.uchime".printf(sample.id));
 		}
 		return true;
 	}
