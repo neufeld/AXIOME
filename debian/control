@@ -2,7 +2,7 @@ Source: autoqiime
 Section: science
 Priority: extra
 Maintainer: Andre Masella <andre@masella.name>
-Build-Depends: debhelper (>= 7.0.50~), autotools-dev, valac (>= 0.14), libgee-dev, libmagic-dev, zlib1g-dev, libbz2-dev, libxml2-dev
+Build-Depends: debhelper (>= 7.0.50~), autotools-dev, valac (>= 0.14) | valac-0.14 | valac-0.16 | valac-0.18, libgee-dev, libmagic-dev, zlib1g-dev, libbz2-dev, libxml2-dev
 Standards-Version: 3.9.1
 Homepage: http://github.com/neufeld/qiimetools
 
