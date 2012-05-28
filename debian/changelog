@@ -1,4 +1,4 @@
-autoqiime (1.5~ppa0) oneiric; urgency=low
+autoqiime (1.5~ppa1) natty; urgency=low
 
   * Added PCoA biplot program
   * Made compatible with QIIME 1.5.0
