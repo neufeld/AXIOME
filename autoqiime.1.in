@@ -1,5 +1,5 @@
 .\" Authors: Andre Masella, Michael Hall
-.TH autoqiime 1 "May 2012" "1.3" "USER COMMANDS"
+.TH autoqiime 1 "May 2012" "1.5" "USER COMMANDS"
 .SH NAME
 autoqiime \- Automation toolkit for QIIME
 .SH SYNOPSIS

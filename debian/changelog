@@ -1,3 +1,18 @@
+autoqiime (1.5~ppa0) oneiric; urgency=low
+
+  * Added PCoA biplot program
+  * Made compatible with QIIME 1.5.0
+  * R scripts now natively use BIOM formatted OTU tables
+  * Added new rjson R library dependency
+  * Added biom.R file to work with BIOM files in R
+  * DuLeg analysis now accepts a p-value cut-off argument
+  * DuLeg analysis creates a .tab file which better summarizes the results
+  * Added clustering-identity attribute to autoqiime tag to set similarity value
+  * Fixed major bug with aq-pca where the wrong labels were being used
+  * Added sample_reads.log file which tracks sample sequence contribution stats
+
+ -- Michael Hall <mwhall@uwaterloo.ca>  Fri, 25 May 2012 00:29:21 -0400
+
 autoqiime (1.4~ppa0) natty; urgency=low
 
   * Put DuLeg stats into many files
