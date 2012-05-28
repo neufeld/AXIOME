@@ -101,7 +101,7 @@ class AutoQIIME.Sources.PandaSource : BaseSource {
 
 		output.add_sequence_source(forward);
 		output.add_sequence_source(reverse);
-		command.append_printf("pandaseq -N -f %s -r %s", Shell.quote(forward), Shell.quote(reverse));
+		command.append_printf("pandaseq $(PANDA_FLAGS) -N -f %s -r %s", Shell.quote(forward), Shell.quote(reverse));
 
 		if (dashj) {
 			command.append_printf(" -j");

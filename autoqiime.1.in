@@ -135,6 +135,11 @@ Prefix before QIIME commands, used for special installations such as MacQIIME or
 .TP
 INFERNAL_MODEL
 Full path to the alignment Infernal model, usually \fBseed.16s.reference_model.sto\fR.
+.TP
+PANDA_FLAGS
+Extra command line arguments for
+.BR pandaseq (1).
+This is where \fB-T\fR should be specified if desired.
 .SH SEE ALSO
 \fB@prefix@/share/doc/@PACKAGE@/sample.aq\fR,
 \fB@prefix@/share/@PACKAGE@/primers.lst\fR,
