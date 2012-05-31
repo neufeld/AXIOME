@@ -321,6 +321,7 @@ namespace AutoQIIME {
 		int sequence_preparations;
 		string sourcefile;
 		internal string? otu_method;
+		internal string? phylo_method;
 		internal string? clust_ident;
 		internal AlignMethod alignmethod;
 		/**
@@ -468,6 +469,9 @@ namespace AutoQIIME {
 			}
 			if (otu_method != null) {
 				makefile.printf("OTU_PICKING_METHOD = %s\n", otu_method);
+			}
+			if (phylo_method != null) {
+				makefile.printf("PHYLO_METHOD = %s\n", phylo_method);
 			}
 			if (clust_ident != null) {
 				makefile.printf("CLUSTER_IDENT = %s\n", clust_ident);
@@ -954,6 +958,48 @@ namespace AutoQIIME {
 		var max_version = version(0, 0);
 
 		if (is_root) {
+			var phylo_method = root->get_prop("phylogeny-method");
+			if (phylo_method != null) {
+				switch (phylo_method.down()) {
+					case "raw-fasttree":
+					case "rawfasttree":
+						output.phylo_method = "raw-fasttree";
+						break;
+					case "fasttree":
+					case "fast-tree":
+						output.phylo_method = "fasttree";
+						break;
+					case "clearcut":
+					case "clear-cut":
+						output.phylo_method = "clearcut";
+						break;
+					case "clustalw":
+					case "clustal":
+					case "clust":
+						output.phylo_method = "clustalw";
+						break;
+					case "fasttree_v1":
+					case "fasttreev1":
+					case "fast-tree_v1":
+					case "fast-treev1":
+						output.phylo_method = "fasttree_v1";
+						break;
+					case "raxml":
+					case "rax":
+						output.phylo_method = "raxml";
+						break;
+					case "raxml_v730":
+					case "raxml730":
+						output.phylo_method = "raxml_v730";
+						break;
+					case "muscle":
+						output.phylo_method = "muscle";
+						break;
+					default:
+						stderr.printf("%s: Unknown Phylogeny method \"%s\".\n", filename, phylo_method);
+						return false;
+				}
+			}
 			var clust_ident = root->get_prop("cluster-identity");
 			if (clust_ident != null) {
 				double ident_val = double.parse(clust_ident);
