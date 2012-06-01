@@ -54,10 +54,17 @@ seq.fasta_rep_set.fasta: picked_otus/seq_otus.txt seq.fasta
 	@echo Picking represntative set...
 	$(V)aq-mkrepset seq.fasta picked_otus/seq_otus.txt > seq.fasta_rep_set.fasta
 
+ifeq ($(ALIGN_METHOD),infernal)
 aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
-	@echo Aligning representative sequences...
+	@echo Aligning representative sequences with infernal...
 	@test ! -d aligned || rm -r aligned
-	$(V)$(QIIME_PREFIX)align_seqs.py -o aligned -m $(ALIGN_METHOD) -t $$INFERNAL_MODEL -i seq.fasta_rep_set.fasta
+	$(V)$(QIIME_PREFIX)align_seqs.py -o aligned -m infernal -t $$INFERNAL_MODEL -i seq.fasta_rep_set.fasta
+else
+aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
+	@echo Aligning representative sequences with $(ALIGN_METHOD)...
+	@test ! -d aligned || rm -r aligned
+	$(V)$(QIIME_PREFIX)align_seqs.py -o aligned -m $(ALIGN_METHOD) -i seq.fasta_rep_set.fasta
+endif
 
 rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt: seq.fasta_rep_set.fasta
 	@echo Assigning taxonomy...
