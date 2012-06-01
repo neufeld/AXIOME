@@ -118,6 +118,9 @@ Produce some data on the quality of the raw Illumina reads. This only applies to
 \fB<rankabundance/>\fR
 Make a rank-abundance plot using QIIME.
 .TP
+\fB<taxaplot/>\fR
+Make bar and area charts of the taxa. Results placed in taxaplot directory of .qiime folder.
+.TP
 \fB<uchime \fR[\fBprofile="\fIprofile\fB"\fR]\fB/>\fR
 Do chimera checking with UCHIME. Since the parameters vary based on the type of DNA, you can specify certain \fIprofile\fR to be one of \fBv3-stringent\fR, or \fBv3-relaxed\fR.
 .TP

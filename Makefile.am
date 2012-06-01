@@ -167,6 +167,7 @@ autoqiime_VALASOURCES = \
 	plugins/a-pcoa.vala \
 	plugins/a-qualanal.vala \
 	plugins/a-rankabundance.vala \
+	plugins/a-taxaplot.vala \
 	plugins/a-uchime.vala \
 	plugins/a-unifrac_mrpp.vala \
 	plugins/a-withseqs.vala \
