@@ -78,11 +78,17 @@ int main(string[] args) {
 		warning("%s", e.message);
 	}
 
+	FileStream relAbu;
+	string clusterLabels;
+	string[] clusterArray;
+
 	//While duleg file is not EOF
 	while ( !duleg.eof() ) {
 
 		//Clear the category to look for next one
 		category = null;
+		//Clear the relAbu file where we pull cluster names from
+		relAbu = null;
 
 		//Search for a category
 		while (category == null) {
@@ -103,10 +109,26 @@ int main(string[] args) {
 		//Set up the output filename
 		string outName = args[1];
 		//Take base filename, and peel off the extension
-		outName = Filename.display_basename(outName)[0:-4];
-		outName = outName + "_" + category + ".tab";
+		var outString = Filename.display_basename(outName)[0:-4];
+		outName = outString + "_" + category + ".tab";
 		//Open the file for writing
 		var outFile = FileStream.open(outName, "w");
+
+		//Try to open the relabu.txt file to try to pull in better cluster names
+		relAbu = FileStream.open(outString + "_" + category + "_relabu.txt", "r");
+		if ( relAbu != null ) {
+			//If the file is there, pull out only the first line
+			clusterLabels = relAbu.read_line();
+			//The line is formatted as a list like: " 1" "2" "3" "4" " 5" "6"
+			//We first remove all spaces, then replace double quotation marks with commas, and then remove single quotations left over
+			clusterLabels = clusterLabels.replace(" ","").replace("\"\"",",").replace("\"","");
+			//Split the comma separated list into an array
+			clusterArray = clusterLabels.split(",");
+		} else {
+			//If we can't open the file, set clusterArray to null to avoid complaints of it being unassigned
+			clusterArray = null;
+		}
+
 
 		//Print output header
 		outFile.printf("#OTU ID\t");
@@ -159,8 +181,16 @@ int main(string[] args) {
 				sum = sum + int.parse(otuinfo[lex2num[i]]);
 				i++;
 			}
+			var delimsplit = delimed.split("\t");
 			//Print out sum column, remaining otu table info, then duleg info
-			outFile.printf("%d\t%s\t%s\t%s\n", sum, otuinfo[i+1], otuinfo[i+2], delimed.splice(0,delimed.index_of("\t")+1));
+			if ( relAbu != null ) {
+				//If we could open the relabu.txt file, translate the cluster #'s given into their proper names
+				outFile.printf("%d\t%s\t%s\t%s\t%s\t%s\n", sum, otuinfo[i+1], otuinfo[i+2], clusterArray[int.parse(delimsplit[1])-1], delimsplit[2], delimsplit[3]);
+			} else {
+				//Otherwise, just use the cluster numbers we are given
+				outFile.printf("%d\t%s\t%s\t%s\t%s\t%s\n", sum, otuinfo[i+1], otuinfo[i+2], delimsplit[1], delimsplit[2], delimsplit[3]);
+
+			}
 		}
 	}
 
