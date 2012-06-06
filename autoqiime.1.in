@@ -91,6 +91,9 @@ Compare libraries on a plot to see if one is a superset of another. This is usef
 Compute Dufrene-Legendre indicator species analysis in R using optional parameter \fIp\fR as p-value cut-off (default is 0.05). For more information, see
 .BR aq-duleg (1), aq-otudulegmerge (1).
 .TP
+\fB<heatmap/>\fR
+Create an OTU heatmap based on the OTU table using QIIME's make_otu_heatmap_html.py script.
+.TP
 \fB<mrpp/>\fR
 Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities in R. For more information, see
 .BR aq-mrpp (1).
