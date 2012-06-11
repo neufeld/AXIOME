@@ -153,6 +153,10 @@ int main(string[] args) {
 
 		//While we are reading nonempty lines
 		while ( (line = duleg.read_line()) != "" ) {
+				if ( line.contains("0 rows") ) {
+					stderr.printf("No indicator species found for %s\n", category);
+					break;
+				}
 				//Using regex, change out any number of spaces between objects for a tab delimiter
 				try {
 					delimed = spacekiller.replace(line, -1, 0, "\t");
