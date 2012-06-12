@@ -7,7 +7,7 @@ aq-nmf-concordance \- Produce a concordance plot for non-negative matrix factori
 .SH DESCRIPTION
 Create a concordance plot, \fBnmf-concordance.pdf\fR, for non-negative matrix factorization using R. Non-negative matrix factorization is a technique to reduce high-dimensional data in fewer dimensions by construction bases with non-negative contributions to explain the data. For the complete analysis, 
 .BR aq-nmf (1)
-requires a degree. To determine the degree, a concordance plot is needed which will show the suitability of a particular degree for the data. The degrees that appear as local minima in the concordance plot are suitable to try for NMF analysis. That is, any point whose neighbours appear higher on the plot are good candidates for NMF analysis.
+requires a degree. To determine the degree, a concordance plot is needed which will show the suitability of a particular degree for the data. The degrees that appear as local maxima in the concordance plot are suitable to try for NMF analysis. That is, any point whose neighbours appear lower on the plot are good candidates for NMF analysis.
 
 Sometimes, the concordance plot will be degenerate, such as a slowly increasing line. If this is the case, the correct NMF degree cannot be reliably determined from the data. Adding more sequences per sample can improve the result.
 
