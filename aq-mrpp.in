@@ -41,7 +41,6 @@ colnames(mapping) <- paste("X", colnames(mapping), sep = "");
 
 pdf("mrpp.pdf")
 def.par <- par(no.readonly = TRUE)
-layout(matrix(1:2, nr = 1))
 sink("mrpp.txt", append = FALSE)
 sink()
 for (x in 1 : nrow(mapping)) {
