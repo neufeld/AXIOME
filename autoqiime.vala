@@ -610,7 +610,7 @@ namespace AutoQIIME {
 					awkprint.append_printf(" && count%d < %d", sample.id, sample.limit);
 				}
 				awkprint.append_printf(") { print \">%d_\" NR \"\\n\" seq; count%d++; }", sample.id, sample.id);
-				awkcheck.append_printf(" if (count%d == 0) { print \"Library defined in %s:%d contributed no sequences. This is probably not what you want.\" > \"/dev/stderr\"; exit 1; } else { ", sample.id, sample.xml-> doc-> url, sample.xml-> line);
+				awkcheck.append_printf(" if (count%d == 0) { print \"Library defined in %s:%d contributed no sequences. This is probably not what you want.\" > \"/dev/stderr\"; print \"%d\\tWarning: %s contributed no sequences to library\" >> \"sample_reads_temp.log\" } else { ", sample.id, sample.xml-> doc-> url, sample.xml-> line, sample.id, sample.tag);
 				awkcheck.append_printf("print \"%d\\t%s\\t\" count%d >> \"sample_reads_temp.log\" }", sample.id, sample.tag, sample.id);
 			}
 			seqrule.append_printf("\t$(V)(%s | awk '/^>/ { if (seq) {%s } name = substr($$0, 2); seq = \"\"; } $$0 !~ /^>/ { seq = seq $$0; } END { if (seq) {%s }%s }' >> seq.fasta) 2>&1 | bzip2 > logs/seq_%d.log.bz2\n\n", prep, awkprint.str, awkprint.str, awkcheck.str, sequence_preparations++);
