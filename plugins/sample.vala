@@ -27,7 +27,7 @@ class AutoQIIME.Analyses.Example : RuleProcessor {
 	 * You should set this to the current version of AutoQIIME when you develop a plugin and never change it.
 	 */
 	public override version introduced_version() {
-		return version(1, 3);
+		return version(1, 5);
 	}
 	/*
 	 * Can this rule be included multiple times? Each tag must generate some non-mutually infering set of Make rules.
