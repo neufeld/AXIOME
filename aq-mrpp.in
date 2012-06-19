@@ -21,6 +21,15 @@ isBiomFile <- TRUE %in% (c("-B","-b","--biom", "--BIOM") %in% args)
 #Clear out any flags from the command arguments
 args <-args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM") ]
 
+#Should have exactly one argument, if not, complain
+if (length(args) != 1) {
+  print("Error: Exactly one parameter required (distance method). Options are: manhattan, euclidean, canberra, bray, kulczynski, jaccard, gower, altGower, morisita, horn, mountford, raup , binomial, chao or cao.")
+  q()
+}
+
+#Grab the method
+distancemethod = args[1];
+
 pkgTest("vegan")
 
 #Read in and format otu table
@@ -39,9 +48,9 @@ mapping <- t(read.table("mapping.txt", header = TRUE, comment.char = "", row.nam
 # For non-numeric sample names, comment out the following line
 colnames(mapping) <- paste("X", colnames(mapping), sep = "");
 
-pdf("mrpp.pdf")
+pdf(paste("mrpp-", distancemethod, ".pdf", sep=""))
 def.par <- par(no.readonly = TRUE)
-sink("mrpp.txt", append = FALSE)
+sink(paste("mrpp-", distancemethod, ".txt", sep=""), append = FALSE)
 sink()
 for (x in 1 : nrow(mapping)) {
 	name <- rownames(mapping)[x]
@@ -53,16 +62,15 @@ for (x in 1 : nrow(mapping)) {
 
 	print(paste("Computing MRPP for", name))
 	m <- mapping[x, rownames(otutable)]
-	otutable.mrpp <- mrpp(otutable, m)
-
+	otutable.mrpp <- mrpp(otutable, m, distance = distancemethod)
 	sink("mrpp.txt", append = TRUE)
-	print(paste("MRPP for", name))
+	print(paste("MRPP for", name, ", method:", distancemethod))
 	print(otutable.mrpp)
 	print(paste("T statistic : ", (otutable.mrpp$delta - otutable.mrpp$E.delta) / sd(otutable.mrpp$boot.deltas)))
 	sink()
 
 	print("Computing meta MDS")
-	plot(otutable.ord <- metaMDS(otutable), type = "text", display = "sites", main = paste("MDS for", name))
+	plot(otutable.ord <- metaMDS(otutable, distance = distancemethod), type = "text", display = "sites", main = paste("MDS for", name, "Method:", distancemethod))
 	ordihull(otutable.ord, m)
 
 	with(otutable.mrpp, {

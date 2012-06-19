@@ -191,15 +191,4 @@ nmf-concordance.pdf: otu_table.txt
 	$(V)aq-nmf-concordance
 endif
 
-# MRPP
-ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
-mrpp.txt mrpp.pdf: otu_table.txt mapping.txt
-	@echo Computing Multi Response Permutation Procedure...
-	$(V)aq-mrpp -B
-else
-mrpp.txt mrpp.pdf: otu_table.txt mapping.txt
-	@echo Computing Multi Response Permutation Procedure...
-	$(V)aq-mrpp
-endif
-	
 .PHONY: all alpha

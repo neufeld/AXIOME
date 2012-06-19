@@ -94,8 +94,8 @@ Compute Dufrene-Legendre indicator species analysis in R using optional paramete
 \fB<heatmap/>\fR
 Create an OTU heatmap based on the OTU table using QIIME's make_otu_heatmap_html.py script.
 .TP
-\fB<mrpp/>\fR
-Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities in R. For more information, see
+\fB<mrpp [method="\fImethod\fB"]/>\fR
+Compute Multi Response Permutation Procedure of within-versus among-group dissimilarities in R using one of the following options: "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao" or "cao". If no method supplied, defaults to Bray-Curtis ("bray"). For more information, see
 .BR aq-mrpp (1).
 .TP
 \fB<nmf-concordance/>\fR
