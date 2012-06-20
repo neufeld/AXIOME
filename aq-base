@@ -121,13 +121,13 @@ endif
 
 # Produce a BLAST database
 blastdbs/nr.nhr blastdbs/nr.nin blastdbs/nr.nsq: seq.fasta_rep_set.fasta
-	@echo Creaing non-redundant BLAST database...
+	@echo Creating non-redundant BLAST database...
 	@test -d blastdbs || mkdir blastdbs
 	$(V)formatdb -i seq.fasta_rep_set.fasta -n nr -p F -t $(BLASTDB_NAME)" Non-Redundant"
 	$(V)mv nr.* blastdbs
 
 blastdbs/r.nhr blastdbs/r.nin blastdbs/r.nsq: seq.fasta
-	@echo Creaing redundant BLAST database...
+	@echo Creating redundant BLAST database...
 	@test -d blastdbs || mkdir blastdbs
 	$(V)formatdb -i seq.fasta -n r -p F -t $(BLASTDB_NAME)
 	$(V)mv r.* blastdbs
