@@ -42,3 +42,27 @@ pdf("nmf-concordance.pdf")
 print(ad$averdiff)
 plot(kstart:kend, ad$averdiff, type = "l", xlab = "Degree", ylab = "Concordance")
 points(kstart:kend, ad$averdiff, pch = 16)
+
+if (length(ad$averdiff) >= 2) {
+    if (ad$averdiff[1] >= ad$averdiff[2]) {
+		print("NMF Candidate degree: 1")
+    }
+
+    for (i in 2:(length(ad$averdiff)-1) ) {
+        if ( ad$averdiff[i] >= ad$averdiff[i-1] && ad$averdiff[i] >= ad$averdiff[i+1] ) {
+            print(paste("NMF Candidate degree:", i))
+        }
+    }
+    mono = TRUE;
+    for (i in 1:(length(ad$averdiff)-1)) {
+        if ( ad$averdiff[i] >= ad$averdiff[i+1] ) {
+            mono = FALSE;
+        }
+    }
+
+    if ( mono ) {
+        print("Monotonically increasing line. Data may be degenerate. Check nmf-concordance.pdf manually.")
+    }
+}
+	
+
