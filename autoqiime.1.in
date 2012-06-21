@@ -99,13 +99,16 @@ Compute Multi Response Permutation Procedure of within-versus among-group dissim
 .BR aq-mrpp (1).
 .TP
 \fB<nmf-concordance/>\fR
-Create a concordance plot for non-negative matrix factorization. The actual NMF analysis, described below, requires a degree and a concordance plot will show the suitability of a particular degree for the data. The degrees that appear as local minima in the concordance plot are suitable to try for NMF analysis. See
+Create a concordance plot for non-negative matrix factorization. The actual NMF analysis, described below, requires a degree and a concordance plot will show the suitability of a particular degree for the data. The degrees that appear as local maxima in the concordance plot are suitable to try for NMF analysis. See
 .BR aq-nmf-concordance (1)
 for more information.
 .TP
 \fB<nmf degree="\fIdegree\fB"/>\fR
 Do a non-negative matrix factorization of the data creating \fIdegree\fR bases, where this degree has been selected from the concordance plot generated above. For more information, see
 .BR aq-nmf (1).
+.TP
+\fB<nmf-auto/>\fR
+First, plots a concordance plot for NMF as with nmf-concordance, and using this it tries to find local maxima to run the main NMF degree on. You should use this instead of (and not in conjunction with) nmf and nmf-concordance. Note that it may not find a maxima from the concordance plot, and thus may not create a NMF plot.
 .TP
 \fB<pca/>\fR
 Perform principal components in R using the numeric variables supplied in the definitions. While QIIME's biplots use Unifrac distances, this PCA uses the taxa information and any numeric supplemental information.

@@ -24,6 +24,31 @@ class AutoQIIME.Analyses.ConcordancePlot : RuleProcessor {
 }
 
 /**
+ * Produce NMF concordance plot, and auto calculate NMF for candidate degrees
+ */
+class AutoQIIME.Analyses.AutoNMFPlot : RuleProcessor {
+	public override RuleType get_ruletype() {
+		return RuleType.ANALYSIS;
+	}
+	public override unowned string get_name() {
+		return "nmf-auto";
+	}
+	public override unowned string ? get_include() {
+		return null;
+	}
+	public override version introduced_version() {
+		return version(1, 5);
+	}
+	public override bool is_only_once() {
+		return true;
+	}
+	public override bool process(Xml.Node *definition, Output output) {
+		output.add_target("nmf-concordance-auto.pdf");
+		return true;
+	}
+}
+
+/**
  * Non-negative matrix factorization
  *
  * Do a non-negative matrix factorization at a particular degree. This relies on an R script to do the heavy lifting.
@@ -47,7 +72,7 @@ class AutoQIIME.Analyses.NonnegativeMatrixFactorization : RuleProcessor {
 	public override bool process(Xml.Node *definition, Output output) {
 		var degree = int.parse(definition-> get_prop("degree"));
 		if (degree < 2 || degree > output.known_samples.size - 1) {
-			definition_error(definition, "The degree \"%s\" is not resonable for NMF.\n", definition-> get_prop("degree"));
+			definition_error(definition, "The degree \"%s\" is not reasonable for NMF.\n", definition-> get_prop("degree"));
 			return false;
 		}
 		output.add_target("nmf/nmf_%d.pdf".printf(degree));

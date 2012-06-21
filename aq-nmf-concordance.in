@@ -19,7 +19,13 @@ args <- commandArgs(trailingOnly = TRUE)
 isBiomFile <- TRUE %in% (c("-B","-b","--biom", "--BIOM") %in% args)
 
 #Clear out any flags from the command arguments
-args <-args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM") ]
+args <- args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM") ]
+
+#Search within args for the auto flag
+
+autoCalc <- TRUE %in% (c("-a","-A","--auto","-auto") %in% args)
+
+args <- args[ (args != "-a" & args != "-A" & args != "--auto" & args != "-auto") ]
 
 #Read in and format otu table
 print("Reading OTU table")
@@ -38,28 +44,38 @@ z <- apply(as.matrix(t(otutable)), 2, function(x) { x/sum(x) })
 ad <- ConsensusFuzzyH(z, nmf.method = nmf.method, Rnmf = FALSE, kstart, kend, nloop, method = "square", ifseed = FALSE)
 
 print("Plotting")
-pdf("nmf-concordance.pdf")
+if (autoCalc) {
+	pdf("nmf-concordance-auto.pdf")
+} else {
+	pdf("nmf-concordance.pdf")
+}
 print(ad$averdiff)
 plot(kstart:kend, ad$averdiff, type = "l", xlab = "Degree", ylab = "Concordance")
 points(kstart:kend, ad$averdiff, pch = 16)
 
-if (length(ad$averdiff) >= 2) {
-    if (ad$averdiff[1] >= ad$averdiff[2]) {
-		print("NMF Candidate degree: 1")
-    }
-
-    for (i in 2:(length(ad$averdiff)-1) ) {
-        if ( ad$averdiff[i] >= ad$averdiff[i-1] && ad$averdiff[i] >= ad$averdiff[i+1] ) {
-            print(paste("NMF Candidate degree:", i))
+#Only autocalculate for degrees larger than 2 (aq-nmf script won't let you do calculation on degrees 1 or 2)
+if (length(ad$averdiff) >= 3) {
+		mono = TRUE;
+    for (i in 1:(length(ad$averdiff)-1) ) {
+        if ( i > 2 ) {
+            if ( ad$averdiff[i] >= ad$averdiff[i-1] && ad$averdiff[i] >= ad$averdiff[i+1] ) {
+                print(paste("NMF Candidate degree:", i))
+                if (autoCalc) {
+                    if (isBiomFile) {
+    		        		    system(paste("aq-nmf -B", i))
+                    } else {
+                        system(paste("aq-nmf", i))
+                    }
+                }
+            }
         }
-    }
-    mono = TRUE;
-    for (i in 1:(length(ad$averdiff)-1)) {
+        #While we're looking through the plot, check for a consistently increasing line
         if ( ad$averdiff[i] >= ad$averdiff[i+1] ) {
-            mono = FALSE;
+           mono = FALSE;
         }
     }
 
+    #If we have a monotonically increasing line, warn the user we probably can't do anything (though they need to check themselves)
     if ( mono ) {
         print("Monotonically increasing line. Data may be degenerate. Check nmf-concordance.pdf manually.")
     }

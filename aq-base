@@ -191,4 +191,16 @@ nmf-concordance.pdf: otu_table.txt
 	$(V)aq-nmf-concordance
 endif
 
+# NMF Concordance + NMF plots on candidate degrees (if any)
+ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
+nmf-concordance-auto.pdf: otu_table.txt
+	@echo Making concordance plot and NMF plots on candidate degrees \(if any\)...
+	$(V)aq-nmf-concordance -B -A
+else
+nmf-concordance-auto.pdf: otu_table.txt
+	@echo Making concordance plot and NMF plots on canddidate degrees \(if any\)...
+	$(V)aq-nmf-concordance -A
+endif
+
+
 .PHONY: all alpha

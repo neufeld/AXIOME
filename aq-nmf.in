@@ -5,7 +5,6 @@
 #  Andre Masella <andre@masella.name>
 options(error = quote(dump.frames("nmf-debug", TRUE)))
 
-K <- as.numeric(tail(commandArgs(trailingOnly = TRUE),1))
 nloop <- 100
 
 source("@prefix@/share/@PACKAGE@/nmf.R")
@@ -19,6 +18,8 @@ isBiomFile <- TRUE %in% (c("-B","-b","--biom", "--BIOM") %in% args)
 
 #Clear out any flags from the command arguments
 args <-args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM") ]
+
+K <- as.numeric(tail(args,1))
 
 # Similarity threshold
 simiv <- 0.8
