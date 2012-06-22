@@ -161,6 +161,7 @@ autoqiime_VALASOURCES = \
 	plugins/a-blast.vala \
 	plugins/a-duleg.vala \
 	plugins/a-heatmap.vala \
+	plugins/a-jackknife.vala \
 	plugins/a-libcmp.vala \
 	plugins/a-mrpp.vala \
 	plugins/a-nmf.vala \
@@ -168,6 +169,7 @@ autoqiime_VALASOURCES = \
 	plugins/a-pcoa.vala \
 	plugins/a-qualanal.vala \
 	plugins/a-rankabundance.vala \
+	plugins/a-ssunique.vala \
 	plugins/a-taxaplot.vala \
 	plugins/a-uchime.vala \
 	plugins/a-unifrac_mrpp.vala \
