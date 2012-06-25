@@ -18,6 +18,7 @@ CLUSTER_IDENT ?= 0.97
 RDP_CONFIDENCE ?= 0.8
 ALIGN_METHOD ?= pynast
 BLASTDB_NAME ?= "Unknown 16S Database"
+BLASTDB_COMMAND ?= formatdb
 V ?= @
 
 # Build basic data from sequences
@@ -120,17 +121,37 @@ rank_abundance/rank_abundance.pdf: otu_table.txt
 endif
 
 # Produce a BLAST database
+ifeq ($(BLASTDB_COMMAND),formatdb)
 blastdbs/nr.nhr blastdbs/nr.nin blastdbs/nr.nsq: seq.fasta_rep_set.fasta
-	@echo Creating non-redundant BLAST database...
+	@echo Creating non-redundant BLAST database with formatdb...
 	@test -d blastdbs || mkdir blastdbs
 	$(V)formatdb -i seq.fasta_rep_set.fasta -n nr -p F -t $(BLASTDB_NAME)" Non-Redundant"
 	$(V)mv nr.* blastdbs
+else
+ifeq ($(BLASTDB_COMMAND),makeblastdb)
+blastdbs/nr.nhr blastdbs/nr.nin blastdbs/nr.nsq: seq.fasta_rep_set.fasta
+	@echo Creating non-redundant BLAST database with makeblastdb...
+	@test -d blastdbs || mkdir blastdbs
+	$(V)makeblastdb -in seq.fasta_rep_set.fasta -dbtype nucl -title $(BLASTDB_NAME)" Non-Redundant" -parse_seqids -out nr
+	$(V)mv nr.* blastdbs
+endif
+endif
 
+ifeq ($(BLASTDB_COMMAND),formatdb)
 blastdbs/r.nhr blastdbs/r.nin blastdbs/r.nsq: seq.fasta
-	@echo Creating redundant BLAST database...
+	@echo Creating redundant BLAST database with formatdb...
 	@test -d blastdbs || mkdir blastdbs
 	$(V)formatdb -i seq.fasta -n r -p F -t $(BLASTDB_NAME)
 	$(V)mv r.* blastdbs
+else
+ifeq ($(BLASTDB_COMMAND),makeblastdb)
+blastdbs/r.nhr blastdbs/r.nin blastdbs/r.nsq: seq.fasta_rep_set.fasta
+	@echo Creating redundant BLAST database with makeblastdb...
+	@test -d blastdbs || mkdir blastdbs
+	$(V)makeblastdb -in seq.fasta -dbtype nucl -title $(BLASTDB_NAME) -parse_seqids -out r
+	$(V)mv r.* blastdbs
+endif
+endif
 
 # Decorate OTU table with representative sequences
 ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)

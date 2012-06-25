@@ -77,12 +77,14 @@ Do a basic alpha diversity analysis (i.e., QIIME's Chao1 curves).
 \fB<beta \fR[\fBlevel="\fIlevel\fB"\fR]\fB \fR[\fBsize="\fIsize\fB"\fR]\fB \fR[\fBtaxa="\fIdepth\fB"\fR]\fB \fR[\fBbackground="\fIcolour\fB"\fR]\fB/>\fR
 Do a QIIME beta diversity analysis and produce biplots and bubble plots. QIIME normally uses summarised taxa for the plots, so the taxonomic level can be specified; if it is omitted, OTUs are used instead. The library may be rarefied to a particular size by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect. Specifying \fItaxa\fR can limit the number of taxa that appear in the biplot; the default is 10 and \fBall\fR can be specified if desired. The background colour can also be specified using the \fBbackground\fR attribute. The colour is interpreted by QIIME. The default is \fBwhite\fR, despite \fBblack\fR seeming to be the popular choice.
 .TP
-\fB<blast \fR[\fBtitle="\fItitle\fB"\fR]\fB/>\fR
+\fB<blast \fR[\fBtitle="\fItitle\fB"\fR]\fB \fR[\fBcommand="\fIblastdbcommand\fB"\fR]\fB/>\fR
 Build a BLAST database over the sequences. This requires
 .BR formatdb (1)
+or
+.BR makeblastdb (1)
 to be installed. A script called \fBblast\fR will be produced that will invoke
 .BR blastall (1)
-pointing to the appropriate database. The database may optionally be given a friendly name, \fItitle\fR. If one is not provided, it will be inferred from the file name.
+pointing to the appropriate database. The database may optionally be given a friendly name, \fItitle\fR. If one is not provided, it will be inferred from the file name. Valid command options are: formatdb, makeblastdb. Default is formatdb.
 .TP
 \fB<compare level="\fIlevel\fB"/>\fR
 Compare libraries on a plot to see if one is a superset of another. This is useful if one sample which is (possibly) a subsample of another. This uses summarised taxa, not OTUs, so the taxonomic level for the analysis must be specified.
