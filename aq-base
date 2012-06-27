@@ -87,9 +87,9 @@ seq.fasta_rep_set_aligned_pfiltered.tre: seq.fasta_rep_set_aligned_pfiltered.fas
 	$(V)$(QIIME_PREFIX)make_phylogeny.py -i seq.fasta_rep_set_aligned_pfiltered.fasta -t $(PHYLO_METHOD)
 endif
 
-otu_table.txt: picked_otus/seq_otus.txt rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt
+otu_table.txt: picked_otus/seq_otus.txt rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt $(OTU_EXCLUDE_FILE)
 	@echo Making OTU table...
-	$(V)$(QIIME_PREFIX)make_otu_table.py -i picked_otus/seq_otus.txt -t rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt -o otu_table.txt
+	$(V)$(QIIME_PREFIX)make_otu_table.py -i picked_otus/seq_otus.txt -t rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt -o otu_table.txt $(OTU_EXCLUDE)
 
 otu_table%.tab: otu_table%.txt
 	@echo Creating legacy OTU table...

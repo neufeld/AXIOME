@@ -160,6 +160,7 @@ autoqiime_VALASOURCES = \
 	plugins/a-beta.vala \
 	plugins/a-blast.vala \
 	plugins/a-duleg.vala \
+	plugins/a-excludetaxa.vala \
 	plugins/a-heatmap.vala \
 	plugins/a-jackknife.vala \
 	plugins/a-libcmp.vala \
