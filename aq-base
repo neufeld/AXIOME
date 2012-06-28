@@ -97,9 +97,15 @@ seq.fasta_rep_set_aligned_pfiltered.tre: seq.fasta_rep_set_aligned_pfiltered.fas
 	@echo Building tree with a RAW FastTree call...
 	$(V)$(QIIME_PREFIX)FastTree -nt < seq.fasta_rep_set_aligned_pfiltered.fasta > seq.fasta_rep_set_aligned_pfiltered.tre
 else
+ifeq ($(PHYLO_METHOD),raw-fasttreemp)
+seq.fasta_rep_set_aligned_pfiltered.tre: seq.fasta_rep_set_aligned_pfiltered.fasta
+	@echo Building tree with a RAW FastTreeMP call \(utilizes all available processors\)...
+	$(V)$(QIIME_PREFIX)FastTreeMP -nt < seq.fasta_rep_set_aligned_pfiltered.fasta > seq.fasta_rep_set_aligned_pfiltered.tre
+else
 seq.fasta_rep_set_aligned_pfiltered.tre: seq.fasta_rep_set_aligned_pfiltered.fasta
 	@echo Building tree with $(PHYLO_METHOD)...
 	$(V)$(QIIME_PREFIX)make_phylogeny.py -i seq.fasta_rep_set_aligned_pfiltered.fasta -t $(PHYLO_METHOD)
+endif
 endif
 
 otu_table.txt: picked_otus/seq_otus.txt rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt $(OTU_EXCLUDE_FILE)

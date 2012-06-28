@@ -965,6 +965,11 @@ namespace AutoQIIME {
 			var phylo_method = root->get_prop("phylogeny-method");
 			if (phylo_method != null) {
 				switch (phylo_method.down()) {
+					case "raw-fasttreemp":
+					case "raw-fasttree-mp":
+					case "rawfasttreemp":
+						output.phylo_method = "raw-fasttreemp";
+						break;
 					case "raw-fasttree":
 					case "rawfasttree":
 						output.phylo_method = "raw-fasttree";
