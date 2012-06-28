@@ -39,16 +39,21 @@ class AutoQIIME.Analyses.BlastDatabase : RuleProcessor {
 		}
 		output.add_rulef("BLASTDB_NAME = %s\n\n", Shell.quote(title).replace("$", "$$"));
 		var blastdbcmd = definition->get_prop("command");
-		switch (blastdbcmd.down()) {
-			case "formatdb":
+		if (blastdbcmd != null) {
+			switch (blastdbcmd.down()) {
+				case "formatdb":
+					output.add_rulef("BLASTDB_COMMAND = formatdb\n\n");
+					break;
+				case "makeblastdb":
+					output.add_rulef("BLASTDB_COMMAND = makeblastdb\n\n");
+					break;
+				default:
+					definition_error(definition, "The BLAST DB command \"%s\" is not valid. Valid options: formatdb, makeblastdb.\n", blastdbcmd);
+					return false;
+			} else {
+				//Default if no command provided
 				output.add_rulef("BLASTDB_COMMAND = formatdb\n\n");
-				break;
-			case "makeblastdb":
-				output.add_rulef("BLASTDB_COMMAND = makeblastdb\n\n");
-				break;
-			default:
-				definition_error(definition, "The BLAST DB command \"%s\" is not valid. Valid options: formatdb, makeblastdb.\n", blastdbcmd);
-        return false;
+			}
 		}
 
 		return true;
