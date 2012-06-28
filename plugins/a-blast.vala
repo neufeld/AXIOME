@@ -50,12 +50,11 @@ class AutoQIIME.Analyses.BlastDatabase : RuleProcessor {
 				default:
 					definition_error(definition, "The BLAST DB command \"%s\" is not valid. Valid options: formatdb, makeblastdb.\n", blastdbcmd);
 					return false;
-			} else {
-				//Default if no command provided
-				output.add_rulef("BLASTDB_COMMAND = formatdb\n\n");
 			}
+		} else {
+			//Default if no command provided
+			output.add_rulef("BLASTDB_COMMAND = formatdb\n\n");
 		}
-
 		return true;
 	}
 }
