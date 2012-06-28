@@ -42,6 +42,7 @@ class AutoQIIME.Analyses.Example : RuleProcessor {
 	public override bool process(Xml.Node *definition, Output output) {
 		message("Example!");
 		output.add_target("example");
+		var parameter = definition->get_prop("parameter");
 		return true;
 	}
 }
