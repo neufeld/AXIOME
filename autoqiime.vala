@@ -535,7 +535,7 @@ namespace AutoQIIME {
 				return;
 			}
 			pcoa.add(flavour);
-			makerules.append(@"beta_div$(flavour)/unweighted_unifrac_otu_table$(flavour).txt beta_div$(flavour)/weighted_unifrac_otu_table$(flavour).txt: otu_table$(flavour).txt seq.fasta_rep_set_aligned_pfiltered.tre\n\t@echo Doing beta diversity analysis $(flavour)...\n\t$$(V)$$(QIIME_PREFIX)beta_diversity.py -i otu_table$(flavour).txt -m weighted_unifrac,unweighted_unifrac -o beta_div$(flavour) -t seq.fasta_rep_set_aligned_pfiltered.tre\n\n");
+			makerules.append(@"beta_div$(flavour)/unweighted_unifrac_otu_table$(flavour).txt beta_div$(flavour)/weighted_unifrac_otu_table$(flavour).txt: otu_table$(flavour).txt seq.fasta_rep_set_aligned_pfiltered.tre\n\t@echo Doing beta diversity analysis $(flavour)...\nifdef MULTICORE\n\t$$(V)$$(QIIME_PREFIX)parallel_beta_diversity.py -i otu_table$(flavour).txt -m weighted_unifrac,unweighted_unifrac -o beta_div$(flavour) -t seq.fasta_rep_set_aligned_pfiltered.tre -O $$(NUM_CORES)\nelse\n\t$$(V)$$(QIIME_PREFIX)beta_diversity.py -i otu_table$(flavour).txt -m weighted_unifrac,unweighted_unifrac -o beta_div$(flavour) -t seq.fasta_rep_set_aligned_pfiltered.tre\nendif\n\n");
 			makerules.append(@"beta_div_pcoa$(flavour)/pcoa_unweighted_unifrac_otu_table$(flavour).txt beta_div_pcoa$(flavour)/pcoa_weighted_unifrac_otu_table$(flavour).txt: beta_div$(flavour)/unweighted_unifrac_otu_table$(flavour).txt beta_div$(flavour)/weighted_unifrac_otu_table$(flavour).txt\n\t@echo Computing principal coordinates $(flavour)...\n\t$$(V)$$(QIIME_PREFIX)principal_coordinates.py -i beta_div$(flavour) -o beta_div_pcoa$(flavour)\n\n");
 		}
 
@@ -1058,8 +1058,8 @@ namespace AutoQIIME {
 				}
 				output.alignmethod = val;
 			} else {
-				// Set default to Infernal
-				output.alignmethod = AlignMethod.INFERNAL;
+				// Set default to PYNAST
+				output.alignmethod = AlignMethod.PYNAST;
 			}
 
 			var verbose = root->get_prop("verbose");

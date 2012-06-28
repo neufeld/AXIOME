@@ -103,6 +103,9 @@ Create 2D and 3D PCoA plots based on jackknifing (repeated subsampling) of the O
 Compute Multi Response Permutation Procedure of within-versus among-group dissimilarities in R using one of the following options: "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao" or "cao". If no method supplied, defaults to Bray-Curtis ("bray"). For more information, see
 .BR aq-mrpp (1).
 .TP
+\fB<multicore num-cores="\fInumber\fB"/>\fR
+Specifies that the analysis is being run on a multicore system. A value for the number of cores must be specified, and all multicore capable analyses will use this number of cores. It must be less than or equal to the number of cores available to the system. This definition must be placed above all other analysis definitions that you wish to run using multiple cores. Please note that not all steps support multiple cores.
+.TP
 \fB<nmf-concordance/>\fR
 Create a concordance plot for non-negative matrix factorization. The actual NMF analysis, described below, requires a degree and a concordance plot will show the suitability of a particular degree for the data. The degrees that appear as local maxima in the concordance plot are suitable to try for NMF analysis. See
 .BR aq-nmf-concordance (1)

@@ -10,7 +10,11 @@ alpha_div/alpha_rarefaction_plots/rarefaction_plots.html: otu_table.txt mapping.
 	@echo Computing Alpha Diversity...
 	@test ! -d rarefaction_tables || rm -r rarefaction_tables
 	@test ! -d alpha_div || rm -r alpha_div
+ifdef MULTICORE
+	$(V)$(QIIME_PREFIX)alpha_rarefaction.py -i otu_table.txt -m mapping.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div -a -O $(NUM_CORES)
+else
 	$(V)$(QIIME_PREFIX)alpha_rarefaction.py -i otu_table.txt -m mapping.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div
+endif
 
 OTU_PICKING_METHOD ?= cdhit
 PHYLO_METHOD ?= fasttree
@@ -62,16 +66,27 @@ aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
 	@test ! -d aligned || rm -r aligned
 	$(V)$(QIIME_PREFIX)align_seqs.py -o aligned -m infernal -t $$INFERNAL_MODEL -i seq.fasta_rep_set.fasta
 else
+ifdef MULTICORE
+aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
+	@echo Aligning representative sequences with multicore pynast using $(NUM_CORES) cores...
+	@test ! -d aligned || rm -r aligned
+	$(V)$(QIIME_PREFIX)parallel_align_seqs_pynast.py -i seq.fasta_rep_set.fasta -o aligned -O $(NUM_CORES)
+else
 aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
 	@echo Aligning representative sequences with $(ALIGN_METHOD)...
 	@test ! -d aligned || rm -r aligned
 	$(V)$(QIIME_PREFIX)align_seqs.py -o aligned -m $(ALIGN_METHOD) -i seq.fasta_rep_set.fasta
 endif
+endif
 
 rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt: seq.fasta_rep_set.fasta
 	@echo Assigning taxonomy...
 	@test ! -d rdp_assigned_taxonomy || rm -r rdp_assigned_taxonomy
+ifdef MULTICORE
+	$(V)$(QIIME_PREFIX)parallel_assign_taxonomy_rdp.py -i seq.fasta_rep_set.fasta -o rdp_assigned_taxonomy -c $(RDP_CONFIDENCE) -O $(NUM_CORES)
+else
 	$(V)$(QIIME_PREFIX)assign_taxonomy.py -i seq.fasta_rep_set.fasta -o rdp_assigned_taxonomy -c $(RDP_CONFIDENCE)
+endif
 
 seq.fasta_rep_set_aligned_pfiltered.fasta: aligned/seq.fasta_rep_set_aligned.fasta
 	@echo Filtering alignment...

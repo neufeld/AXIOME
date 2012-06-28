@@ -165,6 +165,7 @@ autoqiime_VALASOURCES = \
 	plugins/a-jackknife.vala \
 	plugins/a-libcmp.vala \
 	plugins/a-mrpp.vala \
+	plugins/a-multicore.vala \
 	plugins/a-nmf.vala \
 	plugins/a-pca.vala \
 	plugins/a-pcoa.vala \
