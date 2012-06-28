@@ -157,6 +157,10 @@ int main(string[] args) {
 					stderr.printf("No indicator species found for %s\n", category);
 					break;
 				}
+				if (line.contains("max.print")) {
+					stderr.printf("Maximum number of indicator species (1000000) reached for category \"%s\". Some data is excluded from final output.\n",category);
+					break;
+				}
 				//Using regex, change out any number of spaces between objects for a tab delimiter
 				try {
 					delimed = spacekiller.replace(line, -1, 0, "\t");
