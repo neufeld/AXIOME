@@ -43,7 +43,11 @@ ifeq ($(OTU_PICKING_METHOD),raw-cdhit)
 picked_otus/cd-hit-out.clstr: seq.fasta
 	@echo Generating cluster file using cdhit...
 	@test -d picked_otus || mkdir -p picked_otus
+ifdef MULTICORE
+	$(V)cd-hit-est -i seq.fasta -o picked_otus/cd-hit-out -c $(CLUSTER_IDENT) -B 1 -M 0 -T $(NUM_CORES) > picked_otus/cd-hit.output 2>&1
+else
 	$(V)cd-hit-est -i seq.fasta -o picked_otus/cd-hit-out -c $(CLUSTER_IDENT) -B 1 -M 0 > picked_otus/cd-hit.output 2>&1
+endif
 
 picked_otus/seq_otus.txt: picked_otus/cd-hit-out.clstr
 	@echo Converting cdhit cluster file to proper format...
