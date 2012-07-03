@@ -19,7 +19,6 @@ endif
 OTU_PICKING_METHOD ?= cdhit
 PHYLO_METHOD ?= fasttree
 CLUSTER_IDENT ?= 0.97
-RDP_CONFIDENCE ?= 0.8
 ALIGN_METHOD ?= pynast
 BLASTDB_NAME ?= "Unknown 16S Database"
 BLASTDB_COMMAND ?= formatdb
@@ -87,9 +86,9 @@ rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt: seq.fasta_rep_set.f
 	@echo Assigning taxonomy...
 	@test ! -d rdp_assigned_taxonomy || rm -r rdp_assigned_taxonomy
 ifdef MULTICORE
-	$(V)$(QIIME_PREFIX)parallel_assign_taxonomy_rdp.py -i seq.fasta_rep_set.fasta -o rdp_assigned_taxonomy -c $(RDP_CONFIDENCE) -O $(NUM_CORES)
+	$(V)$(QIIME_PREFIX)parallel_assign_taxonomy_rdp.py -i seq.fasta_rep_set.fasta -o rdp_assigned_taxonomy -O $(NUM_CORES) $(RDP_CLASSIFIER_FLAGS)
 else
-	$(V)$(QIIME_PREFIX)assign_taxonomy.py -i seq.fasta_rep_set.fasta -o rdp_assigned_taxonomy -c $(RDP_CONFIDENCE)
+	$(V)$(QIIME_PREFIX)assign_taxonomy.py -i seq.fasta_rep_set.fasta -o rdp_assigned_taxonomy $(RDP_CLASSIFIER_FLAGS)
 endif
 
 seq.fasta_rep_set_aligned_pfiltered.fasta: aligned/seq.fasta_rep_set_aligned.fasta

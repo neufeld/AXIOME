@@ -323,7 +323,6 @@ namespace AutoQIIME {
 		internal string? otu_method;
 		internal string? phylo_method;
 		internal string? clust_ident;
-		internal string? rdp_confidence;
 		internal AlignMethod alignmethod;
 		/**
 		 * The defined variables and their types.
@@ -467,9 +466,6 @@ namespace AutoQIIME {
 				//If not QIIME version 1.5, read off of the tab delineated OTU table using the awk script
 				//TODO: Rewrite the awk script to pull out the sums from the BIOM format (or write something that does)
 				makefile.printf("otu_table_auto.txt: otu_table.txt\n\t@echo Rareifying OTU table to smallest library size...\n\t$(V)$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt %s -d $$(awk -F '\t' 'NR == 1 { } NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; } } } NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; } } END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest; }' otu_table.txt)\n\n", is_version_at_least(1, 3) ? "" : "--lineages_included");
-			}
-			if (rdp_confidence != null) {
-				makefile.printf("RDP_CONFIDENCE = %s\n", rdp_confidence);
 			}
 			if (otu_method != null) {
 				makefile.printf("OTU_PICKING_METHOD = %s\n", otu_method);
@@ -1008,15 +1004,6 @@ namespace AutoQIIME {
 						stderr.printf("%s: Unknown Phylogeny method \"%s\".\n", filename, phylo_method);
 						return false;
 				}
-			}
-			var rdp_confidence = root->get_prop("rdp-confidence");
-			if (rdp_confidence != null) {
-				double conf_val = double.parse(rdp_confidence);
-				if (conf_val >= 1 || conf_val <= 0) {
-					stderr.printf("%s: RDP confidence must be between 0 and 1. Value given: \"%s\".\n", filename, rdp_confidence);
-					return false;
-				}
-				output.rdp_confidence = rdp_confidence;
 			}
 			var clust_ident = root->get_prop("cluster-identity");
 			if (clust_ident != null) {

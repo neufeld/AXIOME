@@ -23,7 +23,7 @@ Included is a sample configuration file with all possible analyses enabled. The 
 
 .B <?xml version="1.0"?>
 .br
-.B <autoqiime version="@VERSION@" \fR[\fBotu-method="\fImethod\fB"\fR]\fB \fR[\fBverbose="\fIvalue\fB"\fR]\fB \fR[\fBalign-method="\fIvalue\fB"\fR]\fB \fR[\fBcluster-identity="\fIvalue\fB"\fR]\fB \fR[\fBphylogeny-method="\fIvalue\fB"\fR]\fB \fR[\fBrdp-confidence="\fIvalue\fB"\fR]\fB>
+.B <autoqiime version="@VERSION@" \fR[\fBotu-method="\fImethod\fB"\fR]\fB \fR[\fBverbose="\fIvalue\fB"\fR]\fB \fR[\fBalign-method="\fIvalue\fB"\fR]\fB \fR[\fBcluster-identity="\fIvalue\fB"\fR]\fB \fR[\fBphylogeny-method="\fIvalue\fB"\fR]\fB>
 .br
 .I Definitions
 .br
@@ -131,6 +131,9 @@ Produce some data on the quality of the raw Illumina reads. This only applies to
 .TP
 \fB<rankabundance/>\fR
 Make a rank-abundance plot using QIIME.
+.TP
+\fB<rdp [confidence="\fIvalue\fB"] [taxfile="\fIfilepath\fB"] [seqfile="\fIfilepath\fB"]/>\fR
+Modifies the RDP classifier flags. Confidence alters the RDP confidence cutoff value. Requires a value between 0 and 1, and default is 0.8. Taxfile and seqfile arguments require full filepaths to the RDP taxonomy file and its related sequence file. If left blank, it will use the default values specified in the QIIME config file (likely GreenGenes). This could be used to train RDP on 18s reference sequences, for example, and these classifications will be used in all downstream analyses.
 .TP
 \fB<taxaplot/>\fR
 Make bar and area charts of the taxa. Results placed in taxaplot directory of .qiime folder.
