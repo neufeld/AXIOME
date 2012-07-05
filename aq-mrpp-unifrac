@@ -16,7 +16,7 @@ pkgTest("labdsv")
 flavour <- tail(commandArgs(trailingOnly = TRUE), 1);
 
 print("Reading Unifrac distances")
-dist <- as.matrix(read.table(paste("beta_div", flavour, "/weighted_unifrac_otu_table", flavour, ".txt", sep = "")))
+dist <- as.matrix(read.table(paste("beta_div_", flavour, "/weighted_unifrac_otu_table_", flavour, ".txt", sep = "")))
 
 print("Reading mapping");
 mapping <- t(read.table("mapping.txt", header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t"))
