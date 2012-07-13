@@ -1002,6 +1002,7 @@ namespace AutoQIIME {
 						break;
 					default:
 						stderr.printf("%s: Unknown Phylogeny method \"%s\".\n", filename, phylo_method);
+						delete doc;
 						return false;
 				}
 			}
@@ -1010,6 +1011,7 @@ namespace AutoQIIME {
 				double ident_val = double.parse(clust_ident);
 				if (ident_val >= 1 || ident_val <= 0) {
 					stderr.printf("%s: Clustering identity must be between 0 and 1. Identity given: \"%s\".\n", filename, clust_ident);
+					delete doc;
 					return false;
 				}
 				output.clust_ident = clust_ident;
@@ -1036,6 +1038,7 @@ namespace AutoQIIME {
 						break;
 					default:
 						stderr.printf("%s: Unknown OTU picking method \"%s\".\n", filename, method);
+						delete doc;
 						return false;
 				}
 			}
