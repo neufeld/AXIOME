@@ -1,3 +1,9 @@
+autoqiime (1.5~ppa3) quantal; urgency=low
+
+  * Incrementing version to deal with a Launchpad issue 
+
+ -- Michael Hall <mwhall@uwaterloo.ca>  Fri, 13 Jul 2012 11:20:15 -0400
+
 autoqiime (1.5~ppa2) natty; urgency=low
 
   * Many bug fixes
