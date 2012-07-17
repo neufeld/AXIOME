@@ -1,12 +1,12 @@
-Name:           autoqiime
+Name:           axiome
 Version:        1.2
 Release:        1%{?dist}
 Summary:        QIIME automation toolkit
-Source:         autoqiime.tar.bz2
+Source:         axiome.tar.bz2
 Group:          Applications/Engineering
 
 License:        GPLv3+
-URL:            http://neufeld.github.com/qiimetools
+URL:            http://neufeld.github.com/AXIOME
 
 BuildRequires:  zlib-devel
 BuildRequires:  bzip2-devel
@@ -24,7 +24,7 @@ Requires:       gzip
 Requires:       R-core
 
 %description
-AutoQIIME is a set of tools for making QIIME <http://qiime.sourceforge.net>
+AXIOME is a set of tools for making QIIME <http://qiime.sourceforge.net>
 easier to manage by automating error-prone tasks and walking through
 common analyses.
 
@@ -42,10 +42,10 @@ make install DESTDIR=$RPM_BUILD_ROOT
 
 %files
 %{_bindir}/aq-*
-%{_bindir}/autoqiime
+%{_bindir}/axiome
 %doc %{_mandir}/man1/*
-%doc %{_defaultdocdir}/autoqiime/sample.aq*
-%{_datadir}/autoqiime/primers.lst
+%doc %{_defaultdocdir}/axiome/sample.aq*
+%{_datadir}/axiome/primers.lst
 
 %changelog
  * Tue Oct 11 2011 Andre Masella <andre@masella.name> 1.1-1

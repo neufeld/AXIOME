@@ -1,7 +1,7 @@
 /**
  * Controls the flags sent to RDP classifier
  */
-class AutoQIIME.Analyses.RDP : RuleProcessor {
+class AXIOME.Analyses.RDP : RuleProcessor {
 	/*
 	 * Is this a new kind of analysis or a new source of sequence data?
 	 */
@@ -22,9 +22,9 @@ class AutoQIIME.Analyses.RDP : RuleProcessor {
 	}
 
 	/**
-	 * What version of AutoQIIME was this feature introduced in?
+	 * What version of AXIOME was this feature introduced in?
 	 *
-	 * You should set this to the current version of AutoQIIME when you develop a plugin and never change it.
+	 * You should set this to the current version of AXIOME when you develop a plugin and never change it.
 	 */
 	public override version introduced_version() {
 		return version(1, 5);

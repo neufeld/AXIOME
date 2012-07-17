@@ -1,7 +1,7 @@
 /**
  * Produce NMF concordance plot
  */
-class AutoQIIME.Analyses.ConcordancePlot : RuleProcessor {
+class AXIOME.Analyses.ConcordancePlot : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}
@@ -26,7 +26,7 @@ class AutoQIIME.Analyses.ConcordancePlot : RuleProcessor {
 /**
  * Produce NMF concordance plot, and auto calculate NMF for candidate degrees
  */
-class AutoQIIME.Analyses.AutoNMFPlot : RuleProcessor {
+class AXIOME.Analyses.AutoNMFPlot : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}
@@ -53,7 +53,7 @@ class AutoQIIME.Analyses.AutoNMFPlot : RuleProcessor {
  *
  * Do a non-negative matrix factorization at a particular degree. This relies on an R script to do the heavy lifting.
  */
-class AutoQIIME.Analyses.NonnegativeMatrixFactorization : RuleProcessor {
+class AXIOME.Analyses.NonnegativeMatrixFactorization : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

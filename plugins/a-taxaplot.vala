@@ -3,7 +3,7 @@
  *
  * Creates bar plots and area charts using the OTU table
  */
-class AutoQIIME.Analyses.TaxaPlot : RuleProcessor {
+class AXIOME.Analyses.TaxaPlot : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

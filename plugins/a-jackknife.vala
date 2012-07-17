@@ -3,7 +3,7 @@
  *
  * Creates bar plots and area charts using the OTU table
  */
-class AutoQIIME.Analyses.JackKnife : RuleProcessor {
+class AXIOME.Analyses.JackKnife : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

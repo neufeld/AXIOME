@@ -3,7 +3,7 @@
  *
  * This relies on an R script to do the heavy lifting. A summarized OTU table is needed.
  */
-class AutoQIIME.Analyses.LibraryComparison : RuleProcessor {
+class AXIOME.Analyses.LibraryComparison : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

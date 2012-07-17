@@ -1,3 +1,10 @@
+axiome (1.6) precise; urgency=low
+
+  * The great renaming to AXIOME from AutoQIIME
+  * Fixed a minor memory leak
+
+ -- Andre Masella <andre@masella.name>  Tue, 17 Jul 2012 12:03:33 -0700
+
 autoqiime (1.5~ppa3) quantal; urgency=low
 
   * Incrementing version to deal with a Launchpad issue 

@@ -1,7 +1,7 @@
 /**
  * Produce UniFrac-based multi-response permutation analysis
  */
-class AutoQIIME.Analyses.UnifracMrpp : RuleProcessor {
+class AXIOME.Analyses.UnifracMrpp : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

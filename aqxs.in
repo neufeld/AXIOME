@@ -2,7 +2,7 @@
 
 if [ $# -ne 1 ]
 then
-	echo "Compile an AutoQIIME module: $0 module.vala"
+	echo "Compile an AXIOME module: $0 module.vala"
 	exit 1
 fi
 BASE="$(basename "$1" .vala)"
@@ -15,7 +15,7 @@ fi
 
 prefix="@prefix@"
 exec_prefix="@exec_prefix@"
-@VALAC@ -C --vapidir="@datarootdir@/vala/vapi" --pkg=autoqiime "${BASE}.vala" "@PKGDATADIR/aq-module.vala" && \
+@VALAC@ -C --vapidir="@datarootdir@/vala/vapi" --pkg=axiome "${BASE}.vala" "@PKGDATADIR/aq-module.vala" && \
 @MOD_LIBTOOL@ --tag=CC --mode=compile @CC@ -c @MOD_ARGS@ -shared aq-module.c $(@PKG_CONFIG@ --cflags --libs gobject-2.0 glib-2.0 libxml-2.0 gee-@GEE_VER@) -o "aq-module.lo" && \
 @MOD_LIBTOOL@ --tag=CC --mode=compile @CC@ -c @MOD_ARGS@ -shared "${BASE}.c" $(@PKG_CONFIG@ --cflags --libs gobject-2.0 glib-2.0 libxml-2.0 gee-@GEE_VER@) -o "${BASE}.lo" && \
 @MOD_LIBTOOL@ --tag=CC --mode=link @CC@ @MOD_ARGS@ -module -shared -avoid-version aq-module.lo "${BASE}.lo" $(@PKG_CONFIG@ --cflags --libs gobject-2.0 glib-2.0 libxml-2.0 gee-@GEE_VER@) -o "${BASE}.la" -rpath "@libdir@/@PACKAGE@" && \

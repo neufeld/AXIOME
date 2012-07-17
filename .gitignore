@@ -2,7 +2,7 @@
 *~
 .deps
 .libs
-AutoQIIMEManual.pdf
+AXIOMEManual.pdf
 ChangeLog
 INSTALL
 Makefile
@@ -30,12 +30,12 @@ aq-qualhisto
 aq-syntheticfastq
 aqxs
 autom4te.cache
-autoqiime
-autoqiime.1
-autoqiime.c
-autoqiime.deps
-autoqiime.h
-autoqiime.vapi
+axiome
+axiome.1
+axiome.c
+axiome.deps
+axiome.h
+axiome.vapi
 build-aux/compile
 build-aux/config.guess
 build-aux/config.sub
@@ -52,6 +52,8 @@ debian/*.log
 debian/*.substvars
 debian/autoqiime
 debian/autoqiime-dev
+debian/axiome
+debian/axiome-dev
 debian/files
 debian/tmp
 fasta.c

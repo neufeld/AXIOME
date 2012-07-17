@@ -1,4 +1,4 @@
-AC_INIT([autoqiime], m4_esyscmd([build-aux/git-version-gen .tarball-version]), [andre@masella.name], [], [http://github.com/neufeld/qiimetools/])
+AC_INIT([axiome], m4_esyscmd([build-aux/git-version-gen .tarball-version]), [andre@masella.name], [], [http://github.com/neufeld/AXIOME/])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS(config.h)
@@ -74,8 +74,8 @@ AC_SUBST(MOD_ARGS)
 
 AC_CONFIG_FILES([
 	Makefile
-	autoqiime.1
-	autoqiime.deps
+	axiome.1
+	axiome.deps
 	aq-nmf
 	aq-nmf-concordance
 	aq-duleg

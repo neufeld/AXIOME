@@ -3,7 +3,7 @@
  *
  * Do prinicpal coordinate analysis on the taxa and the other (numeric) variables specified.
  */
-class AutoQIIME.Analyses.PrincipalCoordinateAnalysis : RuleProcessor {
+class AXIOME.Analyses.PrincipalCoordinateAnalysis : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

@@ -1,27 +1,45 @@
-Source: autoqiime
+Source: axiome
 Section: science
 Priority: extra
 Maintainer: Andre Masella <andre@masella.name>
 Build-Depends: debhelper (>= 7.0.50~), autotools-dev, valac (>= 0.14) | valac-0.14 | valac-0.16 | valac-0.18, libgee-dev, libmagic-dev, zlib1g-dev, libbz2-dev, libxml2-dev
 Standards-Version: 3.9.1
-Homepage: http://github.com/neufeld/qiimetools
+Homepage: http://github.com/neufeld/AXIOME
 
-Package: autoqiime
+Package: axiome
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, gawk, make, r-base, r-cran-gplots, bzip2, gzip (>= 1.1)
 Recommends: pandaseq, blast2
+Replaces: autoqiime (<< 1.6)
+Breaks: autoqiime (<< 1.6)
 Description: QIIME automation toolkit
- AutoQIIME is a set of tools for making QIIME <http://qiime.sourceforge.net>
+ AXIOME is a set of tools for making QIIME <http://qiime.sourceforge.net>
  easier to manage by automating error-prone tasks and walking through
  common analyses.
 
-Package: autoqiime-dev
+Package: axiome-dev
 Architecture: any
-Depends: ${misc:Depends}, autoqiime (= ${binary:Version}), valac (>= 0.14), libgee-dev, libxml2-dev
+Depends: ${misc:Depends}, axiome (= ${binary:Version}), valac (>= 0.14), libgee-dev, libxml2-dev
+Replaces: autoqiime-dev (<< 1.6)
+Breaks: autoqiime-dev (<< 1.6)
 Description: QIIME automation toolkit -- Plugin Development
- AutoQIIME is a set of tools for making QIIME <http://qiime.sourceforge.net>
+ AXIOME is a set of tools for making QIIME <http://qiime.sourceforge.net>
  easier to manage by automating error-prone tasks and walking through
  common analyses.
  .
  This package includes headers and scripts for developing new plugins.
  Regular users probably don't need it.
+
+Package: autoqiime
+Depends: axiome, ${misc:Depends}
+Architecture: all
+Section: oldlibs
+Description: transitional dummy package
+ This is a transitional dummy package. It can safely be removed.
+
+Package: autoqiime-dev
+Depends: axiome-dev, ${misc:Depends}
+Architecture: all
+Section: oldlibs
+Description: transitional dummy package
+ This is a transitional dummy package. It can safely be removed.

@@ -1,7 +1,7 @@
 /**
  * Compute Dufrene-Legendre indicator species analysis in R
  */
-class AutoQIIME.Analyses.DuLegStats : RuleProcessor {
+class AXIOME.Analyses.DuLegStats : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

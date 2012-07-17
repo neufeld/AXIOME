@@ -3,7 +3,7 @@
  *
  * Calling UniFrac using QIIME requires rarefying the OTU table and summarising it to a particular taxonomic level.
  */
-class AutoQIIME.Analyses.BetaDiversity : RuleProcessor {
+class AXIOME.Analyses.BetaDiversity : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

@@ -1,7 +1,7 @@
 /**
  * Decorate the OTU table with the representative sequences
  */
-class AutoQIIME.Analyses.TableWithSeqs : RuleProcessor {
+class AXIOME.Analyses.TableWithSeqs : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 # Automation tool for QIIME
 #
-# Basic rules for doing QIIME analysis. It assumes you have a mapping.txt file with all your sequences and that your sequences are named in QIIME's ${SampleID::int}_${UID::int} format. AutoQIIME does this for you. ;-)
+# Basic rules for doing QIIME analysis. It assumes you have a mapping.txt file with all your sequences and that your sequences are named in QIIME's ${SampleID::int}_${UID::int} format. AXIOME does this for you. ;-)
 
 # Alpha diversity (Chao1 curves) -- This is here so that if you simply do qiime_setup from the terminal, it will attempt to do alpha diversity.
 alpha: alpha_div/alpha_rarefaction_plots/rarefaction_plots.html

@@ -3,7 +3,7 @@
  *
  * Do prinicpal component analysis on the taxa and the other (numeric) variables specified.
  */
-class AutoQIIME.Analyses.PrincipalComponentAnalysis : RuleProcessor {
+class AXIOME.Analyses.PrincipalComponentAnalysis : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

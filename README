@@ -1,9 +1,9 @@
-AutoQIIME
-=========
+AXIOME
+======
 
-Tools for making QIIME easier to use.
+Tools for making QIIME easier to use. (Formerly AutoQIIME.)
 
-To build AutoQIIME, you'll need:
+To build AXIOME, you'll need:
 	Vala <https://live.gnome.org/Vala>
 	Gee <https://live.gnome.org/Libgee>
 	libxml2 <http://xmlsoft.org/>
@@ -18,7 +18,7 @@ On Debian/Ubuntu, you can install these using:
 You'll need to install this package with:
 	./autogen.sh && ./configure && make && make install
 
-To run AutoQIIME, you'll additionally need:
+To run AXIOME, you'll additionally need:
 	QIIME 1.3+ <http://qiime.org/>
 	R
 	GNU make <http://www.gnu.org/software/make/>
@@ -33,8 +33,8 @@ You will need to install several R packages which are dependencies. This can be 
 
 NOTE: You will need to have a default CRAN mirror set in your Rprofile.site file for the aq-inst-cran script to work.
 
-And then you should read sample.aq and man autoqiime
+And then you should read sample.aq and man axiome
 
 If you would like a printable manual, in this directory run:
-	make AutoQIIMEManual.pdf
+	make AXIOMEManual.pdf
 This requires GNU roff (groff).

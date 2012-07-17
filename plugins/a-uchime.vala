@@ -1,7 +1,7 @@
 /**
  * Perform a chimera check with uchime
  */
-class AutoQIIME.Analyses.UchimeCheck : RuleProcessor {
+class AXIOME.Analyses.UchimeCheck : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

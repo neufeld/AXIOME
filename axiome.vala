@@ -1,7 +1,7 @@
 using Gee;
 using Xml;
 
-namespace AutoQIIME {
+namespace AXIOME {
 
 	HashMap<string, string> primers;
 	[CCode(cname = "DATADIR")]
@@ -12,7 +12,7 @@ namespace AutoQIIME {
 	extern const string BINDIR;
 
 	/**
-	 * Create a path for a file inside the bin directory where AutoQIIME was installed.
+	 * Create a path for a file inside the bin directory where AXIOME was installed.
 	 *
 	 * e.g., bin_dir("aq-nmf") = "/usr/local/bin/aq-nmf"
 	 */
@@ -21,9 +21,9 @@ namespace AutoQIIME {
 	}
 
 	/**
-	 * Create a path for a file inside the shared directory where AutoQIIME was installed.
+	 * Create a path for a file inside the shared directory where AXIOME was installed.
 	 *
-	 * e.g., data_dir("nmf.R") = "/usr/local/share/autoqiime/nmf.R"
+	 * e.g., data_dir("nmf.R") = "/usr/local/share/axiome/nmf.R"
 	 */
 	public string data_dir(string filename) {
 		return Path.build_filename(DATADIR, filename);
@@ -37,7 +37,7 @@ namespace AutoQIIME {
 	}
 
 	/**
-	 * Structure for describing versions of AutoQIIME
+	 * Structure for describing versions of AXIOME
 	 */
 	public struct version {
 		int major;
@@ -91,7 +91,7 @@ namespace AutoQIIME {
 		/**
 		 * Gets a primer, by name, from the primer database.
 		 *
-		 * Primers may be either a length, a name, or a string of nucleotides. Names are resolved using AutoQIIME's primer database. If a primer name begins with a #, the length of the named primer will be returned, instead of the primer itself.
+		 * Primers may be either a length, a name, or a string of nucleotides. Names are resolved using AXIOME's primer database. If a primer name begins with a #, the length of the named primer will be returned, instead of the primer itself.
 		 */
 		protected string? get_primer(Xml.Node *definition, string? primer) {
 			if (primer != null) {
@@ -214,7 +214,7 @@ namespace AutoQIIME {
 		 */
 		public abstract unowned string ? get_include();
 		/**
-		 * What version of AutoQIIME was this feature introduced in?
+		 * What version of AXIOME was this feature introduced in?
 		 */
 		public abstract version introduced_version();
 		/**
@@ -461,7 +461,7 @@ namespace AutoQIIME {
 				makefile.printf("\n\nQIIME_GREATER_THAN_1_5 = TRUE");
 			}
 			makefile.printf("\n\nall: Makefile mapping.txt otu_table.txt %s\n\n", targets.str);
-			makefile.printf("Makefile mapping.txt: %s\n\t@echo Updating analyses to be run...\n\t$(V)autoqiime $<\n\n", sourcefile);
+			makefile.printf("Makefile mapping.txt: %s\n\t@echo Updating analyses to be run...\n\t$(V)axiome $<\n\n", sourcefile);
 			//We need to get the "classic" tab delineated OTU table file if QIIME 1.5 or newer for R scripts
 			if ( is_version_at_least(1,5) ) {
 				makefile.printf("otu_table.tab: otu_table.txt\n\t@echo Creating legacy OTU table...\n\t$(V)$(QIIME_PREFIX)convert_biom.py -b -i otu_table.txt -o otu_table.tab --header_key=taxonomy --output_metadata_id=Consensus\\ Lineage\n\n");
@@ -947,15 +947,10 @@ namespace AutoQIIME {
 			stderr.printf("%s: no data in file\n", filename);
 			return false;
 		}
-		if (root-> name != "autoqiime") {
-			stderr.printf("%s: the included file's root element is \"%s\" rather than \"autoqiime\". Are you sure this is an AutoQIIME file?\n", filename, root-> name);
-			delete doc;
-			return false;
-		}
 
 		var version_str = root->get_prop("version");
 		if (version_str == null) {
-			stderr.printf("%s: the version of AutoQIIME required is not specified. If in doubt, try <autoqiime version=\"%s\">.\n", filename, autoqiime_version.to_string());
+			stderr.printf("%s: the version of AXIOME required is not specified. If in doubt, try <axiome version=\"%s\">.\n", filename, axiome_version.to_string());
 			delete doc;
 			return false;
 		}
@@ -966,12 +961,20 @@ namespace AutoQIIME {
 			delete doc;
 			return false;
 		}
-		if (autoqiime_version.older_than(file_version)) {
-			stderr.printf("%s: requires a version newer (%s) than this version of AutoQIIME (%s).\n", filename, file_version.to_string(), autoqiime_version.to_string());
+		if (axiome_version.older_than(file_version)) {
+			stderr.printf("%s: requires a version newer (%s) than this version of AXIOME (%s).\n", filename, file_version.to_string(), axiome_version.to_string());
 			delete doc;
 			return false;
 		}
 		var max_version = version(0, 0);
+
+		if (root-> name != "axiome" && root-> name != "autoqiime") {
+			stderr.printf("%s: the included file's root element is \"%s\" rather than \"axiome\". Are you sure this is an AXIOME file?\n", filename, root-> name);
+			delete doc;
+			return false;
+		} else if (root-> name == "autoqiime" && version(1, 5).older_than(file_version)) {
+			stderr.printf("%s: this file's root element is \"autoqiime\" and that shouldn't be done any more.\n", filename);
+		}
 
 		if (is_root) {
 			var phylo_method = root->get_prop("phylogeny-method");
@@ -1177,7 +1180,7 @@ namespace AutoQIIME {
 			}
 			var rule_version = rule.introduced_version();
 			if (file_version.older_than(rule_version)) {
-				stderr.printf("%s: %d: The directive \"%s\" is requires at least AutoQIIME %s but this file specifies that it only needs version %s.\n", filename, iter-> line, iter-> name, rule_version.to_string(), file_version.to_string());
+				stderr.printf("%s: %d: The directive \"%s\" is requires at least AXIOME %s but this file specifies that it only needs version %s.\n", filename, iter-> line, iter-> name, rule_version.to_string(), file_version.to_string());
 				delete doc;
 				return false;
 			}
@@ -1189,7 +1192,7 @@ namespace AutoQIIME {
 			}
 		}
 		if (max_version.older_than(file_version)) {
-			stderr.printf("%s: Warning: claims to require AutoQIIME %s, but it only uses features from %s.\n", filename, file_version.to_string(), max_version.to_string());
+			stderr.printf("%s: Warning: claims to require AXIOME %s, but it only uses features from %s.\n", filename, file_version.to_string(), max_version.to_string());
 		}
 		output.add_doc(doc);
 		return true;
@@ -1198,10 +1201,13 @@ namespace AutoQIIME {
 	[CCode(cname = "register_plugin_types")]
 	extern void register_plugin_types();
 
-	version autoqiime_version;
+	version axiome_version;
 
 	int main(string[] args) {
-		assert(version.parse(VERSION, out autoqiime_version));
+		assert(version.parse(VERSION, out axiome_version));
+		if (args[0].has_suffix("autoqiime")) {
+			stderr.printf("Please use axiom to invoke this command.\n");
+		}
 		if (args.length != 2) {
 			stderr.printf("Usage: %s config.aq\n", args[0]);
 			return 1;

@@ -1,7 +1,7 @@
 /**
  * Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities in R
  */
-class AutoQIIME.Analyses.MRPPGraphs : RuleProcessor {
+class AXIOME.Analyses.MRPPGraphs : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

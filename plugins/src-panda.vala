@@ -4,7 +4,7 @@ using Gee;
  *
  * Calls PANDAseq and pulls out specific indecies.
  */
-class AutoQIIME.Sources.PandaSource : BaseSource {
+class AXIOME.Sources.PandaSource : BaseSource {
 	public override unowned string get_name() {
 		return "panda";
 	}

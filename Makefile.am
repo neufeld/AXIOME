@@ -33,7 +33,7 @@ bin_SCRIPTS = \
 	$(NULL)
 
 bin_PROGRAMS= \
-	autoqiime \
+	axiome \
 	aq-count-n \
 	aq-demux-illumina \
 	aq-estimateq \
@@ -49,13 +49,13 @@ bin_PROGRAMS= \
 	aq-syntheticfastq \
 	$(NULL)
 
-dist_include_HEADERS = autoqiime.h
+dist_include_HEADERS = axiome.h
 
 vapidir = $(datadir)/vala/vapi
-dist_vapi_DATA = autoqiime.vapi autoqiime.deps
+dist_vapi_DATA = axiome.vapi axiome.deps
 
 man1_MANS = \
-	autoqiime.1 \
+	axiome.1 \
 	aq-base.1 \
 	aq-biplot.1 \
 	aq-bubbleplot.1 \
@@ -98,6 +98,7 @@ man1_MANS = \
 	aq-sort-fasta.1 \
 	aq-syntheticfastq.1 \
 	aqxs.1 \
+	autoqiime.1 \
 	$(NULL)
 
 docdir = $(datadir)/doc/@PACKAGE@
@@ -151,11 +152,11 @@ aq_otudulegmerge_CPPFLAGS = $(GLIB_CFLAGS) $(GEE_CFLAGS)
 aq_otudulegmerge_LDADD = $(GLIB_LIBS) $(GEE_LIBS)
 aq_otudulegmerge_VALASOURCES = otudulegmerge.vala
 aq_otudulegmerge_SOURCES = $(aq_otudulegmerge_VALASOURCES:.vala=.c)
-autoqiime_CPPFLAGS = -DBINDIR=\"$(bindir)\" -DDATADIR=\"$(pkgdatadir)\" -DMODDIR=\"$(pkglibdir)\" $(GLIB_CFLAGS) $(GEE_CFLAGS) $(LIBXML_CFLAGS) $(GMODULE_CFLAGS) $(GIO_CFLAGS)
-autoqiime_LDADD = $(GLIB_LIBS) $(GEE_LIBS) $(LIBXML_LIBS) $(GMODULE_LIBS) $(GIO_LIBS)
-autoqiime_VALAFLAGS = --vapidir=. --pkg=config --pkg=libmagic --pkg=gee-$(GEE_VER) --pkg=libxml-2.0 --pkg=gmodule-2.0 --pkg=gio-2.0
-autoqiime_VALASOURCES = \
-	autoqiime.vala \
+axiome_CPPFLAGS = -DBINDIR=\"$(bindir)\" -DDATADIR=\"$(pkgdatadir)\" -DMODDIR=\"$(pkglibdir)\" $(GLIB_CFLAGS) $(GEE_CFLAGS) $(LIBXML_CFLAGS) $(GMODULE_CFLAGS) $(GIO_CFLAGS)
+axiome_LDADD = $(GLIB_LIBS) $(GEE_LIBS) $(LIBXML_LIBS) $(GMODULE_LIBS) $(GIO_LIBS)
+axiome_VALAFLAGS = --vapidir=. --pkg=config --pkg=libmagic --pkg=gee-$(GEE_VER) --pkg=libxml-2.0 --pkg=gmodule-2.0 --pkg=gio-2.0
+axiome_VALASOURCES = \
+	axiome.vala \
 	plugins/a-alpha.vala \
 	plugins/a-beta.vala \
 	plugins/a-blast.vala \
@@ -179,18 +180,18 @@ autoqiime_VALASOURCES = \
 	plugins/src-fasta.vala \
 	plugins/src-panda.vala \
 	$(NULL)
-autoqiime_SOURCES = $(autoqiime_VALASOURCES:.vala=.c) plugins/types.c
+axiome_SOURCES = $(axiome_VALASOURCES:.vala=.c) plugins/types.c
 
 BUILT_SOURCES = \
 	fmap.c fmap.h \
-	$(autoqiime_VALASOURCES:.vala=.c) \
+	$(axiome_VALASOURCES:.vala=.c) \
 	$(aq_joinn_VALASOURCES:.vala=.c) \
 	$(aq_mkrepset_VALASOURCES:.vala=.c) \
 	$(NULL)
 
-autoqiime.vapi autoqiime.h $(autoqiime_SOURCES): $(autoqiime_VALASOURCES)
-	$(VALAC) $(VALAFLAGS) -g -C -H autoqiime.h --vapi autoqiime.vapi $(autoqiime_VALAFLAGS) $(autoqiime_VALASOURCES) && touch $(autoqiime_VALASOURCES:.vala=.c) autoqiime.vapi autoqiime.h
-	awk '/define/ && /_get_type / { t[substr($$3, 2)] = 1 } END { for(x in t) { print "extern " x "();"; } print "void register_plugin_types(void) {"; for(x in t) { print x"();"; } print "}"}' $(autoqiime_SOURCES) > plugins/types.c
+axiome.vapi axiome.h $(axiome_SOURCES): $(axiome_VALASOURCES)
+	$(VALAC) $(VALAFLAGS) -g -C -H axiome.h --vapi axiome.vapi $(axiome_VALAFLAGS) $(axiome_VALASOURCES) && touch $(axiome_VALASOURCES:.vala=.c) axiome.vapi axiome.h
+	awk '/define/ && /_get_type / { t[substr($$3, 2)] = 1 } END { for(x in t) { print "extern " x "();"; } print "void register_plugin_types(void) {"; for(x in t) { print x"();"; } print "}"}' $(axiome_SOURCES) > plugins/types.c
 
 $(aq_joinn_SOURCES): $(aq_joinn_VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -g -C  $(aq_joinn_VALASOURCES) && touch $@
@@ -213,9 +214,13 @@ fmap.c fmap.h: fmap.vala
 fasta.vapi fasta.c fasta.h: fasta.vala
 	$(VALAC) $(VALAFLAGS) -g -C -H fasta.h --vapi=fasta.vapi --pkg=gee-$(GEE_VER) --pkg=posix fasta.vala && touch $@
 
-AutoQIIMEManual.pdf: $(man1_MANS)
+AXIOMEManual.pdf: $(man1_MANS)
 	(cat cover.ps; groff -Tps -mandoc -fN $^) | ps2pdf - > $@
 
-doc/index.htm: $(autoqiime_VALASOURCES)
+doc/index.htm: $(axiome_VALASOURCES)
 	test ! -d doc || rm -rf doc
-	valadoc -o doc --package-name=autoqiime --package-version=$(VERSION) $(VALAFLAGS) $(autoqiime_VALAFLAGS) $(autoqiime_VALASOURCES)
+	valadoc -o doc --package-name=axiome --package-version=$(VERSION) $(VALAFLAGS) $(axiome_VALAFLAGS) $(axiome_VALASOURCES)
+
+install-exec-hook:
+	$(LN_S) axiom$(EXEEXT) $(DESTDIR)$(bindir)/autoqiime$(EXEEXT)
+

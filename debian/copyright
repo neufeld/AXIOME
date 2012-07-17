@@ -1,9 +1,10 @@
 Format: http://dep.debian.net/deps/dep5
-Upstream-Name: autoqiime
-Source: http://github.com/neufeld/qiimetools
+Upstream-Name: axiome
+Source: http://github.com/neufeld/AXIOME
 
 Files: *
-Copyright: 2011 Andre Masella <andre@masella.name>
+Copyright: 2011-2012 Andre Masella <andre@masella.name>
+Copyright: 2012 Michael Hall <mwhall@uwaterloo.ca>
 License: GPL-3.0+
 
 License: GPL-3.0+

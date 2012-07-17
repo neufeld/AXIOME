@@ -1,7 +1,7 @@
 /**
  * Make a rank-abundance curve using QIIME
  */
-class AutoQIIME.Analyses.RankAbundance : RuleProcessor {
+class AXIOME.Analyses.RankAbundance : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

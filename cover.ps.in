@@ -1,5 +1,5 @@
 %!PS-Adobe-1.0
-%%Title:AutoQIIME @PACKAGE_VERSION@ Manual
+%%Title:@PACKAGE_NAME@ @PACKAGE_VERSION@ Manual
 %%Creator:Andre Masella
 
 /DragonDistance 4 def
@@ -21,7 +21,7 @@ grestore
 /NewCenturySchlbk-Bold findfont 72 scalefont setfont
 newpath
 72 72 2 mul moveto
-(AutoQIIME) show
+(@PACKAGE_NAME@) show
 /NewCenturySchlbk-Bold findfont 24 scalefont setfont
 newpath
 72 72 moveto

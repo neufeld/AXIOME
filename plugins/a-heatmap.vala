@@ -3,7 +3,7 @@
  *
  * Creates HTML heatmaps based on the OTU table
  */
-class AutoQIIME.Analyses.Heatmap : RuleProcessor {
+class AXIOME.Analyses.Heatmap : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

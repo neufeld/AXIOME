@@ -3,7 +3,7 @@
  *
  * Do basic alpha diversity analysis using QIIME's script.
  */
-class AutoQIIME.Analyses.AlphaDiversity : RuleProcessor {
+class AXIOME.Analyses.AlphaDiversity : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

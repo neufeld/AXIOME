@@ -3,7 +3,7 @@
  *
  * Call formatdb to create a BLAST database and create a shell script to sensibly handle calling BLAST with decent options.
  */
-class AutoQIIME.Analyses.BlastDatabase : RuleProcessor {
+class AXIOME.Analyses.BlastDatabase : RuleProcessor {
 	public override RuleType get_ruletype() {
 		return RuleType.ANALYSIS;
 	}

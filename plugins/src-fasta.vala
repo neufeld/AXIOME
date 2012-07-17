@@ -4,7 +4,7 @@ using Gee;
  *
  * Read a FASTA file into seq.fasta and pull sequences with ids matching specific regular expressions.
  */
-class AutoQIIME.Sources.FastaSource : BaseSource {
+class AXIOME.Sources.FastaSource : BaseSource {
 	public override RuleType get_ruletype() {
 		return RuleType.SOURCE;
 	}

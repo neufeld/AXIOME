@@ -1,21 +1,22 @@
 .\" Authors: Andre Masella, Michael Hall
-.TH autoqiime 1 "May 2012" "1.5" "USER COMMANDS"
+.TH axiome 1 "May 2012" "1.5" "USER COMMANDS"
 .SH NAME
-autoqiime \- Automation toolkit for QIIME
+axiome \- Automation toolkit for QIIME
 .SH SYNOPSIS
-.B autoqiime
+.B axiome
 .I input.aq
 .SH DESCRIPTION
-AutoQIIME is a way of automating tedious and error-prone analysis with the QIIME toolkit. Given a file of input data and analyses, it generates a \fBMakefile\fR to perform the analyses. Some analyses make use of
+AXIOME is a way of automating tedious and error-prone analysis with the QIIME toolkit. Given a file of input data and analyses, it generates a \fBMakefile\fR to perform the analyses. Some analyses make use of
 .BR R (1)
 and additional R packages may need to be installed from CRAN. This can be done using
 .BR aq-inst-cran (1).
+Formerly known as AutoQIIME.
 .SH OPTIONS
 .TP
 input.aq
 The input XML configuration file.
 .SH WORKFLOW
-Normally, one creates a input file with a \fB.aq\fR extension. After running AutoQIIME, a directory with a \fB.qiime\fR extension will be created with \fBMakefile\fR, \fBmapping.txt\fR, \fBmapping.extra\fR and possibly others depending on the analyses selected. In this directory, invoking \fBmake\fR will start the analyses. Normally, each analysis is done in the order specified in the original file, but this can be overriden by invoking \fBmake \fItarget\fR where \fItarget\fR is the output file desired (e.g., \fBotu_table.txt\fR).
+Normally, one creates a input file with a \fB.aq\fR extension. After running AXIOME, a directory with a \fB.qiime\fR extension will be created with \fBMakefile\fR, \fBmapping.txt\fR, \fBmapping.extra\fR and possibly others depending on the analyses selected. In this directory, invoking \fBmake\fR will start the analyses. Normally, each analysis is done in the order specified in the original file, but this can be overriden by invoking \fBmake \fItarget\fR where \fItarget\fR is the output file desired (e.g., \fBotu_table.txt\fR).
 
 If \fBmake\fR is interrupted, invoking it again will continue, repeating only the last command. Furthermore, if input files are changed, \fBmake\fR will attempt to return the minimum number of commands needed to update the analysis. Sometimes, this does not work as expected and deleting \fBseq.fasta\fR will guarantee all files will be rebuilt.
 .SH CONFIGURATION FILE
@@ -23,7 +24,25 @@ Included is a sample configuration file with all possible analyses enabled. The 
 
 .B <?xml version="1.0"?>
 .br
-.B <autoqiime version="@VERSION@" \fR[\fBotu-method="\fImethod\fB"\fR]\fB \fR[\fBotu-refseqs="\fIrefseqs\fB"\fR]\fB \fR[\fBotu-blastdb="\fIblastdb\fB"\fR]\fB \fR[\fBotu-flags="\fIstring\fB"\fR]\fB \fR[\fBverbose="\fIvalue\fB"\fR]\fB \fR[\fBalign-method="\fIvalue\fB"\fR]\fB \fR[\fBcluster-identity="\fIvalue\fB"\fR]\fB \fR[\fBphylogeny-method="\fIvalue\fB"\fR]\fB>
+.B <axiome version="@VERSION@"
+.br
+	\fR[\fBalign-method="\fImethod\fB"\fR]\fB
+.br
+	\fR[\fBcluster-identity="\fIvalue\fB"\fR]\fB
+.br
+	\fR[\fBotu-blastdb="\fI/path/to/blastdb\fB"\fR]\fB
+.br
+	\fR[\fBotu-flags="\fIflags\fB"\fR]\fB
+.br
+	\fR[\fBotu-method="\fImethod\fB"\fR]\fB
+.br
+	\fR[\fBotu-refseqs="\fI/path/to/refseqs\fB"\fR]\fB
+.br
+	\fR[\fBphylogeny-method="\fImethod\fB"\fR]\fB
+.br
+	\fR[\fBverbose="\fIvalue\fB"\fR]\fB
+.br
+>
 .br
 .I Definitions
 .br
@@ -31,21 +50,23 @@ Included is a sample configuration file with all possible analyses enabled. The 
 .br
 .I Analyses
 .br
-.B </autoqiime>
+.B </axiome>
 
-The version is used to check that a file is not newer than the version of AutoQIIME being used.
+The version is used to check that a file is not newer than the version of AXIOME being used.
 
-The method used to pick OTUs can be defined by the otu-method parameter. Options are: usearch, usearch_ref, prefix_suffix, mothur, trie, blast, uclust_ref, cdhit, raw-cdhit, uclust and raw-uclust. The "raw" options make direct calls to the tools rather than using QIIME's pick_otus.py script. Multicore support is used for raw-cdhit, uclust_ref and blast methods when the multicore plugin is used. usearch_ref and uclust_ref require the otu-refseqs parameter be set to the filepath of reference sequences. blast requires that either the otu-refseqs parameter or the otu-blastdb parameter is set to a valid reference file (but not both). The otu-flags option allows passing the QIIME scripts any arbitary flags that the pick_otus.py script accepts (but note that for each method, some flags may already be set). The OTU clustering identity (similarity) can be set with \fBcluster-identity\fR with a value between 0 and 1; default is 0.97 if left blank.
+By default, AXIOME will try to be quiet and hide the (ugly) commands used to do the analysis. If you wish to see them, set \fBverbose="true"\fR or run \fBmake V=\fR.
 
-By default, AutoQIIME will try to be quiet and hide the (ugly) commands used to do the analysis. If you wish to see them, set \fBverbose="true"\fR or run \fBmake V=\fR. The alignment method used can be specified with \fBalign-method\fR as one of \fBinfernal\fR, \fBmuscle\fR, and \fBpynast\fR; the default is \fBpynast\fR. The phylogeny method can be set with \fBphylogeny-method\fR, with valid options: fasttree, fasttree_v1, raw-fasttree, raw-fasttreemp (uses multicore FastTreeMP, which must be installed manually), clustalw, clearcut, raxml, raxml_v730, muscle. If not included, AutoQIIME defaults to fasttree. The raw-fasttree option calls FastTree without using QIIME's make_phylogeny.py script.
+The method used to pick OTUs can be defined by the otu-method parameter. Options are: \fBusearch\fR, \fBusearch_ref\fR, \fBprefix_suffix\fR, \fBmothur\fR, \fBtrie\fR, \fBblast\fR, \fBuclust_ref\fR, \fBcdhit\fR, \fBraw-cdhit\fR, \fBuclust\fR and \fBraw-uclust\fR. The \fBraw\fR options make direct calls to the tools rather than using QIIME's \fBpick_otus.py\fR script. Multicore support is used for \fBraw-cdhit\fR, \fBuclust_ref\fR and \fBblast\fR methods when the multicore plugin is used. \fBusearch_ref\fR and \fBuclust_ref\fR require the \fBotu-refseqs\fR parameter be set to the filepath of reference sequences. \fBblast\fR requires that either the \fBotu-refseqs\fR parameter or the \fBotu-blastdb\fR parameter is set to a valid reference file (but not both). The \fBotu-flags\fR option allows passing the QIIME scripts any arbitary flags that the \fBpick_otus.py\fR script accepts (but note that for each method, some flags may already be set). The OTU clustering identity (similarity) can be set with \fBcluster-identity\fR with a value between 0 and 1; default is 0.97 if left blank.
+
+The alignment method used can be specified with \fBalign-method\fR as one of \fBinfernal\fR, \fBmuscle\fR, and \fBpynast\fR; the default is \fBpynast\fR. The phylogeny method can be set with \fBphylogeny-method\fR, with valid options: \fBfasttree\fR, \fBfasttree_v1\fR, \fBraw-fasttree\fR, \fBraw-fasttreemp\fR (uses multicore FastTreeMP, which must be installed manually), \fBclustalw\fR, \fBclearcut\fR, \fBraxm\fRl, \fBraxml_v730\fR, or \fBmuscle\fR. If not included, AXIOME defaults to \fBfasttree\fR. The \fBraw-fasttree\fR option calls FastTree without using QIIME's \fBmake_phylogeny.py\fR script.
 
 Definitions are a list of properties associated with the samples. These are usual physical or chemical information such as sampling time, pH, temperature, humidity, and location. As many properties as needed can be specified and each property can have a type so that incorrect information cannot be entered (e.g., enforcing that "year" be a whole number).
 
-Assemblies are descriptions of the samples. AutoQIIME can automatically assemble pair-end Illumina FASTQ data using
+Assemblies are descriptions of the samples. AXIOME can automatically assemble pair-end Illumina FASTQ data using
 .BR pandaseq (1)
 or read data from FASTA files. In either case, a single file might contain multiple samples multiplexed. The format of this section allows all the input files to be specified and provide information about how to separate samples and the properties, defined above, to be associated with each sample.
 
-Finally, the file lists the analyses to be performed. AutoQIIME will do the analyses in the order specified. Some analyses can be repeated with different parameters and some can be specified only once.
+Finally, the file lists the analyses to be performed. AXIOME will do the analyses in the order specified. Some analyses can be repeated with different parameters and some can be specified only once.
 .TP
 \fB<!-- \fIcomment\fB -->\fR
 This is a comment and will be ignored.
@@ -172,7 +193,7 @@ This is where \fB-T\fR should be specified if desired.
 .BR pandaseq (1),
 .BR make (1).
 
-The following are components used by AutoQIIME or supplemental tools:
+The following are components used by AXIOME or supplemental tools:
 .BR aq-base (1),
 .BR aq-biplot (1),
 .BR aq-bubbleplot (1),

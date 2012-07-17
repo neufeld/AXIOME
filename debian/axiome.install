@@ -1,0 +1,8 @@
+usr/bin/aq-*
+usr/bin/axiome
+usr/share/axiome/primers.lst
+usr/share/axiome/nmf.R
+usr/share/axiome/biom.R
+usr/share/doc/axiome/*
+usr/share/man/man1/axiome.1
+usr/share/man/man1/aq-*.1

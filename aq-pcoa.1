@@ -5,6 +5,6 @@ aq-pcoa \- Perform PCoA in R
 .SH SYNOPSIS
 .B aq-pcoa [-B] [method]
 .SH DESCRIPTION
-Perform a principal coordinate analysis using R. Uses the specified dissimilarity method. If left blank, defaults to Bray-Curtis. Options for method are: "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao" or "cao". It is expected that there be an OTU table called \fBotu_table.txt\fR, the colour and label for every point in \fBmapping.extra\fR, and a list of which properties from \fBmapping.txt\fR to use in a file called \fBheaders.txt\fR. This is automatically set up by AutoQIIME. If using QIIME version 1.5.0 or greater, use flag -B to specify that the OTU table is in BIOM format. Outputs a pdf file with plots, and a text file containing the Eigenvalues.
+Perform a principal coordinate analysis using R. Uses the specified dissimilarity method. If left blank, defaults to Bray-Curtis. Options for method are: "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao" or "cao". It is expected that there be an OTU table called \fBotu_table.txt\fR, the colour and label for every point in \fBmapping.extra\fR, and a list of which properties from \fBmapping.txt\fR to use in a file called \fBheaders.txt\fR. This is automatically set up by AXIOME. If using QIIME version 1.5.0 or greater, use flag -B to specify that the OTU table is in BIOM format. Outputs a pdf file with plots, and a text file containing the Eigenvalues.
 .SH SEE ALSO
-.BR autoqiime (1), aq-orderotu (1).
+.BR axiome (1), aq-orderotu (1).
