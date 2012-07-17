@@ -24,7 +24,7 @@ BLASTDB_NAME ?= "Unknown 16S Database"
 BLASTDB_COMMAND ?= formatdb
 V ?= @
 
-# Build basic data from sequences
+# Build basic data from sequences, OTU picking step
 ifeq ($(OTU_PICKING_METHOD),raw-uclust)
 sorted.fasta: seq.fasta
 	@echo Sorting sequences...
@@ -47,20 +47,65 @@ ifdef MULTICORE
 else
 	$(V)cd-hit-est -i seq.fasta -o picked_otus/cd-hit-out -c $(CLUSTER_IDENT) -B 1 -M 0 > picked_otus/cd-hit.output 2>&1
 endif
-
 picked_otus/seq_otus.txt: picked_otus/cd-hit-out.clstr
 	@echo Converting cdhit cluster file to proper format...
 	@awk '{ ORS="" } { if (/>Cluster/) { if ( NR != 1 ) { print "\n"; } print $$2; } else { print "\t"; gsub(/\.\.\./,""); print substr($$3,2); }}' $< > $@
 else
 picked_otus/seq_otus.txt: seq.fasta
-	@echo Picking OTUs using QIIME and $(OTU_PICKING_METHOD)...
 	@test ! -d picked_otus || rm -r picked_otus
-	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -s $(CLUSTER_IDENT) -m $(OTU_PICKING_METHOD) -o picked_otus -M 4096
+ifeq ($(OTU_PICKING_METHOD),uclust_ref)
+ifdef MULTICORE
+@echo Picking OTUs using QIIME and uclust_ref using $(NUM_CORES) cores...
+	$(V)$(QIIME_PREFIX)parallel_pick_otus_uclust_ref.py -i seq.fasta -s $(CLUSTER_IDENT) -o picked_otus -r $(OTU_REFSEQS) -O $(NUM_CORES) $(OTU_FLAGS)
+else
+	@echo Picking OTUs using QIIME and uclust_ref...
+	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -s $(CLUSTER_IDENT) -m uclust_ref -o picked_otus -r $(OTU_REFSEQS) $(OTU_FLAGS)
+endif
+else
+ifeq ($(OTU_PICKING_METHOD),usearch_ref)
+	@echo Picking OTUs using QIIME and usearch_ref...
+	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -s $(CLUSTER_IDENT) -m usearch_ref -o picked_otus -r $(OTU_REFSEQS) $(OTU_FLAGS)
+else
+ifeq ($(OTU_PICKING_METHOD),blast)
+ifdef OTU_REFSEQS
+ifdef MULTICORE
+	@echo Picking OTUs using QIIME, BLAST and reference sequences with $(NUM_CORES) cores...
+	$(V)$(QIIME_PREFIX)parallel_pick_otus_blast.py -i seq.fasta -s $(CLUSTER_IDENT) -o picked_otus -r $(OTU_REFSEQS) -O $(NUM_CORES) $(OTU_FLAGS)
+else
+	@echo Picking OTUs using QIIME, BLAST and reference sequences...
+	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -s $(CLUSTER_IDENT) -m blast -o picked_otus -r $(OTU_REFSEQS) $(OTU_FLAGS)
+endif
+endif
+ifdef OTU_BLASTDB
+ifdef MULTICORE
+	@echo Picking OTUs using QIIME, BLAST and a BLAST database with $(NUM_CORES) cores...
+	$(V)$(QIIME_PREFIX)parallel_pick_otus_blast.py -i seq.fasta -s $(CLUSTER_IDENT) -o picked_otus -b $(OTU_BLASTDB) -O $(NUM_CORES) $(OTU_FLAGS)
+else
+	@echo Picking OTUs using QIIME, BLAST and a BLAST database...
+	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -s $(CLUSTER_IDENT) -m blast -o picked_otus -b $(OTU_BLASTDB) $(OTU_FLAGS)
+endif
+endif
+else
+ifeq ($(OTU_PICKING_METHOD),usearch)
+ifndef OTU_CHIMERA_REFSEQS
+	@echo Picking OTUs using QIIME and usearch with de novo chimera detection...
+	$(V)$(QIIME_PREFIX)pick_otus.py -m usearch --word_length 64 -o picked_otus -i seq.fasta -x $(OTU_FLAGS)
+else
+	@echo Picking OTUs using QIIME and usearch with reference chimera detection...
+	$(V)$(QIIME_PREFIX)pick_otus.py -m usearch --word_length 64 -o picked_otus -i seq.fasta -f $(OTU_CHIMERA_REFSEQS) $(OTU_FLAGS)
+endif
+else
+	@echo Picking OTUs using QIIME and $(OTU_PICKING_METHOD)...
+	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -s $(CLUSTER_IDENT) -m $(OTU_PICKING_METHOD) -o picked_otus $(OTU_FLAGS)
+endif
+endif
+endif
+endif
 endif
 endif
 
 seq.fasta_rep_set.fasta: picked_otus/seq_otus.txt seq.fasta
-	@echo Picking represntative set...
+	@echo Picking representative set...
 	$(V)aq-mkrepset seq.fasta picked_otus/seq_otus.txt > seq.fasta_rep_set.fasta
 
 ifeq ($(ALIGN_METHOD),infernal)

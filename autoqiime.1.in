@@ -23,7 +23,7 @@ Included is a sample configuration file with all possible analyses enabled. The 
 
 .B <?xml version="1.0"?>
 .br
-.B <autoqiime version="@VERSION@" \fR[\fBotu-method="\fImethod\fB"\fR]\fB \fR[\fBverbose="\fIvalue\fB"\fR]\fB \fR[\fBalign-method="\fIvalue\fB"\fR]\fB \fR[\fBcluster-identity="\fIvalue\fB"\fR]\fB \fR[\fBphylogeny-method="\fIvalue\fB"\fR]\fB>
+.B <autoqiime version="@VERSION@" \fR[\fBotu-method="\fImethod\fB"\fR]\fB \fR[\fBotu-refseqs="\fIrefseqs\fB"\fR]\fB \fR[\fBotu-blastdb="\fIblastdb\fB"\fR]\fB \fR[\fBotu-flags="\fIstring\fB"\fR]\fB \fR[\fBverbose="\fIvalue\fB"\fR]\fB \fR[\fBalign-method="\fIvalue\fB"\fR]\fB \fR[\fBcluster-identity="\fIvalue\fB"\fR]\fB \fR[\fBphylogeny-method="\fIvalue\fB"\fR]\fB>
 .br
 .I Definitions
 .br
@@ -33,7 +33,11 @@ Included is a sample configuration file with all possible analyses enabled. The 
 .br
 .B </autoqiime>
 
-The version is used to check that a file is not newer than the version of AutoQIIME being used. The method used to pick OTUs can also be defined. Currently, that is \fBuclust\fR, or \fBcdhit\fR, the default. They can also be prefixed by \fBraw-\fR to call them directly instead of using \fBpick_otus.py\fR from QIIME. By default, AutoQIIME will try to be quiet and hide the (ugly) commands used to do the analysis. If you wish to see them, set \fBverbose="true"\fR or run \fBmake V=\fR. The alignment method used can be specified with \fBalign-method\fR as one of \fBinfernal\fR, \fBmuscle\fR, and \fBpynast\fR; the default is \fBpynast\fR. The OTU clustering identity (similarity) can be set with \fBcluster-identity\fR with a value between 0 and 1; default is 0.97 if left blank. The phylogeny method can be set with \fBphylogeny-method\fR, with valid options: fasttree, fasttree_v1, raw-fasttree, raw-fasttreemp (uses multicore FastTreeMP, which must be installed manually), clustalw, clearcut, raxml, raxml_v730, muscle. If not included, AutoQIIME defaults to fasttree. The raw-fasttree option calls FastTree without using QIIME's make_phylogeny.py script.
+The version is used to check that a file is not newer than the version of AutoQIIME being used.
+
+The method used to pick OTUs can be defined by the otu-method parameter. Options are: usearch, usearch_ref, prefix_suffix, mothur, trie, blast, uclust_ref, cdhit, raw-cdhit, uclust and raw-uclust. The "raw" options make direct calls to the tools rather than using QIIME's pick_otus.py script. usearch_ref and uclust_ref require the otu-refseqs parameter be set to the filepath of reference sequences. blast requires that either the otu-refseqs parameter or the otu-blastdb parameter is set to a valid reference file (but not both). The otu-flags option allows passing the QIIME scripts any arbitary flags that the pick_otus.py script accepts (but note that for each method, some flags may already be set). The OTU clustering identity (similarity) can be set with \fBcluster-identity\fR with a value between 0 and 1; default is 0.97 if left blank.
+
+By default, AutoQIIME will try to be quiet and hide the (ugly) commands used to do the analysis. If you wish to see them, set \fBverbose="true"\fR or run \fBmake V=\fR. The alignment method used can be specified with \fBalign-method\fR as one of \fBinfernal\fR, \fBmuscle\fR, and \fBpynast\fR; the default is \fBpynast\fR. The phylogeny method can be set with \fBphylogeny-method\fR, with valid options: fasttree, fasttree_v1, raw-fasttree, raw-fasttreemp (uses multicore FastTreeMP, which must be installed manually), clustalw, clearcut, raxml, raxml_v730, muscle. If not included, AutoQIIME defaults to fasttree. The raw-fasttree option calls FastTree without using QIIME's make_phylogeny.py script.
 
 Definitions are a list of properties associated with the samples. These are usual physical or chemical information such as sampling time, pH, temperature, humidity, and location. As many properties as needed can be specified and each property can have a type so that incorrect information cannot be entered (e.g., enforcing that "year" be a whole number).
 
@@ -141,7 +145,7 @@ Make bar and area charts of the taxa. Results placed in taxaplot directory of .q
 \fB<uchime \fR[\fBprofile="\fIprofile\fB"\fR]\fB/>\fR
 Do chimera checking with UCHIME. Since the parameters vary based on the type of DNA, you can specify certain \fIprofile\fR to be one of \fBv3-stringent\fR, or \fBv3-relaxed\fR.
 .TP
-\fB<unifrac-mrpp \fR[\fBlevel="\fIlevel\fB"\fR]\fB/>\fR
+\fB<unifrac-mrpp \fR[\fBsize="\fIsize\fB"\fR]\fB/>\fR
 Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities in R. For more information, see
 .BR aq-mrpp-unifrac (1).
 The library may be rarefied to a particular size by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect.

@@ -321,8 +321,12 @@ namespace AutoQIIME {
 		int sequence_preparations;
 		string sourcefile;
 		internal string? otu_method;
+		internal string? otu_refseqs;
+		internal string? otu_blastdb;
+		internal string? otu_chimera_refseqs;
 		internal string? phylo_method;
 		internal string? clust_ident;
+		internal string? otu_flags;
 		internal AlignMethod alignmethod;
 		/**
 		 * The defined variables and their types.
@@ -470,11 +474,23 @@ namespace AutoQIIME {
 			if (otu_method != null) {
 				makefile.printf("OTU_PICKING_METHOD = %s\n", otu_method);
 			}
+			if (otu_refseqs != null) {
+				makefile.printf("OTU_REFSEQS = %s\n", otu_refseqs);
+			}
+			if (otu_blastdb != null) {
+				makefile.printf("OTU_BLASTDB = %s\n", otu_blastdb);
+			}
+			if (otu_chimera_refseqs != null) {
+				makefile.printf("OTU_CHIMERA_REFSEQS = %s\n", otu_chimera_refseqs);
+			}
 			if (phylo_method != null) {
 				makefile.printf("PHYLO_METHOD = %s\n", phylo_method);
 			}
 			if (clust_ident != null) {
 				makefile.printf("CLUSTER_IDENT = %s\n", clust_ident);
+			}
+			if (otu_flags != null) {
+				makefile.printf("OTU_FLAGS = %s\n", otu_flags);
 			}
 			if (verbose) {
 				makefile.printf("V = \n");
@@ -1016,6 +1032,7 @@ namespace AutoQIIME {
 				}
 				output.clust_ident = clust_ident;
 			}
+
 			var method = root->get_prop("otu-method");
 			if (method != null) {
 				switch (method.down()) {
@@ -1036,12 +1053,71 @@ namespace AutoQIIME {
 					case "rawcd-hit":
 						output.otu_method = "raw-cdhit";
 						break;
+					case "uclust-ref":
+					case "uclust_ref":
+					case "uclustref":
+						var uclustref = root->get_prop("otu-refseqs");
+						if (uclustref == null) {
+							stderr.printf("%s: otu-refseqs argument must be provided for uclust_ref OTU picking method.", filename);
+							delete doc;
+							return false;
+						}
+						output.otu_method = "uclust_ref";
+						output.otu_refseqs = uclustref;
+						break;
+					case "usearch-ref":
+					case "usearch_ref":
+					case "usearchref":
+						var usearchref = root->get_prop("otu-refseqs");
+						if (usearchref == null) {
+							stderr.printf("%s: otu-refseqs argument must be provided for usearch_ref OTU picking method.", filename);
+							delete doc;
+							return false;
+						}
+						output.otu_method = "usearch_ref";
+						output.otu_refseqs = usearchref;
+						break;
+					case "blast":
+						var blastref = root->get_prop("otu-refseqs");
+						var blastdb = root->get_prop("otu-blastdb");
+						if (blastref == null && blastdb == null) {
+							stderr.printf("%s: otu-refseqs or otu-blastdb argument must be provided for BLAST OTU picking method.", filename);
+							delete doc;
+							return false;
+						}
+						if (blastref != null && blastdb != null) {
+							stderr.printf("%s: Only one of otu-refseqs or otu-blastdb may be used for BLAST OTU picking method.", filename);
+							delete doc;
+							return false;
+						}
+						output.otu_method = "blast";
+						output.otu_refseqs = blastref;
+						output.otu_blastdb = blastdb;
+						break;
+					case "trie":
+						output.otu_method = "trie";
+						break;
+					case "mothur":
+					case "mother":
+						output.otu_method = "mothur";
+						break;
+					case "prefix_suffix":
+					case "prefix-suffix":
+					case "prefixsuffix":
+						output.otu_method = "prefix_suffix";
+						break;
+					case "usearch":
+						output.otu_method = "usearch";
+						output.otu_chimera_refseqs = root->get_prop("otu-refseqs");
+						break;
 					default:
 						stderr.printf("%s: Unknown OTU picking method \"%s\".\n", filename, method);
 						delete doc;
 						return false;
 				}
 			}
+
+			output.otu_flags = root->get_prop("otu-flags");
 
 			var alignmethod = root->get_prop("align-method");
 			if (alignmethod != null) {
