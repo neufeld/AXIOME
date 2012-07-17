@@ -1206,7 +1206,7 @@ namespace AXIOME {
 	int main(string[] args) {
 		assert(version.parse(VERSION, out axiome_version));
 		if (args[0].has_suffix("autoqiime")) {
-			stderr.printf("Please use axiom to invoke this command.\n");
+			stderr.printf("Please use axiome to invoke this command.\n");
 		}
 		if (args.length != 2) {
 			stderr.printf("Usage: %s config.aq\n", args[0]);
