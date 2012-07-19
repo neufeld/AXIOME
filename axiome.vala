@@ -235,6 +235,30 @@ namespace AXIOME {
 	}
 
 	/**
+	 * Pipeline options
+	 */
+
+	public enum Pipelines {
+		QIIME = 1,
+		MOTHUR = 2,
+		PHYLOSEQ = 3;
+
+		public static Pipelines ? parse(string name) {
+			var enum_class = (EnumClass) typeof(Pipelines).class_ref();
+			var nick = name.down().replace("_", "-");
+			unowned GLib.EnumValue ? enum_value = enum_class.get_value_by_nick(nick);
+			if (enum_value != null) {
+				Pipelines value = (Pipelines) enum_value.value;
+				return value;
+			}
+			return null;
+		}
+		public string to_string() {
+			return ((EnumClass) typeof (Pipelines).class_ref()).get_value(this).value_nick;
+		}
+	}
+
+	/**
 	 * Friendly names for taxnomic levels as used by QIIME/RDP
 	 */
 	public enum TaxonomicLevel {
@@ -320,6 +344,7 @@ namespace AXIOME {
 		StringBuilder seqsources;
 		int sequence_preparations;
 		string sourcefile;
+		internal Pipelines pipeline;
 		internal string? otu_method;
 		internal string? otu_refseqs;
 		internal string? otu_blastdb;
@@ -349,7 +374,7 @@ namespace AXIOME {
 			makerules = new StringBuilder();
 			samples = new ArrayList<Sample>();
 			seqrule = new StringBuilder();
-			seqrule.printf("\t@echo Building sequence set...\n\t@test -d logs || mkdir logs\n\t@test ! -f seq.fasta || rm seq.fasta\n");
+			seqrule.printf("\t@echo Building sequence set...\n\t@test -d logs || mkdir logs\n\t@test ! -f seq.fasta || rm seq.fasta\n\t@test ! -f seq.group || rm seq.group\n");
 			seqsources = new StringBuilder();
 			pcoa = new HashSet<string>();
 			rareified = new HashSet<int>();
@@ -621,12 +646,13 @@ namespace AXIOME {
 				if (sample.limit > 0) {
 					awkprint.append_printf(" && count%d < %d", sample.id, sample.limit);
 				}
-				awkprint.append_printf(") { print \">%d_\" NR \"\\n\" seq; count%d++; }", sample.id, sample.id);
+				awkprint.append_printf(") { print \">%d_\" NR \"\\n\" seq; print \">%d_\" NR \"\\t%d\" >> \"seq.group\"; count%d++; }", sample.id, sample.id, sample.id, sample.id);
 				awkcheck.append_printf(" if (count%d == 0) { print \"Library defined in %s:%d contributed no sequences. This is probably not what you want.\" > \"/dev/stderr\"; print \"%d\\tWarning: %s contributed no sequences to library\" >> \"sample_reads_temp.log\" } else { ", sample.id, sample.xml-> doc-> url, sample.xml-> line, sample.id, sample.tag);
 				awkcheck.append_printf("print \"%d\\t%s\\t\" count%d >> \"sample_reads_temp.log\" }", sample.id, sample.tag, sample.id);
 			}
 			seqrule.append_printf("\t$(V)(%s | awk '/^>/ { if (seq) {%s } name = substr($$0, 2); seq = \"\"; } $$0 !~ /^>/ { seq = seq $$0; } END { if (seq) {%s }%s }' >> seq.fasta) 2>&1 | bzip2 > logs/seq_%d.log.bz2\n\n", prep, awkprint.str, awkprint.str, awkcheck.str, sequence_preparations++);
 		}
+
 		/**
 		 * Include and process another parsed XML document.
 		 */
@@ -977,6 +1003,15 @@ namespace AXIOME {
 		}
 
 		if (is_root) {
+			var pipeline = Pipelines.parse(root->get_prop("pipeline"));
+			if (pipeline == null){
+				stderr.printf("%s: pipeline parameter must be provided. Options are: qiime, mothur, phyloseq.\n", filename);
+				delete doc;
+				return false;
+			} else {
+				output.pipeline = pipeline;
+			}
+
 			var phylo_method = root->get_prop("phylogeny-method");
 			if (phylo_method != null) {
 				switch (phylo_method.down()) {
