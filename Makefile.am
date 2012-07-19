@@ -222,5 +222,6 @@ doc/index.htm: $(axiome_VALASOURCES)
 	valadoc -o doc --package-name=axiome --package-version=$(VERSION) $(VALAFLAGS) $(axiome_VALAFLAGS) $(axiome_VALASOURCES)
 
 install-exec-hook:
+	test ! -L $(DESTDIR)$(bindir)/autoqiime$(EXEEXT) || rm $(DESTDIR)$(bindir)/autoqiime$(EXEEXT)
 	$(LN_S) axiome$(EXEEXT) $(DESTDIR)$(bindir)/autoqiime$(EXEEXT)
 
