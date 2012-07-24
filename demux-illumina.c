@@ -38,18 +38,6 @@ int bzread(BZFILE * file, void *buf, int len)
 	}
 }
 
-static unsigned long sdbm(str)
-unsigned char *str;
-{
-	unsigned long hash = 0;
-	int c;
-
-	while (c = *str++)
-		hash = c + (hash << 6) + (hash << 16) - hash;
-
-	return hash;
-}
-
 KSEQ_INIT(void *, fileread)
 
 int main(int argc, char **argv)
