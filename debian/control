@@ -30,6 +30,20 @@ Description: QIIME automation toolkit -- Plugin Development
  This package includes headers and scripts for developing new plugins.
  Regular users probably don't need it.
 
+Package: axiome-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends:
+    axiome (= ${binary:Version}),
+    ${misc:Depends}
+Description: QIIME automation toolkit -- Debugging Symbols
+ AXIOME is a set of tools for making QIIME <http://qiime.sourceforge.net>
+ easier to manage by automating error-prone tasks and walking through
+ common analyses.
+ .
+ This package contains debugging symbols. Regular users probably don't need it.
+
 Package: autoqiime
 Depends: axiome, ${misc:Depends}
 Architecture: all

@@ -53,6 +53,7 @@ debian/*.substvars
 debian/autoqiime
 debian/autoqiime-dev
 debian/axiome
+debian/axiome-dbg
 debian/axiome-dev
 debian/files
 debian/tmp

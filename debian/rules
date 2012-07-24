@@ -19,7 +19,10 @@ export DH_OPTIONS
 %:
 	dh $@ 
 
+.PHONY: override_dh_compress
 override_dh_compress:
 	dh_compress -Xsample.aq
 
-
+.PHONY: override_dh_strip
+override_dh_strip:
+	dh_strip --dbg-package=axiome-dbg
