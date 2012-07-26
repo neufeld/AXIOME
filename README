@@ -33,7 +33,7 @@ You will need to install several R packages which are dependencies. This can be 
 
 NOTE: You will need to have a default CRAN mirror set in your Rprofile.site file for the aq-inst-cran script to work.
 
-And then you should read sample.aq and man axiome
+And then you should read sample.ax and man axiome
 
 If you would like a printable manual, in this directory run:
 	make AXIOMEManual.pdf

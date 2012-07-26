@@ -44,7 +44,7 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %{_bindir}/aq-*
 %{_bindir}/axiome
 %doc %{_mandir}/man1/*
-%doc %{_defaultdocdir}/axiome/sample.aq*
+%doc %{_defaultdocdir}/axiome/sample.ax*
 %{_datadir}/axiome/primers.lst
 
 %changelog

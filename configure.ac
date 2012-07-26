@@ -87,7 +87,7 @@ AC_CONFIG_FILES([
 	aq-pcoa
 	aq-inst-cran
 	cover.ps
-	sample.aq
+	sample.ax
 	aqxs
 	]) 
 AC_OUTPUT

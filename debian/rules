@@ -21,7 +21,7 @@ export DH_OPTIONS
 
 .PHONY: override_dh_compress
 override_dh_compress:
-	dh_compress -Xsample.aq
+	dh_compress -Xsample.ax
 
 .PHONY: override_dh_strip
 override_dh_strip:

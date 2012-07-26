@@ -111,7 +111,7 @@ dist_pkgdata_DATA = \
 	$(NULL)
 
 doc_DATA = \
-	sample.aq \
+	sample.ax \
 	$(NULL)
 
 aq_count_n_CPPFLAGS = 

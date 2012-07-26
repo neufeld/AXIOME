@@ -71,5 +71,5 @@ mkrepset.c
 otuwithseqs.c
 otudulegmerge.c
 plugins/*.c
-sample.aq
+sample.ax
 stamp-h1
