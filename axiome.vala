@@ -481,9 +481,23 @@ namespace AXIOME {
 			for(var it = 1; it < qiime_version.length; it++) {
 				makefile.printf(".%d", qiime_version[it]);
 			}
+			switch ( pipeline.to_string() ) {
+				case "qiime":
+					makefile.printf("\n\nPIPELINE = QIIME\n");
+					break;
+				case "mothur":
+					makefile.printf("\n\nPIPELINE = MOTHUR\n");
+					break;
+				case "phyloseq":
+					makefile.printf("\n\nPIPELINE = PHYLOSEQ\n");
+					break;
+				default:
+					makefile.printf("\n\nPIPELINE = QIIME\n");
+					break;
+			}
 			//Declare a variable that has our version number in it for Make to use
 			if ( is_version_at_least(1,5) ) {
-				makefile.printf("\n\nQIIME_GREATER_THAN_1_5 = TRUE");
+				makefile.printf("\nQIIME_GREATER_THAN_1_5 = TRUE");
 			}
 			makefile.printf("\n\nall: Makefile mapping.txt otu_table.txt %s\n\n", targets.str);
 			makefile.printf("Makefile mapping.txt: %s\n\t@echo Updating analyses to be run...\n\t$(V)axiome $<\n\n", sourcefile);
@@ -521,11 +535,13 @@ namespace AXIOME {
 				makefile.printf("V = \n");
 			}
 			alignmethod.print(makefile);
-			makefile.printf("SEQSOURCES =%s\n\nseq.fasta: $(SEQSOURCES)\n%s", seqsources.str, seqrule.str);
+			makefile.printf("SEQSOURCES =%s\n\nseq.fasta seq.group: $(SEQSOURCES)\n%s", seqsources.str, seqrule.str);
 			//Print out the stats for the sample file
 			makefile.printf("\t$(V)awk '{ if (NR == 1) { print \"Sample\\tBarcode\\tSequences Contributed\\n\" } if (min == \"\") { min = max = $$3 }; if ( $$3 > max ) { max = $$3 }; if ( $$3 < min ) { min = $$3 }; total += $$3; count += 1; print; } END { print \"\\nAverage Sequences Contributed: \" total/count \"\\nSmallest Sequences Contributed: \" min \"\\nLargest Sequences Contributed: \" max }' sample_reads_temp.log > sample_reads.log\n\n");
 			makefile.printf("\t$(V)rm sample_reads_temp.log\n\n");
 			makefile.printf("%s.PHONY: all\n\ninclude %s/aq-base\n", makerules.str, BINDIR);
+			makefile.printf("include %s/aq-qiime-base\n", BINDIR);
+			makefile.printf("include %s/aq-mothur-base\n", BINDIR);
 			lookup.print_include(makefile);
 			makefile = null;
 			return true;
@@ -646,7 +662,7 @@ namespace AXIOME {
 				if (sample.limit > 0) {
 					awkprint.append_printf(" && count%d < %d", sample.id, sample.limit);
 				}
-				awkprint.append_printf(") { print \">%d_\" NR \"\\n\" seq; print \">%d_\" NR \"\\t%d\" >> \"seq.group\"; count%d++; }", sample.id, sample.id, sample.id, sample.id);
+				awkprint.append_printf(") { print \">%d_\" NR \"\\n\" seq; print \"%d_\" NR \"\\t%d\" >> \"seq.group\"; count%d++; }", sample.id, sample.id, sample.id, sample.id);
 				awkcheck.append_printf(" if (count%d == 0) { print \"Library defined in %s:%d contributed no sequences. This is probably not what you want.\" > \"/dev/stderr\"; print \"%d\\tWarning: %s contributed no sequences to library\" >> \"sample_reads_temp.log\" } else { ", sample.id, sample.xml-> doc-> url, sample.xml-> line, sample.id, sample.tag);
 				awkcheck.append_printf("print \"%d\\t%s\\t\" count%d >> \"sample_reads_temp.log\" }", sample.id, sample.tag, sample.id);
 			}

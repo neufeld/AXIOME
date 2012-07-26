@@ -1,0 +1,183 @@
+#!/usr/bin/make -f
+
+# Basic rules for doing QIIME analysis. It assumes you have a mapping.txt file with all your sequences and that your sequences are named in QIIME's ${SampleID::int}_${UID::int} format. AXIOME does this for you. ;-)
+
+ifeq ($(PIPELINE),QIIME)
+
+#Defaults for QIIME, as a fallback
+
+OTU_PICKING_METHOD ?= cdhit
+PHYLO_METHOD ?= fasttree
+CLUSTER_IDENT ?= 0.97
+ALIGN_METHOD ?= pynast
+
+# Alpha diversity (Chao1 curves) -- This is here so that if you simply do qiime_setup from the terminal, it will attempt to do alpha diversity.
+
+alpha: alpha_div/alpha_rarefaction_plots/rarefaction_plots.html
+
+alpha_div/alpha_rarefaction_plots/rarefaction_plots.html: otu_table.txt mapping.txt seq.fasta_rep_set_aligned_pfiltered.tre
+	@echo Computing Alpha Diversity...
+	@test ! -d rarefaction_tables || rm -r rarefaction_tables
+	@test ! -d alpha_div || rm -r alpha_div
+ifdef MULTICORE
+	$(V)$(QIIME_PREFIX)alpha_rarefaction.py -i otu_table.txt -m mapping.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div -a -O $(NUM_CORES)
+else
+	$(V)$(QIIME_PREFIX)alpha_rarefaction.py -i otu_table.txt -m mapping.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div
+endif
+
+# Build basic data from sequences, OTU picking step
+ifeq ($(OTU_PICKING_METHOD),raw-uclust)
+sorted.fasta: seq.fasta
+	@echo Sorting sequences...
+	$(V)uclust --mergesort $< --output $@
+
+seq.uc: sorted.fasta
+	@echo Picking OTUs using uclust without QIIME...
+	$(V)uclust --id $(CLUSTER_IDENT) --input sorted.fasta --uc seq.uc
+
+picked_otus/seq_otus.txt: seq.uc
+	@test -d picked_otus || mkdir -p picked_otus
+	@awk '$$1 == "S" { a[$$2] = "\t" $$9; if ($$2 > m) { m = $$2; } } $$1 == "H" { a[$$2] = (a[$$2] "\t" $$9); } END { for (i = 0; i < m; i++) { print i a[i]; }}' $< > $@
+else
+ifeq ($(OTU_PICKING_METHOD),raw-cdhit)
+picked_otus/cd-hit-out.clstr: seq.fasta
+	@echo Generating cluster file using cdhit...
+	@test -d picked_otus || mkdir -p picked_otus
+ifdef MULTICORE
+	$(V)cd-hit-est -i seq.fasta -o picked_otus/cd-hit-out -c $(CLUSTER_IDENT) -B 1 -M 0 -T $(NUM_CORES) > picked_otus/cd-hit.output 2>&1
+else
+	$(V)cd-hit-est -i seq.fasta -o picked_otus/cd-hit-out -c $(CLUSTER_IDENT) -B 1 -M 0 > picked_otus/cd-hit.output 2>&1
+endif
+picked_otus/seq_otus.txt: picked_otus/cd-hit-out.clstr
+	@echo Converting cdhit cluster file to proper format...
+	@awk '{ ORS="" } { if (/>Cluster/) { if ( NR != 1 ) { print "\n"; } print $$2; } else { print "\t"; gsub(/\.\.\./,""); print substr($$3,2); }}' $< > $@
+else
+picked_otus/seq_otus.txt: seq.fasta
+	@test ! -d picked_otus || rm -r picked_otus
+ifeq ($(OTU_PICKING_METHOD),uclust_ref)
+ifdef MULTICORE
+@echo Picking OTUs using QIIME and uclust_ref using $(NUM_CORES) cores...
+	$(V)$(QIIME_PREFIX)parallel_pick_otus_uclust_ref.py -i seq.fasta -s $(CLUSTER_IDENT) -o picked_otus -r $(OTU_REFSEQS) -O $(NUM_CORES) $(OTU_FLAGS)
+else
+	@echo Picking OTUs using QIIME and uclust_ref...
+	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -s $(CLUSTER_IDENT) -m uclust_ref -o picked_otus -r $(OTU_REFSEQS) $(OTU_FLAGS)
+endif
+else
+ifeq ($(OTU_PICKING_METHOD),usearch_ref)
+	@echo Picking OTUs using QIIME and usearch_ref...
+	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -s $(CLUSTER_IDENT) -m usearch_ref -o picked_otus -r $(OTU_REFSEQS) $(OTU_FLAGS)
+else
+ifeq ($(OTU_PICKING_METHOD),blast)
+ifdef OTU_REFSEQS
+ifdef MULTICORE
+	@echo Picking OTUs using QIIME, BLAST and reference sequences with $(NUM_CORES) cores...
+	$(V)$(QIIME_PREFIX)parallel_pick_otus_blast.py -i seq.fasta -s $(CLUSTER_IDENT) -o picked_otus -r $(OTU_REFSEQS) -O $(NUM_CORES) $(OTU_FLAGS)
+else
+	@echo Picking OTUs using QIIME, BLAST and reference sequences...
+	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -s $(CLUSTER_IDENT) -m blast -o picked_otus -r $(OTU_REFSEQS) $(OTU_FLAGS)
+endif
+endif
+ifdef OTU_BLASTDB
+ifdef MULTICORE
+	@echo Picking OTUs using QIIME, BLAST and a BLAST database with $(NUM_CORES) cores...
+	$(V)$(QIIME_PREFIX)parallel_pick_otus_blast.py -i seq.fasta -s $(CLUSTER_IDENT) -o picked_otus -b $(OTU_BLASTDB) -O $(NUM_CORES) $(OTU_FLAGS)
+else
+	@echo Picking OTUs using QIIME, BLAST and a BLAST database...
+	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -s $(CLUSTER_IDENT) -m blast -o picked_otus -b $(OTU_BLASTDB) $(OTU_FLAGS)
+endif
+endif
+else
+ifeq ($(OTU_PICKING_METHOD),usearch)
+ifndef OTU_CHIMERA_REFSEQS
+	@echo Picking OTUs using QIIME and usearch with de novo chimera detection...
+	$(V)$(QIIME_PREFIX)pick_otus.py -m usearch --word_length 64 -o picked_otus -i seq.fasta -x $(OTU_FLAGS)
+else
+	@echo Picking OTUs using QIIME and usearch with reference chimera detection...
+	$(V)$(QIIME_PREFIX)pick_otus.py -m usearch --word_length 64 -o picked_otus -i seq.fasta -f $(OTU_CHIMERA_REFSEQS) $(OTU_FLAGS)
+endif
+else
+	@echo Picking OTUs using QIIME and $(OTU_PICKING_METHOD)...
+	$(V)$(QIIME_PREFIX)pick_otus.py -i seq.fasta -s $(CLUSTER_IDENT) -m $(OTU_PICKING_METHOD) -o picked_otus $(OTU_FLAGS)
+endif
+endif
+endif
+endif
+endif
+endif
+
+seq.fasta_rep_set.fasta: picked_otus/seq_otus.txt seq.fasta
+	@echo Picking representative set...
+	$(V)aq-mkrepset seq.fasta picked_otus/seq_otus.txt > seq.fasta_rep_set.fasta
+
+ifeq ($(ALIGN_METHOD),infernal)
+aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
+	@echo Aligning representative sequences with infernal...
+	@test ! -d aligned || rm -r aligned
+	$(V)$(QIIME_PREFIX)align_seqs.py -o aligned -m infernal -t $$INFERNAL_MODEL -i seq.fasta_rep_set.fasta
+else
+ifdef MULTICORE
+aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
+	@echo Aligning representative sequences with multicore pynast using $(NUM_CORES) cores...
+	@test ! -d aligned || rm -r aligned
+	$(V)$(QIIME_PREFIX)parallel_align_seqs_pynast.py -i seq.fasta_rep_set.fasta -o aligned -O $(NUM_CORES)
+else
+aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
+	@echo Aligning representative sequences with $(ALIGN_METHOD)...
+	@test ! -d aligned || rm -r aligned
+	$(V)$(QIIME_PREFIX)align_seqs.py -o aligned -m $(ALIGN_METHOD) -i seq.fasta_rep_set.fasta
+endif
+endif
+
+rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt: seq.fasta_rep_set.fasta
+	@echo Assigning taxonomy...
+	@test ! -d rdp_assigned_taxonomy || rm -r rdp_assigned_taxonomy
+ifdef MULTICORE
+	$(V)$(QIIME_PREFIX)parallel_assign_taxonomy_rdp.py -i seq.fasta_rep_set.fasta -o rdp_assigned_taxonomy -O $(NUM_CORES) $(RDP_CLASSIFIER_FLAGS)
+else
+	$(V)$(QIIME_PREFIX)assign_taxonomy.py -i seq.fasta_rep_set.fasta -o rdp_assigned_taxonomy $(RDP_CLASSIFIER_FLAGS)
+endif
+
+seq.fasta_rep_set_aligned_pfiltered.fasta: aligned/seq.fasta_rep_set_aligned.fasta
+	@echo Filtering alignment...
+	$(V)$(QIIME_PREFIX)filter_alignment.py -i aligned/seq.fasta_rep_set_aligned.fasta -s
+
+ifeq ($(PHYLO_METHOD),raw-fasttree)
+seq.fasta_rep_set_aligned_pfiltered.tre: seq.fasta_rep_set_aligned_pfiltered.fasta
+	@echo Building tree with a RAW FastTree call...
+	$(V)$(QIIME_PREFIX)FastTree -nt < seq.fasta_rep_set_aligned_pfiltered.fasta > seq.fasta_rep_set_aligned_pfiltered.tre
+else
+ifeq ($(PHYLO_METHOD),raw-fasttreemp)
+seq.fasta_rep_set_aligned_pfiltered.tre: seq.fasta_rep_set_aligned_pfiltered.fasta
+	@echo Building tree with a RAW FastTreeMP call \(utilizes all available processors\)...
+	$(V)$(QIIME_PREFIX)FastTreeMP -nt < seq.fasta_rep_set_aligned_pfiltered.fasta > seq.fasta_rep_set_aligned_pfiltered.tre
+else
+seq.fasta_rep_set_aligned_pfiltered.tre: seq.fasta_rep_set_aligned_pfiltered.fasta
+	@echo Building tree with $(PHYLO_METHOD)...
+	$(V)$(QIIME_PREFIX)make_phylogeny.py -i seq.fasta_rep_set_aligned_pfiltered.fasta -t $(PHYLO_METHOD)
+endif
+endif
+
+otu_table.txt: picked_otus/seq_otus.txt rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt $(OTU_EXCLUDE_FILE)
+	@echo Making OTU table...
+	$(V)$(QIIME_PREFIX)make_otu_table.py -i picked_otus/seq_otus.txt -t rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt -o otu_table.txt $(OTU_EXCLUDE)
+
+otu_table%.tab: otu_table%.txt
+	@echo Creating legacy OTU table...
+	$(V)$(QIIME_PREFIX)convert_biom.py -b -i $< -o $@ --header_key=taxonomy --output_metadata_id=Consensus\ Lineage
+
+# Produce a rank-abundance plot
+ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
+rank_abundance/rank_abundance.pdf: otu_table.txt otu_table.tab
+	@echo Plotting rank-abundance curves...
+	@test ! -d rank_abundance || rm -r rank_abundance
+	$(V)$(QIIME_PREFIX)plot_rank_abundance_graph.py -i otu_table.txt -s "$$(awk -F "\t" 'NR == 2 { printf("%s", $$2); for (i = 3; i < NF; i++) { printf(",%s", $$i); } printf("\n"); exit; }' otu_table.tab)" -o rank_abundance
+	mv rank_abundance/rank_abundance_cols*.pdf rank_abundance/rank_abundance.pdf
+else
+rank_abundance/rank_abundance.pdf: otu_table.txt
+	@echo Plotting rank-abundance curves...
+	@test ! -d rank_abundance || rm -r rank_abundance
+	$(V)$(QIIME_PREFIX)plot_rank_abundance_graph.py -i otu_table.txt -s "$$(awk -F "\t" 'NR == 2 { printf("%s", $$2); for (i = 3; i < NF; i++) { printf(",%s", $$i); } printf("\n"); exit; }' otu_table.txt)" -o rank_abundance
+	mv rank_abundance/rank_abundance_cols*.pdf rank_abundance/rank_abundance.pdf
+endif
+
+endif
