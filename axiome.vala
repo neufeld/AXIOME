@@ -1031,19 +1031,24 @@ namespace AXIOME {
 		}
 
 		if (is_root) {
-			//Define our pipeline. This is mandatory.
-			var pipeline = Pipelines.parse(root->get_prop("pipeline"));
+			//Define our pipeline. Default to QIIME if not provided.
+			var pipeline = root->get_prop("pipeline");
 			if (pipeline == null) {
-				stderr.printf("%s: pipeline parameter must be provided. Options are: qiime, mothur.\n", filename);
-				delete doc;
-				return false;
+				output.pipeline = Pipelines.parse("qiime");
 			} else {
-				output.pipeline = pipeline;
+				var parsedPipe = Pipelines.parse(pipeline);
+				if (parsedPipe == null) {
+					stderr.printf("%s: Unrecognized pipeline option \"%s\". Valid options are qiime, mothur.\n", filename, pipeline);
+					delete doc;
+					return false;
+				} else {
+					output.pipeline = parsedPipe;
+				}
 			}
 
 			//This is only used by QIIME pipeline at the moment.
 			var phylo_method = root->get_prop("phylogeny-method");
-			if (pipeline.to_string() == "qiime") {
+			if (output.pipeline.to_string() == "qiime") {
 				if (phylo_method != null) {
 					switch (phylo_method.down()) {
 						case "raw-fasttreemp":
@@ -1109,7 +1114,7 @@ namespace AXIOME {
 					delete doc;
 					return false;
 				}
-				if (pipeline.to_string() == "qiime") {
+				if (output.pipeline.to_string() == "qiime") {
 					output.clust_ident = clust_ident;
 				} else {
 					//mothur uses distance, not similarity
@@ -1135,7 +1140,7 @@ namespace AXIOME {
 			}
 
 			var method = root->get_prop("otu-method");
-			if (pipeline.to_string() == "qiime") {
+			if (output.pipeline.to_string() == "qiime") {
 				if (method != null) {
 					switch (method.down()) {
 						case "cdhit":
@@ -1258,7 +1263,7 @@ namespace AXIOME {
 
 
 			var alignmethod = root->get_prop("align-method");
-			if (pipeline.to_string() == "qiime") {
+			if (output.pipeline.to_string() == "qiime") {
 				if (alignmethod != null) {
 					var val = AlignMethod.parse(alignmethod);
 					if (val == null) {
@@ -1291,7 +1296,7 @@ namespace AXIOME {
 					}
 			} else {
 				//alignment template is required for mothur
-				if (pipeline.to_string() == "mothur") {
+				if (output.pipeline.to_string() == "mothur") {
 					stderr.printf("%s: alignment-template parameter required for mothur pipeline.\n", filename);
 					delete doc;
 					return false;
@@ -1300,7 +1305,7 @@ namespace AXIOME {
 
 			var class_taxa = root->get_prop("classification-taxa");
 			var class_seqs = root->get_prop("classification-seqs");
-			if (pipeline.to_string() == "mothur") {
+			if (output.pipeline.to_string() == "mothur") {
 				if (class_taxa == null || class_seqs == null) {
 					stderr.printf("%s: classification-taxa and classification-seqs parameters are required for mothur pipeline.\n", filename);
 					delete doc;
@@ -1321,9 +1326,11 @@ namespace AXIOME {
 					output.class_seqs = class_seqs;
 				}
 			} else {
-					stderr.printf("%s: classification-taxa and classification-seqs parameters are only used with mothur pipeline. For QIIME pipeline, please see the rdp plugin.\n", filename);
-					delete doc;
-					return false;
+				if (class_taxa != null || class_seqs != null) {
+						stderr.printf("%s: classification-taxa and classification-seqs parameters are only used with mothur pipeline. For QIIME pipeline, please see the rdp plugin.\n", filename);
+						delete doc;
+						return false;
+				}
 			}
 
 			var verbose = root->get_prop("verbose");

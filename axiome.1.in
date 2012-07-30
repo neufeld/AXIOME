@@ -35,14 +35,14 @@ Included is a sample configuration file with all possible analyses enabled. The 
 .br
 .B </axiome>
 
-The pipeline definitions differ between QIIME and mothur.
+The pipeline definitions differ between QIIME and mothur. If the pipeline parameter shown below is omitted, QIIME will be used.
 
 QIIME pipeline definition:
 
 .br
 .B <axiome version="@VERSION@"
 .br
-  \fRpipeline="\fIqiime\fB"\fR
+  \fBpipeline="\fIqiime\fB"\fR
 .br
   \fR[\fBalign-method="\fImethod\fB"\fR]
 .br
@@ -66,13 +66,13 @@ mothur pipeline definition:
 
 .B <axiome version="@VERSION@"
 .br
-  \fBpipeline="\fImothur"\fB"\fR
+  \fBpipeline="\fImothur\fB"\fR
 .br
-  \fBalignment-template="\fI/path/to/alignment-model"\fR
+  \fBalignment-template="\fI/path/to/alignment-model\fB"\fR
 .br
   \fBclassification-taxa="\fI/path/to/classifier-taxonomy\fB"\fR
 .br
-  \fBclassification-seqs="\fI/path/to/classifier-sequences\fB"
+  \fBclassification-seqs="\fI/path/to/classifier-sequences\fB"\fR
 .br
   \fR[\fBcluster-identity="\fIvalue\fB"\fR]
 .br
