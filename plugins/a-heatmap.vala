@@ -20,9 +20,13 @@ class AXIOME.Analyses.Heatmap : RuleProcessor {
 		return true;
 	}
 	public override bool process(Xml.Node *definition, Output output) {
-
-		output.add_target("heatmap/otu_table.html");
-		output.add_rule("heatmap/otu_table.html: otu_table.txt mapping.txt\n\t@echo Creating OTU heatmap...\n\t$(V)test ! -d heatmap || rm -rf heatmap\n\t$(V)$(QIIME_PREFIX)make_otu_heatmap_html.py -i otu_table.txt -o heatmap/\n\n");
+		var pipeline = output.pipeline;
+		if (pipeline.to_string() == "mothur") {
+			definition_error(definition, "Heatmap plugin not available for mothur. Sorry! Skipping...\n");
+		} else if (pipeline.to_string() == "qiime") {
+			output.add_target("heatmap/otu_table.html");
+			output.add_rule("heatmap/otu_table.html: otu_table.txt mapping.txt\n\t@echo Creating OTU heatmap...\n\t$(V)test ! -d heatmap || rm -rf heatmap\n\t$(V)$(QIIME_PREFIX)make_otu_heatmap_html.py -i otu_table.txt -o heatmap/\n\n");
+		}
 		return true;
 	}
 }

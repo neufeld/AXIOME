@@ -2,23 +2,34 @@
 
 # Basic rules for doing an analysis via mothur.
 
-MOTHUR_ALIGN_TEMPLATE=/home/michael/qiime_software/core_set_aligned.fasta.imputed
-CLASSIFY_SEQS=/home/michael/Trainset7_112011.rdp/trainset7_112011.rdp.fasta
-CLASSIFY_TAXA=/home/michael/Trainset7_112011.rdp/trainset7_112011.rdp.tax
-CUTOFF ?= 0.10
-DISTANCE ?= 0.03
-
 ifeq ($(PIPELINE),MOTHUR)
 
+CLUSTER_IDENT ?= 0.03
+DIST_CUTOFF ?= 0.10
+OTU_PICKING_METHOD ?= an
+
+ifeq ($(OTU_PICKING_METHOD),an)
+OTU_METHOD_LONG = average
+else
+ifeq ($(OTU_PICKING_METHOD),fn)
+OTU_METHOD_LONG = furthest
+else
+ifeq ($(OTU_PICKING_METHOD),nn)
+OTU_METHOD_LONG = nearest
+endif
+endif
+endif
+
 mothur_seqs/seq.names mothur_seqs/seq.unique.fasta: seq.fasta
+	@echo OTU Method: $(OTU_PICKING_METHOD), long: $(OTU_METHOD_LONG)
 	@echo Collapsing identical sequences...
 	$(V)mothur "#unique.seqs(fasta=seq.fasta)" > /dev/null
 	$(V)test -d mothur_seqs || mkdir mothur_seqs
 	$(V)mv seq.unique.fasta seq.names mothur_seqs
 
-mothur_seqs/seq.unique.align: mothur_seqs/seq.unique.fasta $(MOTHUR_ALIGN_TEMPLATE)
+mothur_seqs/seq.unique.align: mothur_seqs/seq.unique.fasta $(ALIGNMENT_TEMPLATE)
 	@echo Aligning sequences...
-	$(V)mothur "#align.seqs(candidate=mothur_seqs/seq.unique.fasta, template=$(MOTHUR_ALIGN_TEMPLATE), processors=$(NUM_CORES))" > /dev/null
+	$(V)mothur "#align.seqs(candidate=mothur_seqs/seq.unique.fasta, template=$(ALIGNMENT_TEMPLATE), processors=$(NUM_CORES))" > /dev/null
 
 mothur_seqs/seq.unique.filter.fasta: mothur_seqs/seq.unique.align
 	@echo Filtering alignment...
@@ -26,46 +37,46 @@ mothur_seqs/seq.unique.filter.fasta: mothur_seqs/seq.unique.align
 
 mothur_seqs/seq.unique.filter.dist: mothur_seqs/seq.unique.filter.fasta
 	@echo Calculating distance matrix...
-	$(V)mothur "#dist.seqs(fasta=mothur_seqs/seq.unique.filter.fasta, cutoff=$(CUTOFF), processors=$(NUM_CORES))" > /dev/null
+	$(V)mothur "#dist.seqs(fasta=mothur_seqs/seq.unique.filter.fasta, cutoff=$(DIST_CUTOFF), processors=$(NUM_CORES))" > /dev/null
 
-mothur_seqs/seq.unique.filter.an.list: mothur_seqs/seq.unique.filter.dist mothur_seqs/seq.names
+mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).list: mothur_seqs/seq.unique.filter.dist mothur_seqs/seq.names
 	@echo Clustering sequences into OTUs...
-	$(V)mothur "#cluster(column=mothur_seqs/seq.unique.filter.dist, name=mothur_seqs/seq.names)" > /dev/null
+	$(V)mothur "#cluster(column=mothur_seqs/seq.unique.filter.dist, name=mothur_seqs/seq.names, method=$(OTU_METHOD_LONG))" > /dev/null
 
-mothur_seqs/seq.unique.filter.an.listfull: mothur_seqs/seq.unique.filter.an.list
+mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).listfull: mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).list
 	@echo Filling in missing distances up to cutoff...
-	$(V)awk -v cutoff=$(CUTOFF) 'BEGIN { FS="\t"; ORS=""; } { if (NR == 1) { old = 0.00; oldrow = $$0; print $$0; print "\n"; } else { new = old + 0.01; while ( new != $$1 ) { tab = index(oldrow, "\t"); printf "%3.2f", new; print "\t" substr(oldrow, tab+1) "\n"; new = new + 0.01; } print $$0; print "\n"; oldrow = $$0; old = $$1; } } END { new = old + 0.01; while ( new < cutoff ) { tab = index(oldrow, "\t"); printf "%3.2f", new; print "\t" substr(oldrow, tab+1) "\n"; new = new + 0.01; } } ' mothur_seqs/seq.unique.filter.an.list > mothur_seqs/seq.unique.filter.an.listfull
+	$(V)awk -v cutoff=$(DIST_CUTOFF) 'BEGIN { FS="\t"; ORS=""; } { if (NR == 1) { old = 0.00; oldrow = $$0; print $$0; print "\n"; } else { new = old + 0.01; while ( new < $$1-0.0001 ) { tab = index(oldrow, "\t"); printf "%3.2f", new; print "\t" substr(oldrow, tab+1) "\n"; new = new + 0.01; } print $$0; print "\n"; oldrow = $$0; old = $$1; } } END { new = old + 0.01; while ( new < cutoff ) { tab = index(oldrow, "\t"); printf "%3.2f", new; print "\t" substr(oldrow, tab+1) "\n"; new = new + 0.01; } } ' mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).list > mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).listfull
 
-mothur_seqs/seq.rdp.taxonomy: seq.fasta $(CLASSIFY_TAXA) $(CLASSIFY_SEQS) seq.group
+mothur_seqs/seq.rdp.taxonomy: seq.fasta $(CLASS_TAXA) $(CLASS_SEQS) seq.group
 	@echo Classifying sequences...
-	$(V)mothur "#classify.seqs(fasta=seq.fasta, template=$(CLASSIFY_SEQS), taxonomy=$(CLASSIFY_TAXA), processors=$(NUM_CORES), group=seq.group)" > /dev/null
+	$(V)mothur "#classify.seqs(fasta=seq.fasta, template=$(CLASS_SEQS), taxonomy=$(CLASS_TAXA), processors=$(NUM_CORES), group=seq.group)" > /dev/null
 	$(V)test -d mothur_seqs || mkdir mothur_seqs
 	$(V)mv seq.rdp.* mothur_seqs
 
-mothur_seqs/seq.unique.filter.an.$(DISTANCE).cons.taxonomy: mothur_seqs/seq.rdp.taxonomy mothur_seqs/seq.unique.filter.an.listfull mothur_seqs/seq.names
+mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).$(CLUSTER_IDENT).cons.taxonomy: mothur_seqs/seq.rdp.taxonomy mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).listfull mothur_seqs/seq.names
 	@echo Classifying OTUs...
-	$(V)mothur "#classify.otu(taxonomy=mothur_seqs/seq.rdp.taxonomy, list=mothur_seqs/seq.unique.filter.an.listfull, name=mothur_seqs/seq.names, label=$(DISTANCE))" > /dev/null
+	$(V)mothur "#classify.otu(taxonomy=mothur_seqs/seq.rdp.taxonomy, list=mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).listfull, name=mothur_seqs/seq.names, label=$(CLUSTER_IDENT))" > /dev/null
 
-mothur_seqs/seq.unique.filter.an.shared: mothur_seqs/seq.unique.filter.an.listfull seq.group
+mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).shared: mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).listfull seq.group
 	@echo Making shared file...
-	$(V)mothur "#make.shared(list=mothur_seqs/seq.unique.filter.an.listfull, group=seq.group, label=$(DISTANCE))" > /dev/null
+	$(V)mothur "#make.shared(list=mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).listfull, group=seq.group, label=$(CLUSTER_IDENT))" > /dev/null
 
-otu_table.txt: mothur_seqs/seq.unique.filter.an.shared mothur_seqs/seq.unique.filter.an.$(DISTANCE).cons.taxonomy
+otu_table.txt: mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).shared mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).$(CLUSTER_IDENT).cons.taxonomy
 	@echo Making OTU table...
-	$(V)mothur "#make.biom(shared=mothur_seqs/seq.unique.filter.an.shared, contaxonomy=mothur_seqs/seq.unique.filter.an.$(DISTANCE).cons.taxonomy)" > /dev/null
-	$(V)mv mothur_seqs/seq.unique.filter.an.$(DISTANCE).biom otu_table.txt
+	$(V)mothur "#make.biom(shared=mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).shared, contaxonomy=mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).$(CLUSTER_IDENT).cons.taxonomy)" > /dev/null
+	$(V)mv mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).$(CLUSTER_IDENT).biom otu_table.txt
 	@echo Moving mothur logs to logs directory...
 	$(V)test -d logs || mkdir logs
 	$(V)mv mothur.*.logfile logs
 
 alpha: alpha-chao.pdf
 
-alpha-chao.pdf: mothur_seqs/seq.unique.filter.an.groups.r_chao
+alpha-chao.pdf: mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).groups.r_chao
 	@echo Plotting alpha rarefaction curves...
-	$(V)aq-mothur-alpha mothur_seqs/seq.unique.filter.an.groups.r_chao > /dev/null
+	$(V)aq-mothur-alpha mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).groups.r_chao > /dev/null
 
-mothur_seqs/seq.unique.filter.an.groups.r_chao: mothur_seqs/seq.unique.filter.an.shared
+mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).groups.r_chao: mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).shared
 	@echo Performing alpha rarefaction using chao...
-	$(V)mothur "#rarefaction.single(shared=mothur_seqs/seq.unique.filter.an.shared, label=$(DISTANCE), calc=chao)"  
+	$(V)mothur "#rarefaction.single(shared=mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).shared, label=$(CLUSTER_IDENT), calc=chao)"  
 
 endif

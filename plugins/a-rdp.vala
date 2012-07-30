@@ -40,28 +40,34 @@ class AXIOME.Analyses.RDP : RuleProcessor {
 	 * Called for each tag, passed as defintion, to add rules to the nascent Makefile using Output.
 	 */
 	public override bool process(Xml.Node *definition, Output output) {
-		string rdp_flags = "";
+		var pipeline = output.pipeline;
+		if (pipeline.to_string() == "mothur") {
+			definition_error(definition, "mothur pipeline does not use RDP. Please remove RDP plugin from .ax file before continuing.\n");
+			return false;
+		} else if (pipeline.to_string() == "qiime") {
+			string rdp_flags = "";
 
-		var rdp_confidence = definition->get_prop("confidence");
-		if (rdp_confidence != null) {
-			double conf_val = double.parse(rdp_confidence);
-			if (conf_val >= 1 || conf_val <= 0) {
-				definition_error(definition, "RDP confidence must be between 0 and 1. Value given: \"%s\".\n", rdp_confidence);
-				return false;
-			} else {
-				rdp_flags += "-c ".concat(rdp_confidence, " ");
+			var rdp_confidence = definition->get_prop("confidence");
+			if (rdp_confidence != null) {
+				double conf_val = double.parse(rdp_confidence);
+				if (conf_val >= 1 || conf_val <= 0) {
+					definition_error(definition, "RDP confidence must be between 0 and 1. Value given: \"%s\".\n", rdp_confidence);
+					return false;
+				} else {
+					rdp_flags += "-c ".concat(rdp_confidence, " ");
+				}
 			}
-		}
 
-		var training_file = definition->get_prop("taxfile");
-		if (training_file != null) {
-			rdp_flags += "-t ".concat(training_file, " ");
+			var training_file = definition->get_prop("taxfile");
+			if (training_file != null) {
+				rdp_flags += "-t ".concat(training_file, " ");
+			}
+			var seq_file = definition->get_prop("seqfile");
+			if (seq_file != null) {
+				rdp_flags += "-r ".concat(seq_file, " ");
+			}
+			output.add_rulef("RDP_CLASSIFIER_FLAGS = %s\n\n", rdp_flags);
 		}
-		var seq_file = definition->get_prop("seqfile");
-		if (seq_file != null) {
-			rdp_flags += "-r ".concat(seq_file, " ");
-		}
-		output.add_rulef("RDP_CLASSIFIER_FLAGS = %s\n\n", rdp_flags);
 		return true;
 	}
 }

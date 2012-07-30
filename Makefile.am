@@ -9,6 +9,8 @@ bin_SCRIPTS = \
 	aq-fasta-length \
 	aq-inst-cran \
 	aq-libcontrib \
+	aq-mothur-base \
+	aq-mothur-alpha \
 	aq-mrpp \
 	aq-mrpp-unifrac \
 	aq-nmf \
@@ -26,6 +28,7 @@ bin_SCRIPTS = \
 	aq-pca \
 	aq-pcoa \
 	aq-pretendsummarize \
+	aq-qiime-base \
 	aq-qualityanal \
 	aq-rareotuwithlineage \
 	aq-sort-fasta \
@@ -73,6 +76,7 @@ man1_MANS = \
 	aq-marry-illumina-index.1 \
 	aq-marry-otu-names.1 \
 	aq-mkrepset.1 \
+	aq-mothur-alpha.1 \
 	aq-mrpp.1 \
 	aq-mrpp-unifrac.1 \
 	aq-nmf-concordance.1 \

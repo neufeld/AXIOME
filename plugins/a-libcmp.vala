@@ -20,15 +20,20 @@ class AXIOME.Analyses.LibraryComparison : RuleProcessor {
 		return true;
 	}
 	public override bool process(Xml.Node *definition, Output output) {
-		var taxlevel = TaxonomicLevel.parse(definition-> get_prop("level"));
-		if (taxlevel == null) {
-			definition_error(definition, "Unknown taxonomic level \"%s\" in library abundance comparison analysis.\n", definition-> get_prop("level"));
-			return false;
+		var pipeline = output.pipeline;
+		if (pipeline.to_string() == "mothur") {
+			definition_error(definition, "Library comparison plugin not available for mothur yet. Sorry! Skipping...\n");
+		} else if  (pipeline.to_string() == "qiime") {
+			var taxlevel = TaxonomicLevel.parse(definition-> get_prop("level"));
+			if (taxlevel == null) {
+				definition_error(definition, "Unknown taxonomic level \"%s\" in library abundance comparison analysis.\n", definition-> get_prop("level"));
+				return false;
+			}
+			var taxname = taxlevel.to_string();
+			output.make_summarized_otu(taxlevel, "");
+			output.add_target("correlation_%s.pdf".printf(taxname));
+			output.add_rulef("correlation_%s.pdf: otu_table_summarized_%s.txt mapping.extra\n\t@echo Comparing libraries at %s-level...\n\t$(V)aq-cmplibs %s\n\n", taxname, taxname, taxname, taxname);
 		}
-		var taxname = taxlevel.to_string();
-		output.make_summarized_otu(taxlevel, "");
-		output.add_target("correlation_%s.pdf".printf(taxname));
-		output.add_rulef("correlation_%s.pdf: otu_table_summarized_%s.txt mapping.extra\n\t@echo Comparing libraries at %s-level...\n\t$(V)aq-cmplibs %s\n\n", taxname, taxname, taxname, taxname);
 		return true;
 	}
 }

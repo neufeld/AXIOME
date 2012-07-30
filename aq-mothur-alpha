@@ -1,0 +1,48 @@
+#!/usr/bin/env Rscript
+
+args <- commandArgs(trailingOnly = TRUE)
+
+if (length(args) != 1) {
+	print("Error: Only one parameter required (alpha data filename).")
+	q()
+}
+
+file <- args[1]
+
+#Grab the tail end of the filename from mothur, which is the method
+calc <- tail(strsplit(file, "_")[[1]], n = 1)
+
+print("Reading alpha data from mothur")
+data <- read.table(file, header = FALSE, skip = 1, sep = "\t", col.names = c("numsamples", "group", "blank", "distance", "lci", "hci"))
+
+print("Reading mapping extra")
+extra <- read.table("mapping.extra", header = TRUE,
+    comment.char = "", row.names = "X.SampleID", sep = "\t")
+
+pdf(file=paste("alpha-", calc, ".pdf", sep=""))
+
+#Get the number of samples
+maxval <- max(data$group, na.rm=TRUE)
+#Get the min/max values for the axes
+xmin <- min(data$numsamples, na.rm=TRUE)
+xmax <- max(data$numsamples, na.rm=TRUE)
+ymin <- min(data$distance, na.rm=TRUE)
+ymax <- max(data$distance, na.rm=TRUE)
+
+#Set up a new plot
+print("Plotting alpha rarefaction curves")
+plot.new()
+plot.window(xlim=c(xmin, xmax), ylim=c(ymin,ymax))
+axis(1)
+axis(2)
+title(main="Alpha Rarefaction Plot", sub=paste("Source file:", file), xlab="Number Sampled", ylab="Number of OTUs")
+#Grab a rainbow for colour coding
+palette <- rainbow(n = maxval + 1)
+#Set up a legend
+legend(x="topleft",legend = extra$Description, fill=palette)
+#For each sample, plot the line
+for ( i in 0:maxval ) {
+	xdata = data[which(data$group == as.character(i)),"numsamples"]
+	ydata = data[which(data$group == as.character(i)),"distance"]
+	lines(xdata, ydata, col=palette[i+1])
+}

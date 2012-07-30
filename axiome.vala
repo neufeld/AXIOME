@@ -240,8 +240,7 @@ namespace AXIOME {
 
 	public enum Pipelines {
 		QIIME = 1,
-		MOTHUR = 2,
-		PHYLOSEQ = 3;
+		MOTHUR = 2;
 
 		public static Pipelines ? parse(string name) {
 			var enum_class = (EnumClass) typeof(Pipelines).class_ref();
@@ -351,7 +350,11 @@ namespace AXIOME {
 		internal string? otu_chimera_refseqs;
 		internal string? phylo_method;
 		internal string? clust_ident;
+		internal string? dist_cutoff;
 		internal string? otu_flags;
+		internal string? alignment_template;
+		internal string? class_taxa;
+		internal string? class_seqs;
 		internal AlignMethod alignmethod;
 		/**
 		 * The defined variables and their types.
@@ -488,9 +491,6 @@ namespace AXIOME {
 				case "mothur":
 					makefile.printf("\n\nPIPELINE = MOTHUR\n");
 					break;
-				case "phyloseq":
-					makefile.printf("\n\nPIPELINE = PHYLOSEQ\n");
-					break;
 				default:
 					makefile.printf("\n\nPIPELINE = QIIME\n");
 					break;
@@ -528,8 +528,20 @@ namespace AXIOME {
 			if (clust_ident != null) {
 				makefile.printf("CLUSTER_IDENT = %s\n", clust_ident);
 			}
+			if (dist_cutoff != null) {
+				makefile.printf("DIST_CUTOFF = %s\n", dist_cutoff);
+			}
 			if (otu_flags != null) {
 				makefile.printf("OTU_FLAGS = %s\n", otu_flags);
+			}
+			if (alignment_template != null) {
+				makefile.printf("ALIGNMENT_TEMPLATE = %s\n", alignment_template);
+			}
+			if (class_taxa != null) {
+				makefile.printf("CLASS_TAXA = %s\n", class_taxa);
+			}
+			if (class_seqs != null) {
+				makefile.printf("CLASS_SEQS = %s\n", class_seqs);
 			}
 			if (verbose) {
 				makefile.printf("V = \n");
@@ -1019,63 +1031,76 @@ namespace AXIOME {
 		}
 
 		if (is_root) {
+			//Define our pipeline. This is mandatory.
 			var pipeline = Pipelines.parse(root->get_prop("pipeline"));
-			if (pipeline == null){
-				stderr.printf("%s: pipeline parameter must be provided. Options are: qiime, mothur, phyloseq.\n", filename);
+			if (pipeline == null) {
+				stderr.printf("%s: pipeline parameter must be provided. Options are: qiime, mothur.\n", filename);
 				delete doc;
 				return false;
 			} else {
 				output.pipeline = pipeline;
 			}
 
+			//This is only used by QIIME pipeline at the moment.
 			var phylo_method = root->get_prop("phylogeny-method");
-			if (phylo_method != null) {
-				switch (phylo_method.down()) {
-					case "raw-fasttreemp":
-					case "raw-fasttree-mp":
-					case "rawfasttreemp":
-						output.phylo_method = "raw-fasttreemp";
-						break;
-					case "raw-fasttree":
-					case "rawfasttree":
-						output.phylo_method = "raw-fasttree";
-						break;
-					case "fasttree":
-					case "fast-tree":
-						output.phylo_method = "fasttree";
-						break;
-					case "clearcut":
-					case "clear-cut":
-						output.phylo_method = "clearcut";
-						break;
-					case "clustalw":
-					case "clustal":
-					case "clust":
-						output.phylo_method = "clustalw";
-						break;
-					case "fasttree_v1":
-					case "fasttreev1":
-					case "fast-tree_v1":
-					case "fast-treev1":
-						output.phylo_method = "fasttree_v1";
-						break;
-					case "raxml":
-					case "rax":
-						output.phylo_method = "raxml";
-						break;
-					case "raxml_v730":
-					case "raxml730":
-						output.phylo_method = "raxml_v730";
-						break;
-					case "muscle":
-						output.phylo_method = "muscle";
-						break;
-					default:
-						stderr.printf("%s: Unknown Phylogeny method \"%s\".\n", filename, phylo_method);
-						delete doc;
-						return false;
+			if (pipeline.to_string() == "qiime") {
+				if (phylo_method != null) {
+					switch (phylo_method.down()) {
+						case "raw-fasttreemp":
+						case "raw-fasttree-mp":
+						case "rawfasttreemp":
+							output.phylo_method = "raw-fasttreemp";
+							break;
+						case "raw-fasttree":
+						case "rawfasttree":
+							output.phylo_method = "raw-fasttree";
+							break;
+						case "fasttree":
+						case "fast-tree":
+							output.phylo_method = "fasttree";
+							break;
+						case "clearcut":
+						case "clear-cut":
+							output.phylo_method = "clearcut";
+							break;
+						case "clustalw":
+						case "clustal":
+						case "clust":
+							output.phylo_method = "clustalw";
+							break;
+						case "fasttree_v1":
+						case "fasttreev1":
+						case "fast-tree_v1":
+						case "fast-treev1":
+							output.phylo_method = "fasttree_v1";
+							break;
+						case "raxml":
+						case "rax":
+							output.phylo_method = "raxml";
+							break;
+						case "raxml_v730":
+						case "raxml730":
+							output.phylo_method = "raxml_v730";
+							break;
+						case "muscle":
+							output.phylo_method = "muscle";
+							break;
+						default:
+							stderr.printf("%s: Unknown Phylogeny method \"%s\".\n", filename, phylo_method);
+							delete doc;
+							return false;
+					}
+				}
+			} else {
+				if (phylo_method != null) {
+					stderr.printf("%s: phylo-method parameter is not compatible with mothur pipeline. Please remove.\n", filename);
+					delete doc;
+					return false;
 				}
 			}
+
+			//Clustering identity. QIIME uses similarity, ie 0.97 for species level
+			//mothur uses distance, ie 0.03 for species level
 			var clust_ident = root->get_prop("cluster-identity");
 			if (clust_ident != null) {
 				double ident_val = double.parse(clust_ident);
@@ -1084,107 +1109,221 @@ namespace AXIOME {
 					delete doc;
 					return false;
 				}
-				output.clust_ident = clust_ident;
+				if (pipeline.to_string() == "qiime") {
+					output.clust_ident = clust_ident;
+				} else {
+					//mothur uses distance, not similarity
+					double dist_val = 1 - ident_val;
+					double cutoff_val = dist_val + 0.05;
+					clust_ident = dist_val.to_string();
+					string dist_cutoff = cutoff_val.to_string();
+					//Double conversion to string causes odd decimal place issues
+					//If the value is larger than 4 characters, slice it down
+					if (clust_ident.length > 4) {
+						clust_ident = clust_ident.slice(0,4);
+					}
+					if (dist_cutoff.length > 4) {
+						dist_cutoff = dist_cutoff.slice(0,4);
+					}
+					//Special case: mothur calls 0% distance "unique"
+					if (ident_val == 0) {
+						clust_ident = "unique";
+					}
+					output.dist_cutoff = dist_cutoff;
+					output.clust_ident = clust_ident;
+				}
 			}
 
 			var method = root->get_prop("otu-method");
-			if (method != null) {
-				switch (method.down()) {
-					case "cdhit":
-					case "cd-hit":
+			if (pipeline.to_string() == "qiime") {
+				if (method != null) {
+					switch (method.down()) {
+						case "cdhit":
+						case "cd-hit":
+							output.otu_method = "cdhit";
+							break;
+						case "uclust":
+							output.otu_method = "uclust";
+							break;
+						case "raw-uclust":
+						case "rawuclust":
+							output.otu_method = "raw-uclust";
+							break;
+						case "raw-cdhit":
+						case "rawcdhit":
+						case "raw-cd-hit":
+						case "rawcd-hit":
+							output.otu_method = "raw-cdhit";
+							break;
+						case "uclust-ref":
+						case "uclust_ref":
+						case "uclustref":
+							var uclustref = root->get_prop("otu-refseqs");
+							if (uclustref == null) {
+								stderr.printf("%s: otu-refseqs argument must be provided for uclust_ref OTU picking method.", filename);
+								delete doc;
+								return false;
+							}
+							output.otu_method = "uclust_ref";
+							output.otu_refseqs = uclustref;
+							break;
+						case "usearch-ref":
+						case "usearch_ref":
+						case "usearchref":
+							var usearchref = root->get_prop("otu-refseqs");
+							if (usearchref == null) {
+								stderr.printf("%s: otu-refseqs argument must be provided for usearch_ref OTU picking method.", filename);
+								delete doc;
+								return false;
+							}
+							output.otu_method = "usearch_ref";
+							output.otu_refseqs = usearchref;
+							break;
+						case "blast":
+							var blastref = root->get_prop("otu-refseqs");
+							var blastdb = root->get_prop("otu-blastdb");
+							if (blastref == null && blastdb == null) {
+								stderr.printf("%s: otu-refseqs or otu-blastdb argument must be provided for BLAST OTU picking method.", filename);
+								delete doc;
+								return false;
+							}
+							if (blastref != null && blastdb != null) {
+								stderr.printf("%s: Only one of otu-refseqs or otu-blastdb may be used for BLAST OTU picking method.", filename);
+								delete doc;
+								return false;
+							}
+							output.otu_method = "blast";
+							output.otu_refseqs = blastref;
+							output.otu_blastdb = blastdb;
+							break;
+						case "trie":
+							output.otu_method = "trie";
+							break;
+						case "mothur":
+						case "mother":
+							output.otu_method = "mothur";
+							break;
+						case "prefix_suffix":
+						case "prefix-suffix":
+						case "prefixsuffix":
+							output.otu_method = "prefix_suffix";
+							break;
+						case "usearch":
+							output.otu_method = "usearch";
+							output.otu_chimera_refseqs = root->get_prop("otu-refseqs");
+							break;
+						default:
+							stderr.printf("%s: Unknown OTU picking method \"%s\".\n", filename, method);
+							delete doc;
+							return false;
+					}
+				} else {
 						output.otu_method = "cdhit";
-						break;
-					case "uclust":
-						output.otu_method = "uclust";
-						break;
-					case "raw-uclust":
-					case "rawuclust":
-						output.otu_method = "raw-uclust";
-						break;
-					case "raw-cdhit":
-					case "rawcdhit":
-					case "raw-cd-hit":
-					case "rawcd-hit":
-						output.otu_method = "raw-cdhit";
-						break;
-					case "uclust-ref":
-					case "uclust_ref":
-					case "uclustref":
-						var uclustref = root->get_prop("otu-refseqs");
-						if (uclustref == null) {
-							stderr.printf("%s: otu-refseqs argument must be provided for uclust_ref OTU picking method.", filename);
-							delete doc;
-							return false;
-						}
-						output.otu_method = "uclust_ref";
-						output.otu_refseqs = uclustref;
-						break;
-					case "usearch-ref":
-					case "usearch_ref":
-					case "usearchref":
-						var usearchref = root->get_prop("otu-refseqs");
-						if (usearchref == null) {
-							stderr.printf("%s: otu-refseqs argument must be provided for usearch_ref OTU picking method.", filename);
-							delete doc;
-							return false;
-						}
-						output.otu_method = "usearch_ref";
-						output.otu_refseqs = usearchref;
-						break;
-					case "blast":
-						var blastref = root->get_prop("otu-refseqs");
-						var blastdb = root->get_prop("otu-blastdb");
-						if (blastref == null && blastdb == null) {
-							stderr.printf("%s: otu-refseqs or otu-blastdb argument must be provided for BLAST OTU picking method.", filename);
-							delete doc;
-							return false;
-						}
-						if (blastref != null && blastdb != null) {
-							stderr.printf("%s: Only one of otu-refseqs or otu-blastdb may be used for BLAST OTU picking method.", filename);
-							delete doc;
-							return false;
-						}
-						output.otu_method = "blast";
-						output.otu_refseqs = blastref;
-						output.otu_blastdb = blastdb;
-						break;
-					case "trie":
-						output.otu_method = "trie";
-						break;
-					case "mothur":
-					case "mother":
-						output.otu_method = "mothur";
-						break;
-					case "prefix_suffix":
-					case "prefix-suffix":
-					case "prefixsuffix":
-						output.otu_method = "prefix_suffix";
-						break;
-					case "usearch":
-						output.otu_method = "usearch";
-						output.otu_chimera_refseqs = root->get_prop("otu-refseqs");
-						break;
-					default:
-						stderr.printf("%s: Unknown OTU picking method \"%s\".\n", filename, method);
-						delete doc;
-						return false;
 				}
+				//Grab additional flags for QIIME
+				output.otu_flags = root->get_prop("otu-flags");
+
+			//mothur OTU options
+			} else {
+					if (method != null) {
+						switch (method.down()) {
+							case "an":
+							case "average":
+							case "average neighbor":
+							case "averageneighbor":
+								output.otu_method = "an";
+								break;
+							case "fn":
+							case "furthest":
+							case "furthest neighbor":
+							case "furthestneighbor":
+								output.otu_method = "fn";
+								break;
+							case "nn":
+							case "nearest":
+							case "nearest neighbor":
+							case "nearestneighbor":
+								output.otu_method = "nn";
+								break;
+							default:
+								stderr.printf("%s: Unknown OTU picking method \"%s\".\n", filename, method);
+								delete doc;
+								return false;
+							}
+					} else {
+						//mothur OTU default
+						output.otu_method = "an";
+					}
 			}
 
-			output.otu_flags = root->get_prop("otu-flags");
 
 			var alignmethod = root->get_prop("align-method");
-			if (alignmethod != null) {
-				var val = AlignMethod.parse(alignmethod);
-				if (val == null) {
-					stderr.printf("%s: Unknown alignment method \"%s\".\n", filename, alignmethod);
+			if (pipeline.to_string() == "qiime") {
+				if (alignmethod != null) {
+					var val = AlignMethod.parse(alignmethod);
+					if (val == null) {
+						stderr.printf("%s: Unknown alignment method \"%s\".\n", filename, alignmethod);
+						delete doc;
+						return false;
+					}
+					output.alignmethod = val;
+				} else {
+					// Set default to PYNAST
+					output.alignmethod = AlignMethod.PYNAST;
+				}
+			} else {
+				if (alignmethod != null) {
+					stderr.printf("%s: align-method parameter is not compatible with mothur pipeline. Please remove.\n", filename);
 					delete doc;
 					return false;
 				}
-				output.alignmethod = val;
+			}
+
+			var alignment_template = root->get_prop("alignment-template");
+			if (alignment_template != null) {
+				var template_file = File.new_for_path(alignment_template);
+					if (! template_file.query_exists()) {
+						stderr.printf ("%s: Alignment template file \"%s\" doesn't exist.\n", filename, alignment_template);
+						delete doc;
+						return false;
+					} else {
+						output.alignment_template = alignment_template;
+					}
 			} else {
-				// Set default to PYNAST
-				output.alignmethod = AlignMethod.PYNAST;
+				//alignment template is required for mothur
+				if (pipeline.to_string() == "mothur") {
+					stderr.printf("%s: alignment-template parameter required for mothur pipeline.\n", filename);
+					delete doc;
+					return false;
+				}
+			}
+
+			var class_taxa = root->get_prop("classification-taxa");
+			var class_seqs = root->get_prop("classification-seqs");
+			if (pipeline.to_string() == "mothur") {
+				if (class_taxa == null || class_seqs == null) {
+					stderr.printf("%s: classification-taxa and classification-seqs parameters are required for mothur pipeline.\n", filename);
+					delete doc;
+					return false;
+				} else {
+					var class_taxa_file = File.new_for_path(class_taxa);
+					var class_seqs_file = File.new_for_path(class_seqs);
+					if (! class_taxa_file.query_exists()) {
+						stderr.printf("%s: Classification taxa file \"%s\" doesn't exist.\n", filename, class_taxa);
+						delete doc;
+						return false;
+					} else if (! class_seqs_file.query_exists()) {
+						stderr.printf("%s: Classifications seqs file \"%s\" doesn't exist.\n", filename, class_seqs);
+						delete doc;
+						return false;
+					}
+					output.class_taxa = class_taxa;
+					output.class_seqs = class_seqs;
+				}
+			} else {
+					stderr.printf("%s: classification-taxa and classification-seqs parameters are only used with mothur pipeline. For QIIME pipeline, please see the rdp plugin.\n", filename);
+					delete doc;
+					return false;
 			}
 
 			var verbose = root->get_prop("verbose");
