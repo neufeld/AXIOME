@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="AXIOME : AXIOME - Automation, Extension, and Integration Of Microbial Ecology: Helper tools to make managing numerical ecology pipelines easier" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>AXIOME</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/neufeld/AXIOME">View on GitHub</a>
+
+          <h1 id="project_title">AXIOME</h1>
+          <h2 id="project_tagline">AXIOME - Automation, Extension, and Integration Of Microbial Ecology: Helper tools to make managing numerical ecology pipelines easier</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/neufeld/AXIOME/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/neufeld/AXIOME/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>AXIOME is a way of automating analyses with the <a href="http://qiime.sourceforge.net/">QIIME</a> (Quantitative Insights Into Microbial Ecology) and <a href="http://mothur.org">mothur</a> toolkits. Given a file of input data and analyses, it generates a Makefile to perform the analyses. It also includes other analyses not found in QIIME or mothur.</p>
+
+<h1>Dependencies</h1>
+
+<p>To build, you will need: GNU autotools, valac, libgee-dev, libmagic-dev, zlib1g-dev, libbz2-dev, libxml2-dev</p>
+
+<p>To run, it will need: gawk, make, bzip2, gzip, and R.</p>
+
+<p>Some features require: pandaseq, blast2, gnuplot</p>
+
+<h1>Install</h1>
+
+<p>Ubuntu users can <a href="https://launchpad.net/%7Eneufeldlab/+archive/ppa/">download packages</a>. These can be installed with: <code>sudo apt-add-repository ppa:neufeldlab/ppa &amp;&amp; sudo apt-get update &amp;&amp; sudo apt-get install axiome</code>.</p>
+
+<p>The source package can be built with <code>./autogen.sh &amp;&amp; ./configure &amp;&amp; make &amp;&amp; make install</code>.</p>
+
+<p>AXIOME can be installed on MacOS, but it is somewhat tricky. Install all the packages needed using Fink or MacPorts. You will then have to manually upgrade <a href="http://ftp.gnome.org/pub/gnome/sources/glib/">GLib</a> to at least 2.31.0 and <a href="http://ftp.gnome.org/pub/gnome/sources/libgee/">Gee</a> to 0.6 and install them both on top of the version managed by Fink. <a href="http://ftp.acc.umu.se/pub/gnome/sources/vala/">Vala</a> is required, but not available in Fink. Install at least version 0.14, but the latest version is recommended.</p>
+
+<h1>Usage</h1>
+
+<p>AXIOME automates the activity of QIIME using a main tool called axiome and a configuration file. A sample configuration file is included, called sample.ax. Information about how to use the tool and the contents of the configuration file can be found in the manual page, which can be viewed by typing man axiome or using the <a>Linux GUI help</a>.</p>
+
+<h1>License</h1>
+
+<p><a href="http://gplv3.fsf.org/">GPLv3+</a></p>
+
+<h1>Authors</h1>
+
+<p>Michael Hall (<a href="mwhall@uwaterloo.ca">mwhall@uwaterloo.ca</a>)</p>
+
+<p>Michael Lynch (<a href="mdjlynch@gmail.com">mdjlynch@gmail.com</a>)</p>
+
+<p>Andre Masella (<a href="andre@masella.name">andre@masella.name</a>)</p>
+
+<h1>Contact</h1>
+
+<p>Dr. Josh Neufeld (<a href="jneufeld@uwaterloo.ca">jneufeld@uwaterloo.ca</a>)</p>
+
+<h1>Download</h1>
+
+<p>You can download this project in either <a href="http://github.com/neufeld/axiome/zipball/master">zip</a> or <a href="http://github.com/neufeld/axiome/tarball/master">tar</a> formats. It can be installed and updated automatically on Ubuntu system from <a href="https://launchpad.net/%7Eneufeldlab/+archive/ppa">Neufeld Lab's PPA</a>.</p>
+
+<p>You can also clone the project with <a href="http://git-scm.com/">Git</a> by running:</p>
+
+<pre><code>$ git clone git://github.com/neufeld/axiome
+</code></pre>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">AXIOME maintained by <a href="https://github.com/neufeld">neufeld</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
