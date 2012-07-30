@@ -20,29 +20,12 @@ Normally, one creates a input file with a \fB.ax\fR extension. After running AXI
 
 If \fBmake\fR is interrupted, invoking it again will continue, repeating only the last command. Furthermore, if input files are changed, \fBmake\fR will attempt to return the minimum number of commands needed to update the analysis. Sometimes, this does not work as expected and deleting \fBseq.fasta\fR will guarantee all files will be rebuilt.
 .SH CONFIGURATION FILE
-Included is a sample configuration file with all possible analyses enabled. The configuration file has three components: definitions, assemblies, and analyses. File will look like this.
+Included is a sample configuration file with all possible analyses enabled. The configuration file has four components: pipeline, definitions, assemblies, and analyses.
 
 .B <?xml version="1.0"?>
 .br
-.B <axiome version="@VERSION@"
 .br
-	\fR[\fBalign-method="\fImethod\fB"\fR]\fB
-.br
-	\fR[\fBcluster-identity="\fIvalue\fB"\fR]\fB
-.br
-	\fR[\fBotu-blastdb="\fI/path/to/blastdb\fB"\fR]\fB
-.br
-	\fR[\fBotu-flags="\fIflags\fB"\fR]\fB
-.br
-	\fR[\fBotu-method="\fImethod\fB"\fR]\fB
-.br
-	\fR[\fBotu-refseqs="\fI/path/to/refseqs\fB"\fR]\fB
-.br
-	\fR[\fBphylogeny-method="\fImethod\fB"\fR]\fB
-.br
-	\fR[\fBverbose="\fIvalue\fB"\fR]\fB
-.br
->
+.I Pipeline
 .br
 .I Definitions
 .br
@@ -52,13 +35,66 @@ Included is a sample configuration file with all possible analyses enabled. The 
 .br
 .B </axiome>
 
+The pipeline definitions differ between QIIME and mothur.
+
+QIIME pipeline definition:
+
+.br
+.B <axiome version="@VERSION@"
+.br
+  \fRpipeline="\fIqiime\fB"\fR
+.br
+  \fR[\fBalign-method="\fImethod\fB"\fR]
+.br
+  \fR[\fBcluster-identity="\fIvalue\fB"\fR]
+.br
+  \fR[\fBotu-blastdb="\fI/path/to/blastdb\fB"\fR]
+.br
+  \fR[\fBotu-flags="\fIflags\fB"\fR]
+.br
+  \fR[\fBotu-method="\fImethod\fB"\fR]
+.br
+  \fR[\fBotu-refseqs="\fI/path/to/refseqs\fB"\fR]
+.br
+  \fR[\fBphylogeny-method="\fImethod\fB"\fR]
+.br
+  \fR[\fBverbose="\fIvalue\fB"\fR]
+.br
+\fB>\fR
+
+mothur pipeline definition:
+
+.B <axiome version="@VERSION@"
+.br
+  \fBpipeline="\fImothur"\fB"\fR
+.br
+  \fBalignment-template="\fI/path/to/alignment-model"\fR
+.br
+  \fBclassification-taxa="\fI/path/to/classifier-taxonomy\fB"\fR
+.br
+  \fBclassification-seqs="\fI/path/to/classifier-sequences\fB"
+.br
+  \fR[\fBcluster-identity="\fIvalue\fB"\fR]
+.br
+  \fR[\fBotu-method="\fImethod\fB"\fR]
+.br
+  \fR[\fBverbose="\fIvalue\fB"\fR]
+.br
+\fB>\fR
+
 The version is used to check that a file is not newer than the version of AXIOME being used.
 
 By default, AXIOME will try to be quiet and hide the (ugly) commands used to do the analysis. If you wish to see them, set \fBverbose="true"\fR or run \fBmake V=\fR.
 
-The method used to pick OTUs can be defined by the otu-method parameter. Options are: \fBusearch\fR, \fBusearch_ref\fR, \fBprefix_suffix\fR, \fBmothur\fR, \fBtrie\fR, \fBblast\fR, \fBuclust_ref\fR, \fBcdhit\fR, \fBraw-cdhit\fR, \fBuclust\fR and \fBraw-uclust\fR. The \fBraw\fR options make direct calls to the tools rather than using QIIME's \fBpick_otus.py\fR script. Multicore support is used for \fBraw-cdhit\fR, \fBuclust_ref\fR and \fBblast\fR methods when the multicore plugin is used. \fBusearch_ref\fR and \fBuclust_ref\fR require the \fBotu-refseqs\fR parameter be set to the filepath of reference sequences. \fBblast\fR requires that either the \fBotu-refseqs\fR parameter or the \fBotu-blastdb\fR parameter is set to a valid reference file (but not both). The \fBotu-flags\fR option allows passing the QIIME scripts any arbitary flags that the \fBpick_otus.py\fR script accepts (but note that for each method, some flags may already be set). The OTU clustering identity (similarity) can be set with \fBcluster-identity\fR with a value between 0 and 1; default is 0.97 if left blank.
+A mothur analysis must have an alignment model specified with \fBalignment-model\fR, a classification taxonomy file specified with \fBclassification-taxa\fR, and a classification sequences file specified with \fBclassification-seqs\fR.
 
-The alignment method used can be specified with \fBalign-method\fR as one of \fBinfernal\fR, \fBmuscle\fR, and \fBpynast\fR; the default is \fBpynast\fR. The phylogeny method can be set with \fBphylogeny-method\fR, with valid options: \fBfasttree\fR, \fBfasttree_v1\fR, \fBraw-fasttree\fR, \fBraw-fasttreemp\fR (uses multicore FastTreeMP, which must be installed manually), \fBclustalw\fR, \fBclearcut\fR, \fBraxm\fRl, \fBraxml_v730\fR, or \fBmuscle\fR. If not included, AXIOME defaults to \fBfasttree\fR. The \fBraw-fasttree\fR option calls FastTree without using QIIME's \fBmake_phylogeny.py\fR script.
+The method used to pick OTUs can be defined by the otu-method parameter. For QIIME, options are: \fBusearch\fR, \fBusearch_ref\fR, \fBprefix_suffix\fR, \fBmothur\fR, \fBtrie\fR, \fBblast\fR, \fBuclust_ref\fR, \fBcdhit\fR, \fBraw-cdhit\fR, \fBuclust\fR and \fBraw-uclust\fR. The \fBraw\fR options make direct calls to the tools rather than using QIIME's \fBpick_otus.py\fR script. Multicore support is used for \fBraw-cdhit\fR, \fBuclust_ref\fR and \fBblast\fR methods when the multicore plugin is used. \fBusearch_ref\fR and \fBuclust_ref\fR require the \fBotu-refseqs\fR parameter be set to the filepath of reference sequences. \fBblast\fR requires that either the \fBotu-refseqs\fR parameter or the \fBotu-blastdb\fR parameter is set to a valid reference file (but not both). The \fBotu-flags\fR option allows passing the QIIME scripts any arbitary flags that the \fBpick_otus.py\fR script accepts (but note that for each method, some flags may already be set).
+
+For mothur, otu-method options are: \fBaverage\fR (default), \fBnearest\fR, \fBfurthest\fR.
+
+The OTU clustering identity (similarity) can be set with \fBcluster-identity\fR with a value between 0 and 1; default is 0.97 if left blank.
+
+The alignment method used by QIIME can be specified with \fBalign-method\fR as one of \fBinfernal\fR, \fBmuscle\fR, and \fBpynast\fR; the default is \fBpynast\fR. The phylogeny method can be set with \fBphylogeny-method\fR, with valid options: \fBfasttree\fR, \fBfasttree_v1\fR, \fBraw-fasttree\fR, \fBraw-fasttreemp\fR (uses multicore FastTreeMP, which must be installed manually), \fBclustalw\fR, \fBclearcut\fR, \fBraxm\fRl, \fBraxml_v730\fR, or \fBmuscle\fR. If not included, AXIOME defaults to \fBfasttree\fR. The \fBraw-fasttree\fR option calls FastTree without using QIIME's \fBmake_phylogeny.py\fR script.
 
 Definitions are a list of properties associated with the samples. These are usual physical or chemical information such as sampling time, pH, temperature, humidity, and location. As many properties as needed can be specified and each property can have a type so that incorrect information cannot be entered (e.g., enforcing that "year" be a whole number).
 
@@ -97,10 +133,10 @@ The version of the CASAVA pipeline that generated the sequences must be specifie
 Since read files are often multiplexed, multiple samples can be specified. For each sample, include \fB<sample tag="\fItag\fB" \fR[\fBlimit="\fIlimit\fB"\fR]\fB \fIdefs\fB/>\fR where \fIdefs\fR includes a value for each definition noted above. Specify the 6 nucleotide Illumina sequencing bar code as \fItag\fR. To only allow some of the sequences, set \fIlimit\fR to the desired number of sequences.
 .TP
 \fB<alpha/>\fR
-Do a basic alpha diversity analysis (i.e., QIIME's Chao1 curves).
+Do a basic alpha diversity analysis (i.e., QIIME's Chao1 curves). Available pipelines: QIIME, mothur
 .TP
 \fB<beta \fR[\fBlevel="\fIlevel\fB"\fR]\fB \fR[\fBsize="\fIsize\fB"\fR]\fB \fR[\fBtaxa="\fIdepth\fB"\fR]\fB \fR[\fBbackground="\fIcolour\fB"\fR]\fB/>\fR
-Do a QIIME beta diversity analysis and produce biplots and bubble plots. QIIME normally uses summarised taxa for the plots, so the taxonomic level can be specified; if it is omitted, OTUs are used instead. The library may be rarefied to a particular size by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect. Specifying \fItaxa\fR can limit the number of taxa that appear in the biplot; the default is 10 and \fBall\fR can be specified if desired. The background colour can also be specified using the \fBbackground\fR attribute. The colour is interpreted by QIIME. The default is \fBwhite\fR, despite \fBblack\fR seeming to be the popular choice.
+Do a QIIME beta diversity analysis and produce biplots and bubble plots. QIIME normally uses summarised taxa for the plots, so the taxonomic level can be specified; if it is omitted, OTUs are used instead. The library may be rarefied to a particular size by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect. Specifying \fItaxa\fR can limit the number of taxa that appear in the biplot; the default is 10 and \fBall\fR can be specified if desired. The background colour can also be specified using the \fBbackground\fR attribute. The colour is interpreted by QIIME. The default is \fBwhite\fR, despite \fBblack\fR seeming to be the popular choice. Available pipeline: QIIME
 .TP
 \fB<blast \fR[\fBtitle="\fItitle\fB"\fR]\fB \fR[\fBcommand="\fIblastdbcommand\fB"\fR]\fB/>\fR
 Build a BLAST database over the sequences. This requires
@@ -109,70 +145,75 @@ or
 .BR makeblastdb (1)
 to be installed. A script called \fBblast\fR will be produced that will invoke
 .BR blastall (1)
-pointing to the appropriate database. The database may optionally be given a friendly name, \fItitle\fR. If one is not provided, it will be inferred from the file name. Valid command options are: formatdb, makeblastdb. Default is formatdb.
+pointing to the appropriate database. The database may optionally be given a friendly name, \fItitle\fR. If one is not provided, it will be inferred from the file name. Valid command options are: formatdb, makeblastdb. Default is formatdb. Available pipeline: QIIME
 .TP
 \fB<compare level="\fIlevel\fB"/>\fR
-Compare libraries on a plot to see if one is a superset of another. This is useful if one sample which is (possibly) a subsample of another. This uses summarised taxa, not OTUs, so the taxonomic level for the analysis must be specified.
+Compare libraries on a plot to see if one is a superset of another. This is useful if one sample which is (possibly) a subsample of another. This uses summarised taxa, not OTUs, so the taxonomic level for the analysis must be specified. Available pipeline: QIIME
 .TP
 \fB<duleg \fR[\fBp="\fIplimit\fB"\fR]\fB/>\fR
 Compute Dufrene-Legendre indicator species analysis in R using optional parameter \fIp\fR as p-value cut-off (default is 0.05). For more information, see
 .BR aq-duleg (1), aq-otudulegmerge (1).
+Available pipelines: QIIME, mothur
 .TP
 \fB<heatmap/>\fR
-Create an OTU heatmap based on the OTU table using QIIME's make_otu_heatmap_html.py script.
+Create an OTU heatmap based on the OTU table using QIIME's make_otu_heatmap_html.py script. Available pipeline: QIIME
 .TP
 \fB<jackknife [size="\fIsize\fB"]/>\fR
-Create 2D and 3D PCoA plots based on jackknifing (repeated subsampling) of the OTU table using QIIME's jackknifed_beta_diversity.py script. Size must be a positive number that is no larger than the largest number of sequences in a sample.
+Create 2D and 3D PCoA plots based on jackknifing (repeated subsampling) of the OTU table using QIIME's jackknifed_beta_diversity.py script. Size must be a positive number that is no larger than the largest number of sequences in a sample. Available pipeline: QIIME
 .TP
 \fB<mrpp [method="\fImethod\fB"]/>\fR
 Compute Multi Response Permutation Procedure of within-versus among-group dissimilarities in R using one of the following options: "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao" or "cao". If no method supplied, defaults to Bray-Curtis ("bray"). For more information, see
 .BR aq-mrpp (1).
+Available pipelines: QIIME, mothur
 .TP
 \fB<multicore num-cores="\fInumber\fB"/>\fR
-Specifies that the analysis is being run on a multicore system. A value for the number of cores must be specified, and all multicore capable analyses will use this number of cores. It must be less than or equal to the number of cores available to the system. This definition must be placed above all other analysis definitions that you wish to run using multiple cores. Please note that not all steps support multiple cores.
+Specifies that the analysis is being run on a multicore system. A value for the number of cores must be specified, and all multicore capable analyses will use this number of cores. It must be less than or equal to the number of cores available to the system. This definition must be placed above all other analysis definitions that you wish to run using multiple cores. Please note that not all steps support multiple cores. Available pipelines: QIIME, mothur
 .TP
 \fB<nmf-concordance/>\fR
 Create a concordance plot for non-negative matrix factorization. The actual NMF analysis, described below, requires a degree and a concordance plot will show the suitability of a particular degree for the data. The degrees that appear as local maxima in the concordance plot are suitable to try for NMF analysis. See
 .BR aq-nmf-concordance (1)
-for more information.
+for more information. Available pipelines: QIIME, mothur
 .TP
 \fB<nmf degree="\fIdegree\fB"/>\fR
 Do a non-negative matrix factorization of the data creating \fIdegree\fR bases, where this degree has been selected from the concordance plot generated above. For more information, see
 .BR aq-nmf (1).
+Available pipelines: QIIME, mothur
 .TP
 \fB<nmf-auto/>\fR
-First, plots a concordance plot for NMF as with nmf-concordance, and using this it tries to find local maxima to run the main NMF degree on. You should use this instead of (and not in conjunction with) nmf and nmf-concordance. Note that it may not find a maxima from the concordance plot, and thus may not create a NMF plot.
+First, plots a concordance plot for NMF as with nmf-concordance, and using this it tries to find local maxima to run the main NMF degree on. You should use this instead of (and not in conjunction with) nmf and nmf-concordance. Note that it may not find a maxima from the concordance plot, and thus may not create a NMF plot. Available pipelines: QIIME, mothur
 .TP
 \fB<pca/>\fR
-Perform principal components in R using the numeric variables supplied in the definitions. While QIIME's biplots use Unifrac distances, this PCA uses the taxa information and any numeric supplemental information.
+Perform principal components in R using the numeric variables supplied in the definitions. While QIIME's biplots use Unifrac distances, this PCA uses the taxa information and any numeric supplemental information. Available pipelines: QIIME, mothur
 .TP
 \fB<pcoa [method="\fImethod\fB"]/>\fR
 Perform principal coordinate analysis in R using one of the following options: "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao" or "cao". If no method supplied, defaults to Bray-Curtis ("bray"). Plots a MDS plot, and if there are 2 or more numerical properties, it will plot a biplot. See
 .BR aq-pcoa (1).
+Available pipelines: QIIME, mothur
 .TP
 \fB<qualityanal/>\fR
 Produce some data on the quality of the raw Illumina reads. This only applies to reads specified to PANDAseq. For more information, see
 .BR aq-qualityanal (1).
+Available pipelines: QIIME, mothur
 .TP
 \fB<rankabundance/>\fR
-Make a rank-abundance plot using QIIME.
+Make a rank-abundance plot using QIIME. Available pipeline: QIIME
 .TP
 \fB<rdp [confidence="\fIvalue\fB"] [taxfile="\fIfilepath\fB"] [seqfile="\fIfilepath\fB"]/>\fR
-Modifies the RDP classifier flags. Confidence alters the RDP confidence cutoff value. Requires a value between 0 and 1, and default is 0.8. Taxfile and seqfile arguments require full filepaths to the RDP taxonomy file and its related sequence file. If left blank, it will use the default values specified in the QIIME config file (likely GreenGenes). This could be used to train RDP on 18s reference sequences, for example, and these classifications will be used in all downstream analyses.
+Modifies the RDP classifier flags. Confidence alters the RDP confidence cutoff value. Requires a value between 0 and 1, and default is 0.8. Taxfile and seqfile arguments require full filepaths to the RDP taxonomy file and its related sequence file. If left blank, it will use the default values specified in the QIIME config file (likely GreenGenes). This could be used to train RDP on 18s reference sequences, for example, and these classifications will be used in all downstream analyses. Available pipeline: QIIME
 .TP
 \fB<taxaplot/>\fR
-Make bar and area charts of the taxa. Results placed in taxaplot directory of .qiime folder.
+Make bar and area charts of the taxa. Results placed in taxaplot directory of .qiime folder. Available pipelines: QIIME, mothur (requires QIIME to be installed)
 .TP
 \fB<uchime \fR[\fBprofile="\fIprofile\fB"\fR]\fB/>\fR
-Do chimera checking with UCHIME. Since the parameters vary based on the type of DNA, you can specify certain \fIprofile\fR to be one of \fBv3-stringent\fR, or \fBv3-relaxed\fR.
+Do chimera checking with UCHIME. Since the parameters vary based on the type of DNA, you can specify certain \fIprofile\fR to be one of \fBv3-stringent\fR, or \fBv3-relaxed\fR. Available pipeline: QIIME
 .TP
 \fB<unifrac-mrpp \fR[\fBsize="\fIsize\fB"\fR]\fB/>\fR
 Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities in R. For more information, see
 .BR aq-mrpp-unifrac (1).
-The library may be rarefied to a particular size by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect.
+The library may be rarefied to a particular size by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect. Available pipeline: QIIME
 .TP
 \fB<withseqs/>\fR
-Produce an OTU table with the representatives sequences in a final column.
+Produce an OTU table with the representatives sequences in a final column. Available pipeline: QIIME
 .SH ENVIRONMENT VARIABLES
 .TP
 QIIME_PREFIX
