@@ -21,7 +21,6 @@ endif
 endif
 
 mothur_seqs/seq.names mothur_seqs/seq.unique.fasta: seq.fasta
-	@echo OTU Method: $(OTU_PICKING_METHOD), long: $(OTU_METHOD_LONG)
 	@echo Collapsing identical sequences...
 	$(V)mothur "#unique.seqs(fasta=seq.fasta)" > /dev/null
 	$(V)test -d mothur_seqs || mkdir mothur_seqs
