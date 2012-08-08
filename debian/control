@@ -12,7 +12,7 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, gawk, make, r-base, r-cran-gplots, 
 Recommends: pandaseq, blast2
 Replaces: autoqiime (<< 1.6)
 Breaks: autoqiime (<< 1.6)
-Description: QIIME automation toolkit
+Description: QIIME and mothur automation toolkit
  AXIOME is a set of tools for making QIIME <http://qiime.sourceforge.net>
  easier to manage by automating error-prone tasks and walking through
  common analyses.
