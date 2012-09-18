@@ -1,8 +1,8 @@
-axiome (1.6~ppa1) precise; urgency=low
+axiome (1.6ubuntu1) precise; urgency=low
 
-  * Added ability to use BLAST and RTAX as taxonomy classifiers through QIIME
+  * Added BLAST and Rtax classification methods for QIIME 
 
- -- Michael Hall <mwhall@uwaterloo.ca>  Tue, 18 Sep 2012 11:52:31 -0400
+ -- Michael Hall <mwhall@uwaterloo.ca>  Tue, 18 Sep 2012 12:08:30 -0400
 
 axiome (1.6) precise; urgency=low
 
