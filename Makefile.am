@@ -197,7 +197,7 @@ BUILT_SOURCES = \
 
 axiome.vapi axiome.h $(axiome_SOURCES): $(axiome_VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -g -C -H axiome.h --vapi axiome.vapi $(axiome_VALAFLAGS) $(axiome_VALASOURCES) && touch $(axiome_VALASOURCES:.vala=.c) axiome.vapi axiome.h
-	awk '/define/ && /_get_type / { t[substr($$3, 2)] = 1 } END { for(x in t) { print "extern " x "();"; } print "void register_plugin_types(void) {"; for(x in t) { print x"();"; } print "}"}' $(axiome_SOURCES) > plugins/types.c
+	awk '/define/ && /_get_type / { t[substr($$3, 2)] = 1 } END { print "#include<glib-object.h>"; for(x in t) { print "extern GType " x "(void);"; } print "void register_plugin_types(void) {"; for(x in t) { print "\t"x"();"; } print "}"}' $(axiome_SOURCES) > plugins/types.c
 
 $(aq_joinn_SOURCES): $(aq_joinn_VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -g -C  $(aq_joinn_VALASOURCES) && touch $@
