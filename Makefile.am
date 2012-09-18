@@ -164,6 +164,7 @@ axiome_VALASOURCES = \
 	plugins/a-alpha.vala \
 	plugins/a-beta.vala \
 	plugins/a-blast.vala \
+	plugins/a-blast-classifier.vala \
 	plugins/a-duleg.vala \
 	plugins/a-excludetaxa.vala \
 	plugins/a-heatmap.vala \
@@ -177,6 +178,7 @@ axiome_VALASOURCES = \
 	plugins/a-qualanal.vala \
 	plugins/a-rankabundance.vala \
 	plugins/a-rdp.vala \
+	plugins/a-rtax.vala \
 	plugins/a-taxaplot.vala \
 	plugins/a-uchime.vala \
 	plugins/a-unifrac_mrpp.vala \

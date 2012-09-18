@@ -344,6 +344,7 @@ namespace AXIOME {
 		int sequence_preparations;
 		string sourcefile;
 		internal Pipelines pipeline;
+		internal string? classification_method;
 		internal string? otu_method;
 		internal string? otu_refseqs;
 		internal string? otu_blastdb;
@@ -509,6 +510,9 @@ namespace AXIOME {
 				//If not QIIME version 1.5, read off of the tab delineated OTU table using the awk script
 				//TODO: Rewrite the awk script to pull out the sums from the BIOM format (or write something that does)
 				makefile.printf("otu_table_auto.txt: otu_table.txt\n\t@echo Rareifying OTU table to smallest library size...\n\t$(V)$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt %s -d $$(awk -F '\t' 'NR == 1 { } NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; } } } NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; } } END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest; }' otu_table.txt)\n\n", is_version_at_least(1, 3) ? "" : "--lineages_included");
+			}
+			if (classification_method != null) {
+				makefile.printf("CLASSIFICATION_METHOD = %s\n", classification_method);
 			}
 			if (otu_method != null) {
 				makefile.printf("OTU_PICKING_METHOD = %s\n", otu_method);
@@ -1136,6 +1140,33 @@ namespace AXIOME {
 					}
 					output.dist_cutoff = dist_cutoff;
 					output.clust_ident = clust_ident;
+				}
+			}
+
+			var class_method = root->get_prop("classification-method");
+			if (output.pipeline.to_string() == "mothur") {
+				stderr.printf("%s: classification-method only compatible with QIIME pipeline. Remove if using mothur.", filename);
+				delete doc;
+				return false;
+			} else if (output.pipeline.to_string() == "qiime") {
+				if (class_method != null) {
+					switch (class_method.down()) {
+						case "blast":
+							output.classification_method = "blast";
+							break;
+						case "rdp":
+							output.classification_method = "rdp";
+							break;
+						case "rtax":
+							output.classification_method = "rtax";
+							break;
+						default:
+							stderr.printf("%s: Unknown classification method \"%s\".", filename, class_method);
+							delete doc;
+							return false;
+					}
+				} else {
+					output.classification_method = "rdp";
 				}
 			}
 

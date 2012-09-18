@@ -128,13 +128,32 @@ aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
 endif
 endif
 
-rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt: seq.fasta_rep_set.fasta
+assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt: seq.fasta_rep_set.fasta
 	@echo Assigning taxonomy...
-	@test ! -d rdp_assigned_taxonomy || rm -r rdp_assigned_taxonomy
+	@test ! -d assigned_taxonomy || rm -r assigned_taxonomy
+ifeq ($(CLASSIFICATION_METHOD),rdp)
 ifdef MULTICORE
-	$(V)$(QIIME_PREFIX)parallel_assign_taxonomy_rdp.py -i seq.fasta_rep_set.fasta -o rdp_assigned_taxonomy -O $(NUM_CORES) $(RDP_CLASSIFIER_FLAGS)
+	$(V)$(QIIME_PREFIX)parallel_assign_taxonomy_rdp.py -i seq.fasta_rep_set.fasta -o assigned_taxonomy -O $(NUM_CORES) $(RDP_CLASSIFIER_FLAGS)
 else
-	$(V)$(QIIME_PREFIX)assign_taxonomy.py -i seq.fasta_rep_set.fasta -o rdp_assigned_taxonomy $(RDP_CLASSIFIER_FLAGS)
+	$(V)$(QIIME_PREFIX)assign_taxonomy.py -m rdp -i seq.fasta_rep_set.fasta -o assigned_taxonomy $(RDP_CLASSIFIER_FLAGS)
+endif
+else
+ifeq ($(CLASSIFICATION_METHOD),blast)
+#ifdef MULTICORE
+#Multicore assign taxonomy appears to be broken (uses wrong relative filepath after a cd command in the jobs command file)
+#	$(V)$(QIIME_PREFIX)parallel_assign_taxonomy_blast.py -i seq.fasta_rep_set.fasta -o assigned_taxonomy -O $(NUM_CORES) $(BLAST_CLASSIFIER_FLAGS)
+#else
+	$(V)$(QIIME_PREFIX)assign_taxonomy.py -m blast -i seq.fasta_rep_set.fasta -o assigned_taxonomy $(BLAST_CLASSIFIER_FLAGS)
+#endif
+else
+ifeq ($(CLASSIFICATION_METHOD),rtax)
+ifndef RTAX_CLASSIFIER_FLAGS
+	$(error Error: You must use the rtax plugin to configure the rtax classifier. Please see axiome manual page.)
+else
+	$(V)$(QIIME_PREFIX)assign_taxonomy.py -m rtax -i seq.fasta_rep_set.fasta -o assign_taxonomy $(RTAX_CLASSIFIER_FLAGS)
+endif
+endif
+endif
 endif
 
 seq.fasta_rep_set_aligned_pfiltered.fasta: aligned/seq.fasta_rep_set_aligned.fasta
@@ -157,9 +176,9 @@ seq.fasta_rep_set_aligned_pfiltered.tre: seq.fasta_rep_set_aligned_pfiltered.fas
 endif
 endif
 
-otu_table.txt: picked_otus/seq_otus.txt rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt $(OTU_EXCLUDE_FILE)
+otu_table.txt: picked_otus/seq_otus.txt assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt $(OTU_EXCLUDE_FILE)
 	@echo Making OTU table...
-	$(V)$(QIIME_PREFIX)make_otu_table.py -i picked_otus/seq_otus.txt -t rdp_assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt -o otu_table.txt $(OTU_EXCLUDE)
+	$(V)$(QIIME_PREFIX)make_otu_table.py -i picked_otus/seq_otus.txt -t assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt -o otu_table.txt $(OTU_EXCLUDE)
 
 otu_table%.tab: otu_table%.txt
 	@echo Creating legacy OTU table...

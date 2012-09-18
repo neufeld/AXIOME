@@ -46,6 +46,8 @@ QIIME pipeline definition:
 .br
   \fR[\fBalign-method="\fImethod\fB"\fR]
 .br
+  \fR[\fBclassification-method="\fImethod\fB"\fR]
+.br
   \fR[\fBcluster-identity="\fIvalue\fB"\fR]
 .br
   \fR[\fBotu-blastdb="\fI/path/to/blastdb\fB"\fR]
@@ -87,6 +89,8 @@ The version is used to check that a file is not newer than the version of AXIOME
 By default, AXIOME will try to be quiet and hide the (ugly) commands used to do the analysis. If you wish to see them, set \fBverbose="true"\fR or run \fBmake V=\fR.
 
 A mothur analysis must have an alignment model specified with \fBalignment-model\fR, a classification taxonomy file specified with \fBclassification-taxa\fR, and a classification sequences file specified with \fBclassification-seqs\fR.
+
+For QIIME, the taxonomic classification method can be selected with the \fBclassification-method\fR parameter. There is only one option for mothur (its built-in classifier), configured with the options mentioned in the previous paragraph. Options for QIIME are: \fBrdp\fR (default), \fBblast\fR, \fBrtax\fR. For each of these, there is a plugin to configure the classifier. These are called rdp, blast-classifier, and rtax, respectively (see below for details). For RDP and BLAST, if the configuration plugins are not used, it will default to using the information in the qiime_config file. If you are using Rtax, the rtax plugin must be used.
 
 The method used to pick OTUs can be defined by the otu-method parameter. For QIIME, options are: \fBusearch\fR, \fBusearch_ref\fR, \fBprefix_suffix\fR, \fBmothur\fR, \fBtrie\fR, \fBblast\fR, \fBuclust_ref\fR, \fBcdhit\fR, \fBraw-cdhit\fR, \fBuclust\fR and \fBraw-uclust\fR. The \fBraw\fR options make direct calls to the tools rather than using QIIME's \fBpick_otus.py\fR script. Multicore support is used for \fBraw-cdhit\fR, \fBuclust_ref\fR and \fBblast\fR methods when the multicore plugin is used. \fBusearch_ref\fR and \fBuclust_ref\fR require the \fBotu-refseqs\fR parameter be set to the filepath of reference sequences. \fBblast\fR requires that either the \fBotu-refseqs\fR parameter or the \fBotu-blastdb\fR parameter is set to a valid reference file (but not both). The \fBotu-flags\fR option allows passing the QIIME scripts any arbitary flags that the \fBpick_otus.py\fR script accepts (but note that for each method, some flags may already be set).
 
@@ -147,6 +151,9 @@ to be installed. A script called \fBblast\fR will be produced that will invoke
 .BR blastall (1)
 pointing to the appropriate database. The database may optionally be given a friendly name, \fItitle\fR. If one is not provided, it will be inferred from the file name. Valid command options are: formatdb, makeblastdb. Default is formatdb. Available pipeline: QIIME
 .TP
+\fB<blast-classifier \fR[\fBdb="\fI/path/to/database\fB"\fR] [\fBseqfile="\fI/path/to/seqfile\fB"\fR] [\fBtaxfile="\fI/path/to/taxfile\fB"\fR]\fB/>\fR
+Configuration plugin when using BLAST as the classification method through QIIME. Only one of the \fBdb\fR or \fBseqfile\fR parameters can be used. If \fBseqfile\fR is used, QIIME will create a temporary BLAST database. The taxfile parameter specifies a tab delineated file which maps sequences to their taxonomy. Available pipelines: QIIME
+.TP
 \fB<compare level="\fIlevel\fB"/>\fR
 Compare libraries on a plot to see if one is a superset of another. This is useful if one sample which is (possibly) a subsample of another. This uses summarised taxa, not OTUs, so the taxonomic level for the analysis must be specified. Available pipeline: QIIME
 .TP
@@ -200,6 +207,9 @@ Make a rank-abundance plot using QIIME. Available pipeline: QIIME
 .TP
 \fB<rdp [confidence="\fIvalue\fB"] [taxfile="\fIfilepath\fB"] [seqfile="\fIfilepath\fB"]/>\fR
 Modifies the RDP classifier flags. Confidence alters the RDP confidence cutoff value. Requires a value between 0 and 1, and default is 0.8. Taxfile and seqfile arguments require full filepaths to the RDP taxonomy file and its related sequence file. If left blank, it will use the default values specified in the QIIME config file (likely GreenGenes). This could be used to train RDP on 18s reference sequences, for example, and these classifications will be used in all downstream analyses. Available pipeline: QIIME
+.TP
+\fB<rtax \fR\fBread-1="\fI/path/to/forward_read.fa\fB"\fR \fR\fBread-2="\fI/path/to/reverse_read.fa\fB"\fR \fBseqfile="\fI/path/to/seqfile\fB"\fR \fBtaxfile="\fI/path/to/taxfile\fB"\fR\fB/>\fR
+Configuration plugin when using Rtax as the classification method through QIIME. Each of the parameters is required. The \fBread-1\fR and \fBread-2\fR parameters are the filepath to the pre-clustering sequences in FASTA format. The \fBtaxfile\fR parameter specifies a tab delineated file which maps the sequences in \fBseqfile\fR to their taxonomy. Available pipelines: QIIME
 .TP
 \fB<taxaplot/>\fR
 Make bar and area charts of the taxa. Results placed in taxaplot directory of .qiime folder. Available pipelines: QIIME, mothur (requires QIIME to be installed)
