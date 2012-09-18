@@ -1,3 +1,9 @@
+axiome (1.6~ppa1) precise; urgency=low
+
+  * Added ability to use BLAST and RTAX as taxonomy classifiers through QIIME
+
+ -- Michael Hall <mwhall@uwaterloo.ca>  Tue, 18 Sep 2012 11:52:31 -0400
+
 axiome (1.6) precise; urgency=low
 
   * The great renaming to AXIOME from AutoQIIME
