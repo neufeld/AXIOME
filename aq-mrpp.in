@@ -80,7 +80,7 @@ for (x in 1 : nrow(mapping)) {
 		text(delta, 2*mean(fig.dist$counts), adj = -0.5, expression(bold(delta)), cex=1.5 )
 	})
 	par(def.par)
-	print("Computing mean distances")
-	otutable.bc <- vegdist(otutable)
-	tryCatch(plot(meandist(otutable.bc, m), main = paste("Mean distances for", name)), error = function() next)
+#	print("Computing mean distances")
+#	otutable.bc <- vegdist(otutable)
+#	tryCatch(plot(meandist(otutable.bc, m), main = paste("Mean distances for", name)), error = function() next)
 }
