@@ -10,7 +10,7 @@ nloop <- 100  # runs for each rank
 nmf.method <- "brunet" # NMF method
 
 source("@prefix@/share/@PACKAGE@/nmf.R")
-source("@prefix@/share/@PACKAGE@/biom.R")
+#source("@prefix@/share/@PACKAGE@/biom.R")
 
 #Pull in arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -30,8 +30,12 @@ args <- args[ (args != "-a" & args != "-A" & args != "--auto" & args != "-auto")
 #Read in and format otu table
 print("Reading OTU table")
 if ( isBiomFile ) {
-        otutable <- BIOM2table("otu_table.txt")
-        kend <- nrow(otutable) # endrank
+#        otutable <- BIOM2table("otu_table.txt")
+#        kend <- nrow(otutable) # endrank
+        rawtable <- read.table("otu_table.tab", skip = 1,
+        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+        kend <- ncol(rawtable) - 1 # end rank
 } else {
         rawtable <- read.table("otu_table.txt", skip = 1,
         comment.char = "", header = TRUE, row.names = 1, sep = "\t")

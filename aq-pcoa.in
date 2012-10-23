@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 options(error = quote(dump.frames("pcoa-debug", TRUE)))
 
-source("@prefix@/share/@PACKAGE@/biom.R")
+#source("@prefix@/share/@PACKAGE@/biom.R")
 
 #Pull in arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -41,7 +41,12 @@ pkgTest("ape")
 #Read in and format otu table
 print("Reading OTU table")
 if ( isBiomFile ) {
-        otutable <- BIOM2table("otu_table.txt")
+#        otutable <- BIOM2table("otu_table.txt")
+        rawtable <- read.table("otu_table.tab", skip = 1,
+        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+        #Sort numerically the samples
+        otutable <- otutable[order(as.integer(sub("X","", rownames(otutable)))),]
 } else {
         rawtable <- read.table("otu_table.txt", skip = 1,
         comment.char = "", header = TRUE, row.names = 1, sep = "\t")

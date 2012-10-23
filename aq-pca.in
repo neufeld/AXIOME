@@ -15,7 +15,12 @@ args <-args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM")
 #Read in and format otu table
 print("Reading OTU table")
 if ( isBiomFile ) {
-        otutable <- BIOM2table("otu_table.txt")
+#        otutable <- BIOM2table("otu_table.txt")
+				rawtable <- read.table("otu_table.tab", skip = 1,
+        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+        otutable <- otutable[order(as.integer(sub("X","", rownames(otutable)))),]
+
 } else {
         rawtable <- read.table("otu_table.txt", skip = 1,
         comment.char = "", header = TRUE, row.names = 1, sep = "\t")

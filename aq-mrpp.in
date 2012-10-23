@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 options(error = quote(dump.frames("mrpp-debug", TRUE)))
 
-source("@prefix@/share/@PACKAGE@/biom.R")
+#source("@prefix@/share/@PACKAGE@/biom.R")
 
 pkgTest <- function(x)
 {
@@ -35,7 +35,10 @@ pkgTest("vegan")
 #Read in and format otu table
 print("Reading OTU table")
 if ( isBiomFile ) {
-        otutable <- BIOM2table("otu_table.txt")
+#        otutable <- BIOM2table("otu_table.txt")
+        rawtable <- read.table("otu_table.tab", skip = 1,
+        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
 } else {
         rawtable <- read.table("otu_table.txt", skip = 1,
         comment.char = "", header = TRUE, row.names = 1, sep = "\t")
@@ -63,7 +66,7 @@ for (x in 1 : nrow(mapping)) {
 	print(paste("Computing MRPP for", name))
 	m <- mapping[x, rownames(otutable)]
 	otutable.mrpp <- mrpp(otutable, m, distance = distancemethod)
-	sink("mrpp.txt", append = TRUE)
+	sink(paste("mrpp-", distancemethod, ".txt", sep=""), append = TRUE)
 	print(paste("MRPP for", name, ", method:", distancemethod))
 	print(otutable.mrpp)
 	print(paste("T statistic : ", (otutable.mrpp$delta - otutable.mrpp$E.delta) / sd(otutable.mrpp$boot.deltas)))

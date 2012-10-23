@@ -44,7 +44,7 @@ class AXIOME.Analyses.PrincipalCoordinateAnalysis : RuleProcessor {
 
 		output.add_target("pcoa-%s-biplot.pdf".printf(method));
 		if ( is_version_at_least(1,5) ) {
-			output.add_rulef("pcoa-%s-biplot.pdf: mapping.txt otu_table.txt headers.txt\n\t@echo Computing PCoA analysis using method '%s'\n\t$(V)aq-pcoa -B %s\n\n", method, method, method);
+			output.add_rulef("pcoa-%s-biplot.pdf: mapping.txt otu_table.tab headers.txt\n\t@echo Computing PCoA analysis using method '%s'\n\t$(V)aq-pcoa -B %s\n\n", method, method, method);
 		} else {
 				output.add_rulef("pcoa-%s-biplot.pdf: mapping.txt otu_table.txt headers.txt\n\t@echo Computing PCoA analysis using method '%s'\n\t$(V)aq-pcoa %s\n\n", method, method, method);
 		}

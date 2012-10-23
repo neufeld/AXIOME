@@ -100,29 +100,35 @@ chimeras/chimeras%.uchime chimeras/himeras%.aln chimeras/chimeras%.fasta: chimer
 	$(V)usearch --uchime $< --uchimeout chimeras/chimeras$*.uchime --uchimealns chimeras/chimeras$*.aln --chimeras chimeras/chimeras$*.fasta --quiet $(UCHIMEFLAGS)
 
 # PCA with R
+ifndef QIIME_GREATER_THAN_1_5
 pca-biplot.pdf: mapping.txt otu_table.txt headers.txt
 	@echo Making biplot...
-ifndef ($(QIIME_GREATER_THAN_1_5))
 	$(V)aq-pca
 else
+pca-biplot.pdf: mapping.txt otu_table.tab headers.txt
+	@echo Making biplot...
 	$(V)aq-pca -B
 endif
 
 # NMF Concordance
+ifndef QIIME_GREATER_THAN_1_5
 nmf-concordance.pdf: otu_table.txt
 	@echo Making concordance plot...
-ifndef ($(QIIME_GREATER_THAN_1_5))
 	$(V)aq-nmf-concordance
 else
+nmf-concordance.pdf: otu_table.tab
+	@echo Making concordance plot...
 	$(V)aq-nmf-concordance -B
 endif
 
 # NMF Concordance + NMF plots on candidate degrees (if any)
+ifndef QIIME_GREATER_THAN_1_5
 nmf-concordance-auto.pdf: otu_table.txt
 	@echo Making concordance plot and NMF plots on candidate degrees \(if any\)...
-ifndef ($(QIIME_GREATER_THAN_1_5))
 	$(V)aq-nmf-concordance -A
 else
+nmf-concordance-auto.pdf: otu_table.tab
+	@echo Making concordance plot and NMF plots on candidate degrees \(if any\)...
 	$(V)aq-nmf-concordance -B -A
 endif
 

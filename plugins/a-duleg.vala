@@ -37,7 +37,7 @@ class AXIOME.Analyses.DuLegStats : RuleProcessor {
 		}
 			output.add_target("duleg/duleg_%s.txt".printf(pstr));
 			if ( is_version_at_least(1,5) ) {
-				output.add_rulef("duleg/duleg_%s.txt: otu_table.txt otu_table_with_sequences.txt mapping.txt\n\t@echo Computing Dufrene-Legendre stats for p=%f\n\t$(V)aq-duleg -B %s\n\t$(V)aq-otudulegmerge duleg_%s.txt otu_table_with_sequences.txt\n\t$(V)test -d duleg || mkdir duleg\n\t$(V)mv duleg_* duleg\n\n", pstr, p, praw, pstr);
+				output.add_rulef("duleg/duleg_%s.txt: otu_table.tab otu_table_with_sequences.txt mapping.txt\n\t@echo Computing Dufrene-Legendre stats for p=%f\n\t$(V)aq-duleg -B %s\n\t$(V)aq-otudulegmerge duleg_%s.txt otu_table_with_sequences.txt\n\t$(V)test -d duleg || mkdir duleg\n\t$(V)mv duleg_* duleg\n\n", pstr, p, praw, pstr);
 			} else {
 				output.add_rulef("duleg/duleg_%s.txt: otu_table.txt otu_table_with_sequences.txt mapping.txt\n\t@echo Computing Dufrene-Legendre stats for p=%f\n\t$(V)aq-duleg %s\n\t$(V)aq-otudulegmerge duleg_%s.txt otu_table_with_sequences.txt\n\t$(V)test -d duleg || mkdir duleg\n\t$(V)mv duleg_* duleg\n\n", pstr, p, praw, pstr);
 			}
