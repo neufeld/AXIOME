@@ -69,7 +69,7 @@ dir.create("nmf", FALSE)
 for (k in 1:K) {
 	pfam.file <- file(paste("nmf/basis_taxa_", K, "_", k, ".txt", sep = ""), "w")
 		ix <- write.taxa.list(X = An, P = P, H = H, spw1 = spw1, 
-				labelnames = labelname, taxaid = otutable[, ncol(otutable)], pfams = otutable[, ncol(otutable)], 
+				labelnames = labelname, taxaid = rownames(rawtable), pfams = rawtable[, ncol(rawtable)], 
 				ixv = Spe$V, k, pfam.file = pfam.file, 
 				simiv = simiv, profile = otutable[, 1:(ncol(otutable) - 1)], V.m = V.m)
 		#lix <- length(ix)
