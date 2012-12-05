@@ -37,12 +37,15 @@ if ( isBiomFile ) {
         rawtable <- read.table("otu_table.tab", skip = 1,
         comment.char = "", header = TRUE, row.names = 1, sep = "\t")
         otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+				#Sort numerically the samples
+        otutable <- otutable[order(as.integer(sub("X","", rownames(otutable)))),]
 } else {
         rawtable <- read.table("otu_table.txt", skip = 1,
         comment.char = "", header = TRUE, row.names = 1, sep = "\t")
         otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+				#Sort numerically the samples
+        otutable <- otutable[order(as.integer(sub("X","", rownames(otutable)))),]
 }
-
 print("Reading mapping extra");
 extra <- read.table("mapping.extra", header = TRUE,
     comment.char = "", row.names = "X.SampleID", sep = "\t")
