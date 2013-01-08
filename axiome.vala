@@ -500,6 +500,9 @@ namespace AXIOME {
 			if ( is_version_at_least(1,5) ) {
 				makefile.printf("\nQIIME_GREATER_THAN_1_5 = TRUE");
 			}
+			if ( is_version_at_least(1,6) ) {
+				makefile.printf("\nQIIME_GREATER_THAN_1_6 = TRUE");
+			}
 			makefile.printf("\n\nall: Makefile mapping.txt otu_table.txt %s\n\n", targets.str);
 			makefile.printf("Makefile mapping.txt: %s\n\t@echo Updating analyses to be run...\n\t$(V)axiome $<\n\n", sourcefile);
 			//We need to get the "classic" tab delineated OTU table file if QIIME 1.5 or newer for R scripts
