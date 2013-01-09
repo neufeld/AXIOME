@@ -13,9 +13,9 @@ Each analysis starts with an XML tag in the input file. To do useful work, the f
 4. AXIOME writes the `Makefile` and the user invokes `make`.
 5. `make` invokes the commands written in step 3. For simple commands, or commands which vary depending on the user parameters, it is best if the commands are written directly in the `Makefile`. Extremely complicated commands may be best suited to having an external program or script to do most of the work. These are the included `aq-` commands.
 
-Make, for the unfamilar, uses simple timestamps to verify updates. Therefore, a rule species the input files needed and the output files generated. When the input files are newer than the output files, or the output files are no-existent, it will run the specified commands.
+Make, for the unfamiliar, uses simple timestamps to verify updates. Therefore, a rule species the input files needed and the output files generated. When the input files are newer than the output files, or the output files are no-existent, it will run the specified commands.
 
-Many simple rules have been added to `aq-base` as a starting template for use by generated `Makefile`s.
+Many simple rules have been added to `aq-base`, `aq-qiime-base` and `aq-mothur-base` as a starting template for use by generated `Makefile`s.
 
 
 How to Add An Analysis
@@ -76,18 +76,18 @@ The following environment variables are available in the `Makefile`:
 
 ALIGNMENT_TEMPLATE: The alignment template for MOTHUR
 BLASTDB_COMMAND: Command to make BLAST databases
-CLASSIFICATION_METHOD:
-CLASS_SEQS: 
+CLASSIFICATION_METHOD: Set to the user's selected taxonomic classification method (rdp, blast, or rtax)
+CLASS_SEQS: The classification sequences file for MOTHUR
 CLASS_TAXA: The classification taxa for MOTHUR
 CLUSTER_IDENT: The cluster identity threshold for MOTHUR
-DIST_CUTOFF: 
+DIST_CUTOFF: MOTHUR distance cutoff (opposite of similarity in QIIME) 
 NUM_CORES: The number of CPUs to use, if the application can be multi threaded.
-OTU_BLASTDB: 
-OTU_CHIMERA_REFSEQS: 
-OTU_FLAGS: 
+OTU_BLASTDB: BLAST database file for OTU picking (used with QIIME)
+OTU_CHIMERA_REFSEQS: Reference sequences for chimera checking.
+OTU_FLAGS: Additional flags to be passed to QIIME's pick_otus.py script (arbitrary string).
 OTU_PICKING_METHOD:  The OTU picking method
-OTU_REFSEQS: 
-PHYLO_METHOD: 
+OTU_REFSEQS: Reference sequence file for picking OTUs.
+PHYLO_METHOD: Method for building phylogenetic tree.
 PIPELINE: The pipeline used, either QIIME or MOTHUR
 QIIME_GREATER_THAN_1_5: TRUE if QIIME version 1.5 is available. 
 QIIME_GREATER_THAN_1_6 : TRUE if QIIME version 1.6 is available.
