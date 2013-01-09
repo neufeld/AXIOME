@@ -1,0 +1,94 @@
+Developing for AXIOME
+=====================
+
+The AXIOME workflow is as follows:
+
+XML file → [axiome] → Makefile + mapping.txt → [make + aq-* scripts + QIIME + PANDAseq] → output analyses
+
+Each analysis starts with an XML tag in the input file. To do useful work, the following must happen:
+
+1. An class extending `RuleProcessor` built into the AXIOME binary or present in a loadable module.
+2. When AXIOME processes the XML file, if it recognises an XML tag that matches the `RuleProcessor`, it will invoke the `process` method.
+3. The method will decide how to do the analysis requested and create a rule in the `Makefile` using the `add_target` and `add_rule` methods.
+4. AXIOME writes the `Makefile` and the user invokes `make`.
+5. `make` invokes the commands written in step 3. For simple commands, or commands which vary depending on the user parameters, it is best if the commands are written directly in the `Makefile`. Extremely complicated commands may be best suited to having an external program or script to do most of the work. These are the included `aq-` commands.
+
+Make, for the unfamilar, uses simple timestamps to verify updates. Therefore, a rule species the input files needed and the output files generated. When the input files are newer than the output files, or the output files are no-existent, it will run the specified commands.
+
+Many simple rules have been added to `aq-base` as a starting template for use by generated `Makefile`s.
+
+
+How to Add An Analysis
+======================
+
+1. Figure out how to do the analysis.
+
+Determine what steps are necessary in a built AXIOME directory (i.e., one where `make` has completed successfully). Suppose the command is something like:
+
+	head -n +2 otu_table.txt | do-my-analyisis -f seq.fasta -d 5 > result.txt
+
+2. Create a copy of plugins/sample.vala as myanalysis.vala. It need not be in the AXIOME directory and fill in the details.
+
+	The `get_name` method should return the name of the analysis as it will appear in the input XML tag.
+
+	Set `introduced_version` to be the current version of AXIOME if it is not already.
+
+	Set `is_only_once` to whether or not your analysis can be run with different settings. In our case, we might allow 5 to be changed to a different parameter, so we will say false.
+
+	Change process to generate the code and return true if the tag is successful. Suppose we wish for the XML tag to look like <my-analysis dee="5"/>, then we could write code like this:
+		// Get the string value from the XML node of the XML node.
+		var d_str = definition->get_prop("dee");
+		// Check it does indeed exist.
+		if (d_str == null) {
+			message("You must specify a dee to my-analysis.");
+			return false;
+		}
+		// Convert it to an integer.
+		var d = int.parse(d_str);
+		if (d < 1) {
+			message("The value %d is not acceptable for my-analysis.", d);
+			return false;
+		}
+		// Tell make that it should try to build this file:
+		output.add_target(@"myanalysis$(d).txt");
+		// Tell make how to build this file. Per make syntax, the format is: target: sources\n\tcommand\n\n
+		output.add_rule(@"myanalysis$(d).txt: otu_table.txt seq.fasta\n\thead -n +2 otu_table.txt | do-my-analyisis -f seq.fasta -d $(d) > myanalysis$(d).txt\n\n");
+		return true;
+
+3. Use `aqxs` to build and install the module.
+
+
+More Tools
+==========
+
+If you deal with levels of taxonomic classification, you can use `TaxonomicLevel.parse` to get a taxonomic level that you can convert to a number as understood by QIIME and RDP by casting to `int`.
+
+If the rules are more complicated, but easily coded in `make`, these rules can be placed in a file which is specified by `get_include`.
+
+There are special `RuleProcessors`, called `BaseSource` that provide sources of sequence. They follow similar style to `RuleProcessor`s, but they have a `generate_command` method that must do two things:
+	1. Call `output.add_sequence_source` for each input file required.
+	2. Call `command.append_printf` or `command.append` to call a command which produces the FASTA sequences the user has requested.
+
+The Make Environment
+====================
+
+The following environment variables are available in the `Makefile`:
+
+ALIGNMENT_TEMPLATE: The alignment template for MOTHUR
+BLASTDB_COMMAND: Command to make BLAST databases
+CLASSIFICATION_METHOD:
+CLASS_SEQS: 
+CLASS_TAXA: The classification taxa for MOTHUR
+CLUSTER_IDENT: The cluster identity threshold for MOTHUR
+DIST_CUTOFF: 
+NUM_CORES: The number of CPUs to use, if the application can be multi threaded.
+OTU_BLASTDB: 
+OTU_CHIMERA_REFSEQS: 
+OTU_FLAGS: 
+OTU_PICKING_METHOD:  The OTU picking method
+OTU_REFSEQS: 
+PHYLO_METHOD: 
+PIPELINE: The pipeline used, either QIIME or MOTHUR
+QIIME_GREATER_THAN_1_5: TRUE if QIIME version 1.5 is available. 
+QIIME_GREATER_THAN_1_6 : TRUE if QIIME version 1.6 is available.
+QIIME_PREFIX: The prefix that should go on QIIME commands in the case they are not installed in the PATH.
