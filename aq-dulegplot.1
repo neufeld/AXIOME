@@ -1,0 +1,10 @@
+.\" Authors: Michael Hall
+.TH aq-dulegplot 1 "January 2013" "1.6" "USER COMMANDS"
+.SH NAME 
+aq-dulegplot \- Uses pygal package to plot stacked bar charts of the aq-otudulegmerge indicator species output.
+.SH SYNOPSIS
+.B aq-dulegplot -i input -o output -m mapping -c category [-l level]
+.SH DESCRIPTION
+Creates stacked bar plots of the abundance of the indicator species provided in an AXIOME analysis. Takes as input the .tab file resulting from aq-otudulegmerge, the mapping file, and a category. An optional level parameter can be specified as a comma separated list of integers. Default is to plot level 6 (typically genus level). For this analysis, you must have the pygal packaged installed. See pygal.org for installation details.
+.SH SEE ALSO
+.BR axiome (1), aq-duleg(1), aq-otudulegmerge.
