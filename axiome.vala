@@ -1148,9 +1148,11 @@ namespace AXIOME {
 
 			var class_method = root->get_prop("classification-method");
 			if (output.pipeline.to_string() == "mothur") {
-				stderr.printf("%s: classification-method only compatible with QIIME pipeline. Remove if using mothur.", filename);
-				delete doc;
-				return false;
+				if (class_method != null) {
+					stderr.printf("%s: classification-method only compatible with QIIME pipeline. Remove if using mothur.\n", filename);
+					delete doc;
+					return false;
+				}
 			} else if (output.pipeline.to_string() == "qiime") {
 				if (class_method != null) {
 					switch (class_method.down()) {
