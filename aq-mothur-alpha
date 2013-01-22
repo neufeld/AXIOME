@@ -1,13 +1,42 @@
 #!/usr/bin/env Rscript
 
-args <- commandArgs(trailingOnly = TRUE)
 
-if (length(args) != 1) {
-	print("Error: Only one parameter required (alpha data filename).")
-	q()
+library('getopt')
+
+#Grab arguments
+#Arguments required:
+#-i input mothur alpha calculations
+#-e mapping.extra file
+#-o output directory
+
+spec = matrix(c('input','i',1,'character','mapping.extra','e',1,'character','output','o',1,'character','help','h',2,'character'),byrow=TRUE,ncol=4)
+
+opt = getopt(spec)
+
+#if help was asked for, print a friendly message
+# and exit with a non-zero error code
+
+if ( !is.null(opt$help) ) {
+	cat(getopt(spec,usage=TRUE))
+	q(status=1)
 }
 
-file <- args[1]
+if ( is.null(opt$input) ) {
+	print("Input alpha file required.")
+	q(status=1)
+}
+if ( is.null(opt$mapping.extra) ) {
+	print("Mapping.extra file required")
+	q(status=1)
+}
+if ( is.null(opt$output) ) {
+	print("Output directory required.")
+	q(status=1)
+}
+
+file = opt$input
+mappingExtra = opt$mapping
+outDir = opt$output
 
 #Grab the tail end of the filename from mothur, which is the method
 calc <- tail(strsplit(file, "_")[[1]], n = 1)
@@ -16,10 +45,10 @@ print("Reading alpha data from mothur")
 data <- read.table(file, header = FALSE, skip = 1, sep = "\t", col.names = c("numsamples", "group", "blank", "distance", "lci", "hci"))
 
 print("Reading mapping extra")
-extra <- read.table("mapping.extra", header = TRUE,
+extra <- read.table(mappingExtra, header = TRUE,
     comment.char = "", row.names = "X.SampleID", sep = "\t")
 
-pdf(file=paste("alpha-", calc, ".pdf", sep=""))
+pdf(file=paste(outDir, "/alpha-", calc, ".pdf", sep=""))
 
 #Get the number of samples
 maxval <- max(data$group, na.rm=TRUE)

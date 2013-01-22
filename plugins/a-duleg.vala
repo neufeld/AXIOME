@@ -46,10 +46,10 @@ class AXIOME.Analyses.DuLegStats : RuleProcessor {
 			plotlevels = "6";
 		}
 		output.add_target("duleg/duleg_%s.txt".printf(pstr));
-		if ( is_version_at_least(1,5) ) {
-			output.add_rulef("duleg/duleg_%s.txt: otu_table.tab otu_table_with_sequences.txt mapping.txt\n\t@echo Computing Dufrene-Legendre stats for p=%f\n\t$(V)aq-duleg -B %s\n\t$(V)aq-otudulegmerge duleg_%s.txt otu_table_with_sequences.txt\n\t$(V)test -d duleg || mkdir duleg\n\t$(V)mv duleg_* duleg\nifdef PLOT_DULEG\n\t@echo Creating Duleg plots...\n\t$(V)test ! -d dulegplots || rm -rf dulegplots\n\tfind duleg/*.tab -exec aq-dulegplot -i {} -o duleg_plots/ -m mapping.txt -l %s \\;\nendif\n\n", pstr, p, praw, pstr, plotlevels);
+		if ( is_version_at_least(1,5) || output.pipeline.to_string() == "mothur" ) {
+			output.add_rulef("duleg/duleg_%s.txt: otu_table.tab otu_table_with_sequences.txt mapping.txt\n\t@echo Computing Dufrene-Legendre stats for p=%f\n\t$(V)test -d duleg || mkdir duleg\n\t$(V)aq-duleg -p %s -i otu_table.tab -o duleg -m mapping.txt\n\t$(V)aq-otudulegmerge duleg/duleg_%s.txt otu_table_with_sequences.txt duleg\nifdef PLOT_DULEG\n\t@echo Creating Duleg plots...\n\t$(V)test ! -d duleg_plots || rm -rf duleg_plots\n\tfind duleg/*.tab -exec aq-dulegplot -i {} -o duleg_plots/ -m mapping.txt -l %s \\;\nendif\n\n", pstr, p, praw, pstr, plotlevels);
 		} else {
-			output.add_rulef("duleg/duleg_%s.txt: otu_table.txt otu_table_with_sequences.txt mapping.txt\n\t@echo Computing Dufrene-Legendre stats for p=%f\n\t$(V)aq-duleg %s\n\t$(V)aq-otudulegmerge duleg_%s.txt otu_table_with_sequences.txt\n\t$(V)test -d duleg || mkdir duleg\n\t$(V)mv duleg_* duleg\nifdef PLOT_DULEG\n\t@echo Creating Duleg plots...\n\t$(V)test ! -d dulegplots || rm -rf dulegplots\n\tfind duleg/*.tab -exec aq-dulegplot -i {} -o duleg_plots/ -m mapping.txt -l %s \\;\nendif\n\n", pstr, p, praw, pstr, plotlevels);
+			output.add_rulef("duleg/duleg_%s.txt: otu_table.txt otu_table_with_sequences.txt mapping.txt\n\t@echo Computing Dufrene-Legendre stats for p=%f\n\t$(V)test -d duleg || mkdir duleg\n\t$(V)aq-duleg -p %s -i otu_table.txt -o duleg -m mapping.txt\n\t$(V)aq-otudulegmerge duleg/duleg_%s.txt otu_table_with_sequences.txt duleg\nifdef PLOT_DULEG\n\t@echo Creating Duleg plots...\n\t$(V)test ! -d duleg_plots || rm -rf duleg_plots\n\tfind duleg/*.tab -exec aq-dulegplot -i {} -o duleg_plots/ -m mapping.txt -l %s \\;\nendif\n\n", pstr, p, praw, pstr, plotlevels);
 		}
 		return true;
 	}

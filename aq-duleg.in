@@ -1,8 +1,7 @@
 #!/usr/bin/env Rscript
 
-options(error = quote(dump.frames("duleg-debug", TRUE)))
+options(error = quote(dump.frames(outDir, "/duleg-debug", TRUE)))
 
-#source("@prefix@/share/@PACKAGE@/biom.R")
 
 pkgTest <- function(x)
 {
@@ -13,23 +12,54 @@ pkgTest <- function(x)
         }
 }
 
-#Pull in arguments
-args <- commandArgs(trailingOnly = TRUE)
+pkgTest("getopt")
 
-#Search within args for the biom flags
-isBiomFile <- TRUE %in% (c("-B","-b","--biom", "--BIOM") %in% args)
+#Grab arguments
+#Arguments required:
+#-i input OTU table (tabular format ONLY, JSON libraries much too slow in R)
+#-m mapping file
+#-o output dir
+#-p p-value
+spec = matrix(c('input', 'i', 1, "character",'mapping', 'm', 1, "character",'output' , 'o', 1, "character", 'pval' ,'p', 2, "character",'help', 'h', 2, "character"), byrow=TRUE, ncol=4)
 
-#Clear out any flags from the command arguments
-args <-args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM") ]
+opt = getopt(spec)
 
-#Should have exactly one argument, if not, complain
-if (length(args) != 1) {
-	print("Error: Exactly one parameter required (p cut-off value)")
+# if help was asked for print a friendly message
+# and exit with a non-zero error code
+if ( !is.null(opt$help) ) {
+  cat(getopt(spec, usage=TRUE))
+  q(status=1)
+}
+
+if ( is.null(opt$input) ) {
+  print("Input OTU table required.")
+  q(status=1)
+}
+if ( is.null(opt$mapping) ) {
+  print("Mapping file required.")
+  q(status=1)
+}
+if ( is.null(opt$output) ) {
+  print("Output filepath required.")
+  q(status=1)
+}
+
+plimit = opt$pval
+
+if ( is.null(opt$pval) ) {
+	plimit = 0.05
+}
+
+otuTableFile = opt$input
+mappingFile = opt$mapping
+outDir = opt$output
+
+#Sanity check on input
+if ( plimit <= 0 || plimit >= 1 ) {
+	print("Error: p value must be greater than 0, and less than 1")
 	q()
 }
 
-#Set the plimit
-plimit <- args[1]
 
 #Sanity check on input
 if ( plimit <= 0 || plimit >= 1 ) {
@@ -42,29 +72,20 @@ pkgTest("labdsv")
 
 #Read in and format otu table
 print("Reading OTU table")
-if ( isBiomFile ) {
-#	otutable <- BIOM2table("otu_table.txt")
-	rawtable <- read.table("otu_table.tab", skip = 1, 
-	comment.char = "", header = TRUE, row.names = 1, sep = "\t")
-	otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
-} else {
-	rawtable <- read.table("otu_table.txt", skip = 1, 
-	comment.char = "", header = TRUE, row.names = 1, sep = "\t")
-	otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
-}
-
-
+rawtable <- read.table(otuTableFile, skip = 1, 
+comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
 
 #Read in mapping
 print("Reading mapping");
-mapping <- t(read.table("mapping.txt", header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t"))
+mapping <- t(read.table(mappingFile, header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t"))
 
 # For non-numeric sample names, comment out the following line
 colnames(mapping) <- paste("X", colnames(mapping), sep = "");
 
 #Send to file duleg_p.txt where p is the supplied p value with the decimal point removed
 pstr <- sub(".","",as.character(plimit),fixed=TRUE)
-sink(paste("duleg_", pstr, ".txt", sep=""), append = FALSE)
+sink(paste(outDir, "/duleg_", pstr, ".txt", sep=""), append = FALSE)
 sink()
 
 for (x in 1 : nrow(mapping)) {
@@ -82,16 +103,16 @@ for (x in 1 : nrow(mapping)) {
 
 #Save to our output file
 	print("Saving")
-	sink(paste("duleg_", pstr, ".txt", sep=""), append = TRUE)
+	sink(paste(outDir, "/duleg_", pstr, ".txt", sep=""), append = TRUE)
 	print(paste("For", name))
 	#Run a summary using our p cutoff value supplied via command line argument
 	summary(d, p=plimit, too.many=1000000, digits=5)
 	sink()
 	
-	write.table(d$indcls, file = paste("duleg_", pstr, "_", name, "_indcls.txt", sep =""));
-	write.table(d$indval, file = paste("duleg_", pstr, "_", name, "_indval.txt", sep =""));
-	write.table(d$maxcls, file = paste("duleg_", pstr, "_", name, "_maxcls.txt", sep =""));
-	write.table(d$pval, file = paste("duleg_", pstr, "_", name, "_pval.txt", sep =""));
-	write.table(d$relabu, file = paste("duleg_", pstr, "_", name, "_relabu.txt", sep =""));
-	write.table(d$relfrq, file = paste("duleg_", pstr, "_", name, "_relfrq.txt", sep =""));
+	write.table(d$indcls, file = paste(outDir, "/duleg_", pstr, "_", name, "_indcls.txt", sep =""));
+	write.table(d$indval, file = paste(outDir, "/duleg_", pstr, "_", name, "_indval.txt", sep =""));
+	write.table(d$maxcls, file = paste(outDir, "/duleg_", pstr, "_", name, "_maxcls.txt", sep =""));
+	write.table(d$pval, file = paste(outDir, "/duleg_", pstr, "_", name, "_pval.txt", sep =""));
+	write.table(d$relabu, file = paste(outDir, "/duleg_", pstr, "_", name, "_relabu.txt", sep =""));
+	write.table(d$relfrq, file = paste(outDir, "/duleg_", pstr, "_", name, "_relfrq.txt", sep =""));
 }

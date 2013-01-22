@@ -1,9 +1,9 @@
 using Gee;
 
 int main(string[] args) {
-	//We require two arguments
-	if (args.length != 3) {
-		stderr.printf("Usage: %s duleg_*.txt otu_table_with_sequences.txt\n", args[0]);
+	//We require three arguments
+	if (args.length != 4) {
+		stderr.printf("Usage: %s duleg_*.txt otu_table_with_sequences.txt outdir\n", args[0]);
 		return 1;
 	}
 	//Open the Duleg text file for reading
@@ -20,6 +20,13 @@ int main(string[] args) {
 	if (otu == null) {
 		stderr.printf("Could not open %s: %s\n", args[2], strerror(errno));
 		return 1;
+	}
+
+	var outDir = args[3];
+	try {
+		DirUtils.create(outDir, 0755);
+	} catch (Error e) {
+		stderr.printf("Error creating directory at %s\n", outDir);
 	}
 
 	//Store the otutable in a hashmap, with each of the columns items in the ArrayList<string>
@@ -112,7 +119,7 @@ int main(string[] args) {
 		var outString = Filename.display_basename(outName)[0:-4];
 		outName = outString + "_" + category + ".tab";
 		//Open the file for writing
-		var outFile = FileStream.open(outName, "w");
+		var outFile = FileStream.open(outDir + "/" + outName, "w");
 
 		//Try to open the relabu.txt file to try to pull in better cluster names
 		relAbu = FileStream.open(outString + "_" + category + "_relabu.txt", "r");
