@@ -6,6 +6,7 @@ bin_SCRIPTS = \
 	aq-bubbleplot \
 	aq-cmplibs \
 	aq-duleg \
+	aq-dulegplot \
 	aq-fasta-length \
 	aq-inst-cran \
 	aq-libcontrib \
@@ -32,6 +33,7 @@ bin_SCRIPTS = \
 	aq-qualityanal \
 	aq-rareotuwithlineage \
 	aq-sort-fasta \
+	aq-venn \
 	aqxs \
 	$(NULL)
 
@@ -66,6 +68,7 @@ man1_MANS = \
 	aq-count-n.1 \
 	aq-demux-illumina.1 \
 	aq-duleg.1 \
+	aq-dulegplot.1 \
 	aq-estimateq.1 \
 	aq-fasta-length.1 \
 	aq-fastq2oldillumina.1 \
@@ -101,6 +104,7 @@ man1_MANS = \
 	aq-rareotuwithlineage.1 \
 	aq-sort-fasta.1 \
 	aq-syntheticfastq.1 \
+	aq-venn.1 \
 	aqxs.1 \
 	autoqiime.1 \
 	$(NULL)
@@ -183,6 +187,7 @@ axiome_VALASOURCES = \
 	plugins/a-taxaplot.vala \
 	plugins/a-uchime.vala \
 	plugins/a-unifrac_mrpp.vala \
+	plugins/a-venn.vala \
 	plugins/a-withseqs.vala \
 	plugins/src-fasta.vala \
 	plugins/src-panda.vala \

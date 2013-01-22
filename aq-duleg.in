@@ -53,6 +53,8 @@ if ( isBiomFile ) {
 	otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
 }
 
+
+
 #Read in mapping
 print("Reading mapping");
 mapping <- t(read.table("mapping.txt", header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t"))
@@ -74,6 +76,7 @@ for (x in 1 : nrow(mapping)) {
 	}
 	print(paste("Computing for", name))
 	dis.bc <- dsvdis(otutable, 'bray/curtis')
+	#Maps OTU samples to metadata groups, so OTU table order does not matter
 	clust <- mapping[x, rownames(otutable)]
 	d <- indval(otutable, clust)
 

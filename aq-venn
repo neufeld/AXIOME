@@ -1,0 +1,157 @@
+#!/usr/bin/env Rscript
+
+
+library('getopt')
+
+#Grab arguments
+#Arguments required:
+#-i input OTU table (tabular format ONLY, JSON libraries much too slow in R)
+#-m mapping file
+#-o output PDF file
+spec = matrix(c('input', 'i', 1, "character",'mapping', 'm', 1, "character",'output' , 'o', 1, "character",'help', 'h', 2, "character"), byrow=TRUE, ncol=4)
+
+opt = getopt(spec)
+
+# if help was asked for print a friendly message
+# and exit with a non-zero error code
+if ( !is.null(opt$help) ) {
+	cat(getopt(spec, usage=TRUE))
+	q(status=1)
+}
+
+if ( is.null(opt$input) ) {
+	print("Input OTU table required.")
+	q(status=1)
+}
+if ( is.null(opt$mapping) ) {
+	print("Mapping file required.")
+	q(status=1)
+}
+if ( is.null(opt$output) ) {
+	print("Output filepath required.")
+	q(status=1)
+}
+
+otuTableFile = opt$input
+mappingFile = opt$mapping
+outFile = opt$output
+
+#Load required packages
+library('Vennerable')
+library('gplots')
+
+#Read in the OTU table
+print("Reading OTU table")
+rawtable <- read.table(otuTableFile, skip = 1,
+        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+#Take out the consensus lineage
+otutable <- rawtable[1:(ncol(rawtable) - 1)]
+
+#Sort the samples numerically so the mapping and the OTU table are consistent
+otutable <- otutable[,order(as.integer(sub("X","", colnames(otutable))))]
+#Read in mapping
+print("Reading mapping");
+mapping <- t(read.table(mappingFile, header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t"))
+
+# For non-numeric sample names, comment out the following line
+colnames(mapping) <- paste("X", colnames(mapping), sep = "");
+
+#Calculate the row sum for the OTU table
+#Switch the next two rows out for sequences/OTU counts
+#TODO: Proper argument passing and handling of this
+rowsum <- rowSums(otutable)
+#rowsum <- rep(1,dim(otutable)[1])
+#TODO: Proper argument passing and handling of file output
+pdf(outFile)
+#Put a title page in (needed to have a title on the Vennerable plots
+#because Vennerable doesn't use the high level plot function correctly...)
+textplot("OTU Table Venn Diagrams - Sequences")
+
+#We want a Venn diagram for each of the metadata
+for (x in 1 : nrow(mapping)) {
+	#Get the name of the metadata
+	name <- rownames(mapping)[x]
+	clusters <- as.matrix(mapping[x,])
+	#Unique values the metadata take on
+	fac.levels <- levels(factor(clusters))
+	#The number of unique values (clusters)
+	fac.len <- length(fac.levels)
+	#We only want to do Venn diagrams on sets of size 2-4
+	if (fac.len < 2 || fac.len >= 5) {
+		print(paste("Ignoring", name, " (either one or greater than 5 categories for this metadata, cannot draw Venn diagrams for this range)."))
+		next
+	}
+	
+	print(paste("Computing for", name))
+	print("Collapsing samples")
+	collapsed_otutable <- NULL
+	clusternamelist <- NULL
+	#Go through the columns of the OTU table, and add columns together
+	#based on their metadata cluster (collapse columns)
+	for (cluster in 1 : fac.len) {
+		#Start with an array of zeros
+		clustertotal = array(0,dim(otutable)[1])
+		clustername <- as.character(fac.levels)[cluster]
+		for (samplename in 1 : length(clusters)) {
+			if (clusters[samplename] == clustername) {
+				#Perform the column addition
+				clustertotal <- clustertotal + otutable[,samplename]
+				
+			}
+		}
+		#Add this cluster to the overall collapsed table
+		collapsed_otutable<-cbind(collapsed_otutable,clustertotal)
+		#Keep track of the names in order that we are collapsing
+		clusternamelist<-c(clusternamelist, clustername)
+	}
+	#Set the names of the clusters
+	colnames(collapsed_otutable)<-clusternamelist
+	print("Determining memberships")
+	#We have the sums already, so we want convert the OTU table to
+	#a binary membership matrix (0's stay 0, anything more than 1 means
+	#we have membership in the cluster)
+	collapsed_otutable[collapsed_otutable!=0] <- 1
+	#From these memberships, collapse the rows down to string labels
+	#(ie, an OTU is in cluster A, B, but not C, we would have c(1,1,0)
+	#and we create a label '110' for it.
+	labels <- apply(collapsed_otutable,1,paste,collapse="")
+	#Now make a two columned matrix with the OTU memberships and the proper
+	#count
+	tab <- matrix(c(labels,rowsum),ncol=2)
+	colnames(tab) <-c ("labels","sums")
+	#colnames(tab) <- c(clusternamelist,"Counts")
+	#Convert to dataframe for collapsing
+	tab <- as.data.frame(tab)
+	print("Collapsing OTUs")
+	#Add together the counts for all OTUs in the same membership category
+	result <- aggregate(as.numeric(as.character(tab$sums)),list(tab$labels),FUN=sum)
+	#Create a Vennerable venn object, at first initializing 0 weights
+	venn <- Venn(SetNames=clusternamelist, Weight=rep(0,2^fac.len))
+	#Apply the weights from the collapsed table (because Vennerable allows us
+	#to assign weights by the string labels that were created, also it's vectorized)
+	Weights(venn)[as.character(result$Group.1)]<-as.numeric(as.character(result$x))
+	
+	#I prefer circles for 2 and 3 sets, and squares for 4 sets.
+	if (fac.len <= 3) {
+		plot(venn, type="circles",doWeights=FALSE)
+	} else {
+		plot(venn, type="squares",doWeights=FALSE)
+	}
+	#Hold the plot
+	par(new=TRUE)
+	#Put the metadata clustername on the held plot
+	textplot(name, valign=c("top"),cex=1,mar=c(0,0,0,0))
+
+	#Playing around with other packages. Ignore. Don't want to lose this
+	#code in case anyone wants to use other packages.
+	#result <- aggregate(as.numeric(as.character(tab$Counts)),list(list(tab[,1:fac.len])),FUN=sum)
+	#expanded_result<-cbind(t(apply(as.matrix(as.character(result$Group.1)),1,function(x) as.integer(strsplit(x,"")[[1]]))),as.numeric(as.character(result$x)))
+	#final_result<-t(matrix(unlist(apply(expanded_result,1,function(x) rep(as.vector(x[1:fac.len]),times=x[fac.len+1]))),nrow=fac.len))
+	#final_result<-cbind(final_result,rowSums(final_result))
+	#colnames(final_result)<-c(clusternamelist,"Total_lists")
+	#print(dim(final_result))
+	#print(final_result[1,])
+	#vennDiagram(vennCounts(final_result))
+	#evenn(res=final_result, prop=TRUE)
+}
+dev.off()
