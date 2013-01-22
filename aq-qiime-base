@@ -11,6 +11,28 @@ PHYLO_METHOD ?= fasttree
 CLUSTER_IDENT ?= 0.97
 ALIGN_METHOD ?= pynast
 
+ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
+ifdef MIN_SEQ_IN_OTU
+MIN_SEQ_IN_OTU := -n $(MIN_SEQ_IN_OTU)
+endif
+ifdef MAX_SEQ_IN_OTU
+MAX_SEQ_IN_OTU := -x $(MAX_SEQ_IN_OTU)
+endif
+ifdef MIN_SAMPLES_IN_OTU
+MIN_SAMPLES_IN_OTU := -s $(MIN_SAMPLES_IN_OTU)
+endif
+ifdef MAX_SAMPLES_IN_OTU
+MAX_SAMPLES_IN_OTU := -y $(MAX_SAMPLES_IN_OTU)
+endif
+else
+ifdef MIN_SEQ_IN_OTU
+MIN_SEQ_IN_OTU := -c $(MIN_SEQ_IN_OTU)
+endif
+ifdef MIN_SAMPLES_IN_OTU
+MIN_SAMPLES_IN_OTU := -s $(MIN_SAMPLES_IN_OTU)
+endif
+endif
+
 # Alpha diversity (Chao1 curves) -- This is here so that if you simply do qiime_setup from the terminal, it will attempt to do alpha diversity.
 
 alpha: alpha_div/alpha_rarefaction_plots/rarefaction_plots.html
@@ -180,6 +202,16 @@ endif
 otu_table.txt: picked_otus/seq_otus.txt assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt $(OTU_EXCLUDE_FILE)
 	@echo Making OTU table...
 	$(V)$(QIIME_PREFIX)make_otu_table.py -i picked_otus/seq_otus.txt -t assigned_taxonomy/seq.fasta_rep_set_tax_assignments.txt -o otu_table.txt $(OTU_EXCLUDE)
+ifdef FILTEROTUTABLE
+	@echo Filtering OTU table...
+ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
+	$(V)$(QIIME_PREFIX)filter_otus_from_otu_table.py -i otu_table.txt $(MIN_SEQ_IN_OTU) $(MAX_SEQ_IN_OTU) $(MIN_SAMPLES_IN_OTU) $(MAX_SAMPLES_IN_OTU) -o otu_table_filtered.txt
+else
+	$(V)$(QIIME_PREFIX)filter_otu_table.py -i otu_table.txt -c $(MIN_SEQ_IN_OTU) -s $(MIN_SAMPLES_IN_OTU) -o otu_table_filtered.txt
+endif
+	$(V)mv otu_table_filtered.txt otu_table.txt
+endif
+
 
 otu_table%.tab: otu_table%.txt
 	@echo Creating legacy OTU table...

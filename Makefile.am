@@ -167,6 +167,7 @@ axiome_VALASOURCES = \
 	plugins/a-blast-classifier.vala \
 	plugins/a-duleg.vala \
 	plugins/a-excludetaxa.vala \
+	plugins/a-filterotus.vala \
 	plugins/a-heatmap.vala \
 	plugins/a-jackknife.vala \
 	plugins/a-libcmp.vala \
