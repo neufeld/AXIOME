@@ -120,6 +120,8 @@ dist_pkgdata_DATA = \
 
 doc_DATA = \
 	sample.ax \
+	hmmb.ax \
+	hmmb.fasta.gz \
 	$(NULL)
 
 aq_count_n_CPPFLAGS = 

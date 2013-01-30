@@ -88,6 +88,7 @@ AC_CONFIG_FILES([
 	aq-inst-cran
 	cover.ps
 	sample.ax
+	hmmb.ax
 	aqxs
 	]) 
 AC_OUTPUT

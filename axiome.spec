@@ -45,6 +45,8 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %{_bindir}/axiome
 %doc %{_mandir}/man1/*
 %doc %{_defaultdocdir}/axiome/sample.ax*
+%doc %{_defaultdocdir}/axiome/hmmb.ax*
+%doc %{_defaultdocdir}/axiome/hmmb.fasta.gz
 %{_datadir}/axiome/primers.lst
 
 %changelog

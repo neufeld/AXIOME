@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<axiome version="@VERSION@" otu-method="cdhit" cluster-identity="0.97" align-method="pynast">
+	<!-- Definitions -->
+	<!-- First, we must specify all the types of data we intend to associate with our data. For instance, if we collected the collected the samples from different times, or different environment, or different substrates, then we define those here. Each definition can have a type. The type "d" is a decimal number, the type "i" is an integer, the type "s" is for text. If absent, the type is assumed to be "s". -->
+
+	<def name="Description"/>
+	<def name="Colour"/>
+	<def name="General" type="i"/>
+	<def name="Subject" type="i"/>
+	<def name="Specific" type="i"/>
+	<def name="End" type="i"/>
+	<def name="Mouth" type="i"/>
+	
+	
+	<!-- Pulling data from a gzipped FASTA. AXIOME automatically detects compression and decompresses on the fly -->
+	<fasta file="@prefix@/share/doc/@PACKAGE@/hmmb.fasta.gz">
+		<!-- When assembling this run, we can now describe our samples. First, we need to specify the regex that will match sequences and then fill out all of the definitions from above. The regex lets you pull out only some sequences from a file. Use "." to get everything. You could get all the sequences starting with "SALT" by saying regex="^SALT" or only sequences with a numeric identifier by saying regex="^[0-9]*$". If this makes no sense to you, start reading http://en.wikipedia.org/wiki/Regular_expression#Basic_concepts You can also specify limit="x" to only take the first x sequences. -->
+		<sample regex="L1GCCTAA" limit="500" Colour="red" Subject="1" General="1" Specific="1" End="1" Mouth="1" Description ="S1 SBL"/>
+		<sample regex="L2GTAGCC" limit="500" Colour="red" Subject="1" General="1" Specific="1" End="1" Mouth="1" Description ="S1 SBR"/>
+		<sample regex="L1ACATCG" limit="500" Colour="red" Subject="1" General="1" Specific="2" End="1" Mouth="1" Description ="S1 SPL"/>
+		<sample regex="L2AAGCTA" limit="500" Colour="red" Subject="1" General="1" Specific="2" End="1" Mouth="1" Description ="S1 SPR"/>
+		<sample regex="L1CGTGAT" limit="500" Colour="red" Subject="1" General="1" Specific="3" End="1" Mouth="1" Description ="S1 TON"/>
+		<sample regex="L2ACGGTA" limit="500" Colour="Yellow" Subject="1" General="2" Specific="5" End="1" Mouth="2" Description ="S1 GBO"/>
+		<sample regex="L1CTCTCT" limit="500" Colour="Yellow" Subject="1" General="2" Specific="6" End="1" Mouth="2" Description ="S1 GDU"/>
+		<sample regex="L1CACTGT" limit="500" Colour="blue" Subject="1" General="3" Specific="7" End="2" Mouth="2" Description ="S1 CTR"/>
+		<sample regex="L1TGGTCA" limit="500" Colour="blue" Subject="1" General="3" Specific="8" End="2" Mouth="2" Description ="S1 CSI"/>
+		<sample regex="L1ATTGGC" limit="500" Colour="blue" Subject="1" General="3" Specific="9" End="2" Mouth="2" Description ="S1 CRE"/>
+		<sample regex="L1GATCTG" limit="500" Colour="Green" Subject="1" General="4" Specific="10" End="2" Mouth="2" Description ="S1 STO"/>
+		<sample regex="L1AAGCTA" limit="500" Colour="pink" Subject="2" General="1" Specific="1" End="1" Mouth="1" Description ="S2 SBL"/>
+		<sample regex="L2CGTACT" limit="500" Colour="pink" Subject="2" General="1" Specific="1" End="1" Mouth="1" Description ="S2 SBR"/>
+		<sample regex="L1CTGATC" limit="500" Colour="pink" Subject="2" General="1" Specific="2" End="1" Mouth="1" Description ="S2 SPL"/>
+		<sample regex="L2TACAAG" limit="500" Colour="pink" Subject="2" General="1" Specific="2" End="1" Mouth="1" Description ="S2 SPR"/>
+		<sample regex="L1TCAAGT" limit="500" Colour="pink" Subject="2" General="1" Specific="3" End="1" Mouth="1" Description ="S2 TON"/>
+		<sample regex="L2AGTTGG" limit="500" Colour="cornsilk" Subject="2" General="2" Specific="4" End="1" Mouth="2" Description ="S2 GAN"/>
+		<sample regex="L2CTCTCT" limit="500" Colour="cornsilk" Subject="2" General="2" Specific="5" End="1" Mouth="2" Description ="S2 GBO"/>
+		<sample regex="L1TACAAG" limit="500" Colour="NavyBlue" Subject="2" General="3" Specific="7" End="2" Mouth="2" Description ="S2 CTR"/>
+		<sample regex="L1GTAGCC" limit="500" Colour="NavyBlue" Subject="2" General="3" Specific="8" End="2" Mouth="2" Description ="S2 CSI"/>
+		<sample regex="L1CGTACT" limit="500" Colour="blue" Subject="2" General="3" Specific="9" End="2" Mouth="2" Description ="S2 CRE"/>
+		<sample regex="L1GACTGA" limit="500" Colour="SeaGreen" Subject="2" General="4" Specific="10" End="2" Mouth="2" Description ="S2 STO"/>
+		<sample regex="L1TGAGGA" limit="500" Colour="maroon" Subject="3" General="1" Specific="1" End="1" Mouth="1" Description ="S3 SBL"/>
+		<sample regex="L2ACAACC" limit="500" Colour="maroon" Subject="3" General="1" Specific="1" End="1" Mouth="1" Description ="S3 SBR"/>
+		<sample regex="L1TCGCTT" limit="500" Colour="maroon" Subject="3" General="1" Specific="2" End="1" Mouth="1" Description ="S3 SPL"/>
+		<sample regex="L2TGAGGA" limit="500" Colour="maroon" Subject="3" General="1" Specific="2" End="1" Mouth="1" Description ="S3 SPR"/>
+		<sample regex="L1GCTCAA" limit="500" Colour="maroon" Subject="3" General="1" Specific="3" End="1" Mouth="1" Description ="S3 TON"/>
+		<sample regex="L2CAAGTG" limit="500" Colour="Gold" Subject="3" General="2" Specific="4" End="1" Mouth="2" Description ="S3 GAN"/>
+		<sample regex="L2CCTTGA" limit="500" Colour="Gold" Subject="3" General="2" Specific="5" End="1" Mouth="2" Description ="S3 GBO"/>
+		<sample regex="L1CCTTGA" limit="500" Colour="gold" Subject="3" General="2" Specific="6" End="1" Mouth="2" Description ="S3 GDU"/>
+		<sample regex="L1ACCTCA" limit="500" Colour="aquamarine" Subject="3" General="3" Specific="7" End="2" Mouth="2" Description ="S3 CTR"/>
+		<sample regex="L1ACAACC" limit="500" Colour="aquamarine" Subject="3" General="3" Specific="8" End="2" Mouth="2" Description ="S3 CSI"/>
+		<sample regex="L1ACGGTA" limit="500" Colour="aquamarine" Subject="3" General="3" Specific="9" End="2" Mouth="2" Description ="S3 CRE"/>
+		<sample regex="L1AGTTGG" limit="500" Colour="DarkGreen" Subject="3" General="4" Specific="10" End="2" Mouth="2" Description ="S3 STO"/>
+		<sample regex="L2GCCTAA" limit="500" Colour="OrangeRed" Subject="4" General="1" Specific="1" End="1" Mouth="1" Description ="S4 SBL"/>
+		<sample regex="L2CACTGT" limit="500" Colour="OrangeRed" Subject="4" General="1" Specific="1" End="1" Mouth="1" Description ="S4 SBR"/>
+		<sample regex="L2ACATCG" limit="500" Colour="OrangeRed" Subject="4" General="1" Specific="2" End="1" Mouth="1" Description ="S4 SPL"/>
+		<sample regex="L2TGGTCA" limit="500" Colour="OrangeRed" Subject="4" General="1" Specific="2" End="1" Mouth="1" Description ="S4 SPR"/>
+		<sample regex="L2CGTGAT" limit="500" Colour="OrangeRed" Subject="4" General="1" Specific="3" End="1" Mouth="1" Description ="S4 TON"/>
+		<sample regex="L2GACTGA" limit="500" Colour="Goldenrod" Subject="4" General="2" Specific="4" End="1" Mouth="2" Description ="S4 GAN"/>
+		<sample regex="L2TCGCTT" limit="500" Colour="Goldenrod" Subject="4" General="2" Specific="6" End="1" Mouth="2" Description ="S4 GDU"/>
+		<sample regex="L2GATCTG" limit="500" Colour="turquoise" Subject="4" General="3" Specific="7" End="2" Mouth="2" Description ="S4 CTR"/>
+		<sample regex="L2ATTGGC" limit="500" Colour="turquoise" Subject="4" General="3" Specific="8" End="2" Mouth="2" Description ="S4 CSI"/>
+		<sample regex="L2TCAAGT" limit="500" Colour="turquoise" Subject="4" General="3" Specific="9" End="2" Mouth="2" Description ="S4 CRE"/>
+		<sample regex="L2CTGATC" limit="500" Colour="LimeGreen" Subject="4" General="4" Specific="10" End="2" Mouth="2" Description ="S4 STO"/>
+			
+
+	</fasta>
+
+	<multicore num-cores="2"/>
+	<!-- Analyses -->
+	<!-- Do a basic alpha diversity analysis (i.e., QIIME's Chao1 curves) -->
+	<beta level="class"/>
+	<!-- The parameter "size" allows you to rarefy the library to a particular size, or "auto" to use the smallest sample size. Specifying taxa can limit the number of taxa the appear in the biplot. The default is 10. You can specify "all" if desired. -->
+	<beta level="class" size="auto" taxa="50"/>
+	<!-- Build a BLAST database over the sequences -->
+	<blast/>
+	<!-- Create an OTU heatmap via QIIME -->
+	<heatmap/>
+	<!-- Create a Bray-Curtis PCoA plot via AXIOME's R script -->
+	<pcoa/>	
+	<!-- Compute Dufrene-Legendre indicator species analysis over the variables provided above -->
+	<duleg p="0.01"/>
+	<duleg/>
+	<!-- Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities over the variables provided above -->
+	<mrpp/>
+.	<!-- Make a rank-abundance plot -->
+	<rankabundance/>
+	<!-- Produce an OTU table with the representatives sequences -->
+	<withseqs/>
+</axiome>

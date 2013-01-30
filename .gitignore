@@ -63,6 +63,7 @@ fasta.h
 fasta.vapi
 fmap.c
 fmap.h
+hmmb.ax
 joinn.c
 libtool
 m4/
