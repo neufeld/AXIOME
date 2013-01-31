@@ -12,36 +12,54 @@ nmf.method <- "brunet" # NMF method
 source("@prefix@/share/@PACKAGE@/nmf.R")
 #source("@prefix@/share/@PACKAGE@/biom.R")
 
-#Pull in arguments
-args <- commandArgs(trailingOnly = TRUE)
+pkgTest <- function(x)
+{
+        if (!require(x,character.only = TRUE))
+        {
+                install.packages(x,dep=TRUE)
+                if(!require(x,character.only = TRUE)) stop("Package not found")
+        }
+}
 
-#Search within args for the biom flags
-isBiomFile <- TRUE %in% (c("-B","-b","--biom", "--BIOM") %in% args)
+pkgTest("getopt")
 
-#Clear out any flags from the command arguments
-args <- args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM") ]
+#Grab arguments
+#Arguments required:
+#-i input OTU table (tabular format ONLY, JSON libraries much too slow in R)
+#-o output dir
+#-a auto flag
+spec = matrix(c('input', 'i', 1, "character",'output' , 'o', 1, "character", 'auto' ,'a', 0, "character",'help', 'h', 2, "character"), byrow=TRUE, ncol=4)
 
-#Search within args for the auto flag
+opt = getopt(spec)
 
-autoCalc <- TRUE %in% (c("-a","-A","--auto","-auto") %in% args)
+# if help was asked for print a friendly message
+# and exit with a non-zero error code
+if ( !is.null(opt$help) ) {
+  cat(getopt(spec, usage=TRUE))
+  q(status=1)
+}
 
-args <- args[ (args != "-a" & args != "-A" & args != "--auto" & args != "-auto") ]
+if ( is.null(opt$input) ) {
+  print("Input OTU table required.")
+  q(status=1)
+}
+if ( is.null(opt$output) ) {
+  print("Output directory required.")
+  q(status=1)
+}
+
+otuTable <- opt$input
+outDir <- opt$output
+autoCalc <- opt$auto
+
+dir.create(outDir)
 
 #Read in and format otu table
 print("Reading OTU table")
-if ( isBiomFile ) {
-#        otutable <- BIOM2table("otu_table.txt")
-#        kend <- nrow(otutable) # endrank
-        rawtable <- read.table("otu_table.tab", skip = 1,
-        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
-        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
-        kend <- ncol(rawtable) - 1 # end rank
-} else {
-        rawtable <- read.table("otu_table.txt", skip = 1,
-        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
-        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
-        kend <- ncol(rawtable) - 1 # end rank
-}
+rawtable <- read.table(otuTable, skip = 1,
+comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+kend <- min(ncol(rawtable) - 1, 20) # end rank
 
 print("Computing")
 z <- apply(as.matrix(t(otutable)), 2, function(x) { x/sum(x) })
@@ -49,9 +67,9 @@ ad <- ConsensusFuzzyH(z, nmf.method = nmf.method, Rnmf = FALSE, kstart, kend, nl
 
 print("Plotting")
 if (autoCalc) {
-	pdf("nmf-concordance-auto.pdf")
+	pdf(paste(outDir, "/nmf-concordance-auto.pdf",sep=""))
 } else {
-	pdf("nmf-concordance.pdf")
+	pdf(paste(outDir, "/nmf-concordance.pdf",sep=""))
 }
 print(ad$averdiff)
 plot(kstart:kend, ad$averdiff, type = "l", xlab = "Degree", ylab = "Concordance")
@@ -61,15 +79,11 @@ points(kstart:kend, ad$averdiff, pch = 16)
 if (length(ad$averdiff) >= 3) {
 		mono = TRUE;
     for (i in 1:(length(ad$averdiff)-1) ) {
-        if ( i > 2 ) {
+        if ( i > 2  && i < 20) {
             if ( ad$averdiff[i] >= ad$averdiff[i-1] && ad$averdiff[i] >= ad$averdiff[i+1] ) {
                 print(paste("NMF Candidate degree:", i))
                 if (autoCalc) {
-                    if (isBiomFile) {
-    		        		    system(paste("aq-nmf -B", i))
-                    } else {
-                        system(paste("aq-nmf", i))
-                    }
+    		        	system(paste("aq-nmf -i", otuTable, "-e mapping.extra -o", outDir, "-d", i))
                 }
             }
         }

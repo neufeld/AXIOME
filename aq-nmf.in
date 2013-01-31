@@ -10,44 +10,73 @@ nloop <- 100
 source("@prefix@/share/@PACKAGE@/nmf.R")
 #source("@prefix@/share/@PACKAGE@/biom.R")
 
-#Pull in arguments
-args <- commandArgs(trailingOnly = TRUE)
+pkgTest <- function(x)
+{
+        if (!require(x,character.only = TRUE))
+        {
+                install.packages(x,dep=TRUE)
+                if(!require(x,character.only = TRUE)) stop("Package not found")
+        }
+}
 
-#Search within args for the biom flags
-isBiomFile <- TRUE %in% (c("-B","-b","--biom", "--BIOM") %in% args)
+pkgTest("getopt")
 
-#Clear out any flags from the command arguments
-args <-args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM") ]
+#Grab arguments
+#Arguments required:
+#-i input OTU table (tabular format ONLY, JSON libraries much too slow in R)
+#-e mapping.extra file
+#-o output dir
+#-d degrees
+spec = matrix(c('input', 'i', 1, "character",'mapping.extra', 'e', 1, "character",'outputdir' , 'o', 2, "character", 'degrees' ,'d', 1, "character",'help', 'h', 2, "character"), byrow=TRUE, ncol=4)
 
-K <- as.numeric(tail(args,1))
+opt = getopt(spec)
 
+# if help was asked for print a friendly message
+# and exit with a non-zero error code
+if ( !is.null(opt$help) ) {
+  cat(getopt(spec, usage=TRUE))
+  q(status=1)
+}
+
+if ( is.null(opt$input) ) {
+  print("Input OTU table required.")
+  q(status=1)
+}
+if ( is.null(opt$output) ) {
+	opt$output <- getwd()
+}
+if ( is.null(opt$mapping.extra) ) {
+  print("Mapping.extra file required.")
+  q(status=1)
+}
+if ( is.null(opt$degrees) ) {
+	print("Number of degrees must be specified.")
+	q(status=1)
+}
+
+otuTable <- opt$input
+outDir <- opt$outputdir
+mappingFile <- opt$mapping.extra
+K <- as.integer(opt$degrees)
+print(K)
 # Similarity threshold
 simiv <- 0.8
 # Main code
-if (is.na(K) || K < 2 || K > 20) {
-	print("No dimension specified on command line")
+if (K < 2 || K > 20) {
+	print("Degrees not in acceptable range (2-20)")
 	q("no", status = 1, runLast = FALSE)
-	
 }
 
-#Read in and format otu table
+#rEAD In and format otu table
 print("Reading OTU table")
-if ( isBiomFile ) {
-#        otutable <- BIOM2table("otu_table.txt")
-        rawtable <- read.table("otu_table.tab", skip = 1,
-        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
-        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
-				#Sort numerically the samples
-        otutable <- otutable[order(as.integer(sub("X","", rownames(otutable)))),]
-} else {
-        rawtable <- read.table("otu_table.txt", skip = 1,
-        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
-        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
-				#Sort numerically the samples
-        otutable <- otutable[order(as.integer(sub("X","", rownames(otutable)))),]
-}
+rawtable <- read.table(otuTable, skip = 1,
+comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+#Sort numerically the samples
+otutable <- otutable[order(as.integer(sub("X","", rownames(otutable)))),]
+
 print("Reading mapping extra");
-extra <- read.table("mapping.extra", header = TRUE,
+extra <- read.table(mappingFile, header = TRUE,
     comment.char = "", row.names = "X.SampleID", sep = "\t")
 
 # Create a normalised matrix
@@ -70,7 +99,7 @@ Spe <- spectreorder(best$Hmatrix, L = 2, beta = c(0.001, 0.2), lim = lim)
 print("Writing basis taxa")
 dir.create("nmf", FALSE)
 for (k in 1:K) {
-	pfam.file <- file(paste("nmf/basis_taxa_", K, "_", k, ".txt", sep = ""), "w")
+	pfam.file <- file(paste(outDir, "/basis_taxa_", K, "_", k, ".txt", sep = ""), "w")
 		ix <- write.taxa.list(X = An, P = P, H = H, spw1 = spw1, 
 				labelnames = labelname, taxaid = rownames(rawtable), pfams = rawtable[, ncol(rawtable)], 
 				ixv = Spe$V, k, pfam.file = pfam.file, 
@@ -81,7 +110,7 @@ for (k in 1:K) {
 		#lix0 = lix0 + lix
 		close(pfam.file)
 }
-pdf(paste("nmf/nmf_", K, ".pdf", sep = ""))
+pdf(paste(outDir, "/nmf_", K, ".pdf", sep = ""))
 nmfplot(Spe$HTH, extra[Spe$V, "Description"], extra[Spe$V, "Description"], cexaxis = 0.8)
 nmfplot(Spe$HTH, extra[Spe$V, "Description"], extra[Spe$V, "Description"], cexaxis = 0.8, cexayis = 0.5)
 nmfplot.h(best$Hmatrix[, Spe$V], taxa = paste("Basis taxa", 1:K), samples = extra[Spe$V, "Description"])

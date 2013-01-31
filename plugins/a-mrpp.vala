@@ -30,12 +30,12 @@ class AXIOME.Analyses.MRPPGraphs : RuleProcessor {
 			method = "bray";
 		}
 
-		output.add_target("mrpp-%s.pdf".printf(method));
-		output.add_target("mrpp-%s.txt".printf(method));
+		output.add_target("mrpp/mrpp-%s.pdf".printf(method));
+		output.add_target("mrpp/mrpp-%s.txt".printf(method));
 		if ( is_version_at_least(1,5) || output.pipeline.to_string() == "mothur" ) {
-			output.add_rulef("mrpp-%s.pdf mrpp-%s.txt: mapping.txt otu_table.tab\n\t@echo Computing Multi Response Permutation Procedure with method '%s'\n\t$(V)aq-mrpp -B %s\n\n", method, method, method, method);
+			output.add_rulef("mrpp/mrpp-%s.pdf mrpp/mrpp-%s.txt: mapping.txt otu_table.tab\n\t@echo Computing Multi Response Permutation Procedure with method '%s'\n\t$(V)aq-mrpp -i otu_table.tab -o mrpp -m mapping.txt -d %s\n\n", method, method, method, method);
 		} else {
-    output.add_rulef("mrpp-%s.pdf mrpp-%s.txt: mapping.txt otu_table.txt\n\t@echo Computing Multi Response Permutation Procedure with method '%s'\n\t$(V)aq-mrpp %s\n\n", method, method, method, method);
+    output.add_rulef("mrpp/mrpp-%s.pdf mrpp/mrpp-%s.txt: mapping.txt otu_table.txt\n\t@echo Computing Multi Response Permutation Procedure with method '%s'\n\t$(V)aq-mrpp -i otu_table.txt -o mrpp -m mapping.txt -d %s\n\n", method, method, method, method);
 		}
 		return true;
 	}

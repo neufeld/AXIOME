@@ -1,40 +1,82 @@
 #!/usr/bin/env Rscript
 options(error = quote(dump.frames("pca-debug", TRUE)))
 
-source("@prefix@/share/@PACKAGE@/biom.R")
+#source("@prefix@/share/@PACKAGE@/biom.R")
 
-#Pull in arguments
-args <- commandArgs(trailingOnly = TRUE)
-
-#Search within args for the biom flags
-isBiomFile <- TRUE %in% (c("-B","-b","--biom", "--BIOM") %in% args)
-
-#Clear out any flags from the command arguments
-args <-args[ (args != "-b" & args != "-B" & args != "--biom" & args != "--BIOM") ]
-
-#Read in and format otu table
-print("Reading OTU table")
-if ( isBiomFile ) {
-#        otutable <- BIOM2table("otu_table.txt")
-				rawtable <- read.table("otu_table.tab", skip = 1,
-        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
-        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
-        otutable <- otutable[order(as.integer(sub("X","", rownames(otutable)))),]
-
-} else {
-        rawtable <- read.table("otu_table.txt", skip = 1,
-        comment.char = "", header = TRUE, row.names = 1, sep = "\t")
-        otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
-				otutable <- otutable[order(as.integer(sub("X","", rownames(otutable)))),]
+pkgTest <- function(x)
+{
+        if (!require(x,character.only = TRUE))
+        {
+                install.packages(x,dep=TRUE)
+                if(!require(x,character.only = TRUE)) stop("Package not found")
+        }
 }
 
+pkgTest('getopt')
+
+#Grab arguments
+#Arguments required:
+#-i input OTU table (tabular format ONLY, JSON libraries much too slow in R)
+#-m mapping file
+#-e mapping.extra file
+#-t headers.txt file
+#-o output dir
+spec = matrix(c('input', 'i', 1, "character",
+'mapping','m',1,"character",
+'mapping.extra','e',1,"character",
+'headers','t',1,'character',
+'output','o',1,"character",
+'help','h',2,"character"), byrow=TRUE, ncol=4)
+
+opt = getopt(spec)
+
+# if help was asked for print a friendly message
+# and exit with a non-zero error code
+if ( !is.null(opt$help) ) {
+  cat(getopt(spec, usage=TRUE))
+  q(status=1)
+}
+
+if ( is.null(opt$input) ) {
+  print("Input OTU table required.")
+  q(status=1)
+}
+if ( is.null(opt$mapping) ) {
+  print("Mapping file required.")
+  q(status=1)
+}
+if ( is.null(opt$mapping.extra) ) {
+  print("mapping.txt file required.")
+  q(status=1)
+}
+if ( is.null(opt$headers) ) {
+  print("headers.txt file required.")
+  q(status=1)
+}
+if ( is.null(opt$output) ) {
+  opt$output <- getwd()
+}
+
+outDir <- opt$output
+otuTable <- opt$input
+mappingFile <- opt$mapping
+mappingExtra <- opt$mapping.extra
+headersFile <- opt$headers
+
+dir.create(outDir)
+
+rawtable <- read.table(otuTable, skip = 1,
+comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+otutable <- otutable[order(as.integer(sub("X","", rownames(otutable)))),]
+
 print("Reading mapping");
-mapping <- read.table("mapping.txt", header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t")
+mapping <- read.table(mappingFile, header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t")
 print("Reading mapping extra");
-extra <- read.table("mapping.extra", header = TRUE,
+extra <- read.table(mappingExtra, header = TRUE,
     comment.char = "", row.names = "X.SampleID", sep = "\t")
 print("Reading header");
-interest <- read.table("headers.txt")[1,] == "TRUE";
+interest <- read.table(headersFile)[1,] == "TRUE";
 print("Computing PCA");
 
 for(i in 0 : length(interest)) {
@@ -52,7 +94,7 @@ rownames(newmapping) <- colnames(mapping)[interest];
 d <- rbind(t(otutable), newmapping);
 p <- prcomp(t(d), scale = TRUE);
 
-pdf("pca-biplot.pdf");
+pdf(paste(outDir, "/pca-biplot.pdf",sep=""));
 
 print("Making Scree plot");
 plot(p);

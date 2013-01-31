@@ -103,33 +103,33 @@ chimeras/chimeras%.uchime chimeras/himeras%.aln chimeras/chimeras%.fasta: chimer
 ifndef QIIME_GREATER_THAN_1_5
 pca-biplot.pdf: mapping.txt otu_table.txt headers.txt
 	@echo Making biplot...
-	$(V)aq-pca
+	$(V)aq-pca -i otu_table.txt -t headers.txt -m mapping.txt -e mapping.extra -o pca
 else
 pca-biplot.pdf: mapping.txt otu_table.tab headers.txt
 	@echo Making biplot...
-	$(V)aq-pca -B
+	$(V)aq-pca -i otu_table.tab -t headers.txt -m mapping.txt -e mapping.extra -o pca
 endif
 
 # NMF Concordance
 ifndef QIIME_GREATER_THAN_1_5
-nmf-concordance.pdf: otu_table.txt
+nmf/nmf-concordance.pdf: otu_table.txt
 	@echo Making concordance plot...
-	$(V)aq-nmf-concordance
+	$(V)aq-nmf-concordance -i otu_table.txt -o nmf
 else
-nmf-concordance.pdf: otu_table.tab
+nmf/nmf-concordance.pdf: otu_table.tab
 	@echo Making concordance plot...
-	$(V)aq-nmf-concordance -B
+	$(V)aq-nmf-concordance -i otu_table.tab -o nmf
 endif
 
 # NMF Concordance + NMF plots on candidate degrees (if any)
 ifndef QIIME_GREATER_THAN_1_5
-nmf-concordance-auto.pdf: otu_table.txt
+nmf/nmf-concordance-auto.pdf: otu_table.txt
 	@echo Making concordance plot and NMF plots on candidate degrees \(if any\)...
-	$(V)aq-nmf-concordance -A
+	$(V)aq-nmf-concordance -i otu_table.txt -o nmf -a
 else
-nmf-concordance-auto.pdf: otu_table.tab
+nmf/nmf-concordance-auto.pdf: otu_table.tab
 	@echo Making concordance plot and NMF plots on candidate degrees \(if any\)...
-	$(V)aq-nmf-concordance -B -A
+	$(V)aq-nmf-concordance -i otu_table.tab -o nmf -a
 endif
 
 .PHONY: all alpha
