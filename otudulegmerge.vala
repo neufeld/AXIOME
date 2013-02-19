@@ -122,7 +122,7 @@ int main(string[] args) {
 		var outFile = FileStream.open(outDir + "/" + outName, "w");
 
 		//Try to open the relabu.txt file to try to pull in better cluster names
-		relAbu = FileStream.open(outString + "_" + category + "_relabu.txt", "r");
+		relAbu = FileStream.open(outDir + "/" + outString + "_" + category + "_relabu.txt", "r");
 		if ( relAbu != null ) {
 			//If the file is there, pull out only the first line
 			clusterLabels = relAbu.read_line();
