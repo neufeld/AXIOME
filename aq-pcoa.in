@@ -111,7 +111,7 @@ colnames(newmapping) <- paste("X", rownames(mapping), sep = "");
 rownames(newmapping) <- colnames(mapping)[interest];
 
 d <- vegdist(otutable, method=dmethod);
-pdf(paste(outDir, "/pcoa-",dmethod,"-biplot.pdf",sep=""));
+pdf(paste(outDir, "/pcoa-",dmethod,"-biplot.pdf",sep=""),useDingbats=F);
 
 print("Making MDS Plot");
 
@@ -128,4 +128,6 @@ if ( length(useful) > 1 ) {
 sink(paste(outDir, "/pcoa-",dmethod,".txt",sep=""))
 print("Eigenvalues:")
 print(as.matrix(p$values$Eigenvalues))
+print("Relative Eigenvalues:")
+print(as.matrix(p$values$Relative_eig))
 sink()
