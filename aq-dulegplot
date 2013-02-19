@@ -2,7 +2,13 @@
 import pygal
 import argparse
 import os
+import matplotlib
+matplotlib.use('SVG')
+font = {'size'   : 8}
 
+matplotlib.rc('font', **font)
+import matplotlib.pyplot as plt
+import numpy as np
 #Read off of command line options:
 # - input duleg file
 # - mapping file
@@ -14,15 +20,20 @@ parser.add_argument("-o",metavar="outdir",action="store",help="output directory 
 parser.add_argument("-m",metavar="mapping",action="store",help="input mapping file location", required=True)
 parser.add_argument("-c",metavar="category",action="store",help="metadata category to plot", required=False)
 parser.add_argument("-l",metavar="level",action="store",help="comma separated list of taxonomic levels to plot", default="6", required=False)
+parser.add_argument("-t",metavar="type",action="store",help="plot type: by sequences (seq) or OTUs (otu)",default="seq", required=False)
 args = parser.parse_args()
 
 dulegFile = open(args.i,"rU")
 mappingFile = open(args.m,"rU")
 levelList = args.l.split(",")
 category = args.c
+base = os.path.basename(args.i)
+if (args.t == "seq"):
+	plotType = "seq"
+else:
+	plotType = "otu"
 if (category == None):
 	#Attempt to parse out category from the incoming file name
-	base = os.path.basename(args.i)
 	try:
 		category = base.split("_",2)[2].split(".")[0]
 	except:
@@ -93,37 +104,70 @@ for level in levelList:
 			abundance = line[sumPos]
 			classification = line[sumPos+1]
 			classification = classification.split(";")
-			cluster = line[sumPos+3]
+			ind_cluster = line[sumPos+3]
+			#Collapse the columns by cluster
 			sortedAbundance = clusterSort(line, sumPos, sampleNames, sampleMemberships)
 			try:
 				classAtLevel = classification[int(level)-1]
 				if classAtLevel not in taxaDict:
 					taxaDict[classAtLevel] = {}
-				clusterDict = taxaDict[classAtLevel]
-				for cluster in clusterList:
-					if cluster in clusterDict:
-						clusterDict[cluster] += int(float(sortedAbundance[cluster]))
+				clusterDict = taxaDict[classAtLevel]	
+				if (plotType == "seq"):
+					for cluster in clusterList:
+						if cluster in clusterDict:
+							clusterDict[cluster] += int(float(sortedAbundance[cluster]))
+						else:
+							clusterDict[cluster] = int(float(sortedAbundance[cluster]))
+				else:
+					if ind_cluster in clusterDict:
+						clusterDict[ind_cluster] += 1
 					else:
-						clusterDict[cluster] = int(float(sortedAbundance[cluster]))
+						clusterDict[ind_cluster] = 1
 			except:
 				pass
-				
-	chart = pygal.StackedBar()
-	chart.title = "Indicator Species by Abundance (Level " + level + ")"
-	chart.x_labels = taxaDict.keys()
-	chart.x_label_rotation = 90
+	plt.ioff()
+	fig = plt.figure(figsize=(15,5),facecolor='w') 
+	colournum = 0
+	colourlist = [ 'green', 'red', 'blue', 'yellow', 'violet', 'orange', 'cyan', 'purple', 'lime' ]
+	N = len(taxaDict.keys())
+	ind = np.arange(N)
+	width = 0.35
+	#Pygal plotting, not super compatible with image editors :(		
+	#chart = pygal.StackedBar()
+	#chart.title = "Indicator Species by Abundance (Level " + level + ")"
+	#chart.x_labels = taxaDict.keys()
+	#chart.x_label_rotation = 90
+	plt.ylabel('Abundance')
+	plt.title('Indicator Species by Abundance (Level ' + level + ')')
+	plt.xticks(ind+width/2., taxaDict.keys())
+	plt.setp(plt.xticks()[1], rotation=90)
 	chartDict = {}
 	for taxa in taxaDict.values():
 		for cluster in clusterList:
 			if cluster not in chartDict:
 				chartDict[cluster] = []
 			if cluster not in taxa:
-				chartDict[cluster].append(None)
+				chartDict[cluster].append(0)
 			else:
 				chartDict[cluster].append(taxa[cluster])
-
+	plotlst = []
+	usedcolours = []
+	yoff = None
 	for cluster in chartDict:
-		chart.add(str(cluster),chartDict[cluster])
-	chart.render_to_file(os.path.dirname(args.o) + "/" + saveBase + "_" + category + "_L" + level + ".svg")
-
-print("Complete!")
+		if (yoff == None):
+			pl = plt.bar(ind, chartDict[cluster], width, color=colourlist[colournum%9])
+			yoff = chartDict[cluster]
+			#Deal with the empty yoff case to prevent cashing matplotlib
+			if (len(yoff) == 0):
+				yoff = None
+		else:
+			pl = plt.bar(ind, chartDict[cluster], width, bottom=yoff, color=colourlist[colournum%9])
+			yoff = map(sum,zip(chartDict[cluster],yoff))
+		plotlst.append(pl)
+		usedcolours.append(pl[0])
+		colournum += 1
+	plt.legend(usedcolours, clusterList)
+		#chart.add(str(cluster),chartDict[cluster])
+#	chart.render_to_file(os.path.dirname(args.o) + "/" + saveBase + "_" + category + "_L" + level + ".svg")
+	plt.savefig(os.path.dirname(args.o) + "/" + saveBase + "_" + category + "_L" + level + '.svg', transparent=False, bbox_inches='tight', pad_inches=0)
+	plt.close()
