@@ -1448,10 +1448,9 @@ namespace AXIOME {
 
 		var version = get_qiime_version();
 		if (version == null) {
-			return 1;
+			version = {0,0,0};
 		}
 		qiime_version = version;
-
 		var rootname = ( args[1].has_suffix(".aq") || args[1].has_suffix(".ax") ) ? args[1].substring(0, args[1].length-3) : args[1];
 		var dirname = rootname.concat(FileUtils.test(rootname.concat(".qiime"), FileTest.IS_DIR) ? ".qiime" : ".axiome");
 		var output = new Output(dirname, args[1]);
