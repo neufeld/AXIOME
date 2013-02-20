@@ -41,11 +41,13 @@ alpha_div/alpha_rarefaction_plots/rarefaction_plots.html: otu_table.txt mapping.
 	@echo Computing Alpha Diversity...
 	@test ! -d rarefaction_tables || rm -r rarefaction_tables
 	@test ! -d alpha_div || rm -r alpha_div
+	$(V)echo 'alpha_diversity:metrics\tshannon,chao1,observed_species' > alpha_params.txt
 ifdef MULTICORE
-	$(V)$(QIIME_PREFIX)alpha_rarefaction.py -i otu_table.txt -m mapping.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div -a -O $(NUM_CORES)
+	$(V)$(QIIME_PREFIX)alpha_rarefaction.py -i otu_table.txt -m mapping.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div -p alpha_params.txt -a -O $(NUM_CORES)
 else
-	$(V)$(QIIME_PREFIX)alpha_rarefaction.py -i otu_table.txt -m mapping.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div
+	$(V)$(QIIME_PREFIX)alpha_rarefaction.py -i otu_table.txt -m mapping.txt -t seq.fasta_rep_set_aligned_pfiltered.tre -o alpha_div -p alpha_params.txt
 endif
+	$(V)mv alpha_params.txt alpha_div
 
 # Build basic data from sequences, OTU picking step
 ifeq ($(OTU_PICKING_METHOD),raw-uclust)
