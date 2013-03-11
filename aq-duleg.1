@@ -3,8 +3,8 @@
 .SH NAME 
 aq-duleg \- Compute Dufrene-Legendre indicator species analysis in R
 .SH SYNOPSIS
-.B aq-duleg [-B] \fBp\fR
+.B aq-duleg -i otu_table -m mapping.txt -p p_val_cutoff -o output_dir
 .SH DESCRIPTION
-Calculates the indicator value (fidelity and relative abundance) of species in clusters or types. This is done using the \fBlabdsv\fR R package. Bray-Curtis distances are used between samples. Parameter \fBp\fR provides a p-value cutoff for output (must be less than 1). otu_table.txt must exist in the working directory. When called through AXIOME, this is done for you. If using QIIME version 1.5.0 or greater, use flag -B to specify that the OTU table is in BIOM format.
+Calculates the indicator value (fidelity and relative abundance) of species in clusters or types. This is done using the \fBlabdsv\fR R package. Bray-Curtis distances are used between samples. Parameter \fB-p\fR provides a p-value cutoff for output (must be less than 1). OTU table must be provided in tab-delimited format.
 .SH SEE ALSO
 .BR axiome (1), aq-orderotu (1).

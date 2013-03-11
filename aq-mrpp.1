@@ -3,8 +3,8 @@
 .SH NAME 
 aq-mrpp \- Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities in R
 .SH SYNOPSIS
-.B aq-mrpp [-B] method
+.B aq-mrpp -i otu_table -m mapping.txt -d distance_method -o output_dir
 .SH DESCRIPTION
-Multiple Response Permutation Procedure (MRPP) provides a test of whether there is a significant difference between two or more groups of samples. Samples are group based on all provided variables from the \fBmapping.txt\fR file. For each variable, three plots are produced: a multi-dimensional scaling, histogram of the differences among groups, and a graph of mean distances. This is done using the \fBvegan\fR R package. Options for method are: "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao" or "cao". Recommended method is "bray", which uses Bray-Curtis distances to create the plots. If using QIIME version 1.5.0 or greater, use flag -B to specify that the OTU table is in BIOM format.
+Multiple Response Permutation Procedure (MRPP) provides a test of whether there is a significant difference between two or more groups of samples. Samples are group based on all provided variables from the \fBmapping.txt\fR file. For each variable, three plots are produced: a multi-dimensional scaling, histogram of the differences among groups, and a graph of mean distances. This is done using the \fBvegan\fR R package. Options for method are: "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao" or "cao". Recommended method is "bray", which uses Bray-Curtis distances to create the plots. OTU table must be provided in tab delimited format.
 .SH SEE ALSO
 .BR axiome (1).

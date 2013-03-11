@@ -3,8 +3,8 @@
 .SH NAME 
 aq-pca \- Perform PCA in R
 .SH SYNOPSIS
-.B aq-pca [-B]
+.B aq-pca -i otu_table -m mapping.txt -e mapping.extra -t headers.txt -o output
 .SH DESCRIPTION
-Perform a principal component analysis using R. This includes taxa and any numerical properties in the \fBmapping.txt\fR file. It is expected that there be an OTU table called \fBotu_table.txt\fR, the colour and label for every point in \fBmapping.extra\fR, and a list of which properties from \fBmapping.txt\fR to use in a file called \fBheaders.txt\fR. This is automatically set up by AXIOME. If using QIIME version 1.5.0 or greater, use flag -B to specify that the OTU table is in BIOM format.
+Perform a principal component analysis using R. This includes taxa and any numerical properties in the \fBmapping.txt\fR file. It is expected that there be an OTU table called \fBotu_table.txt\fR, the colour and label for every point in \fBmapping.extra\fR, and a list of which properties from \fBmapping.txt\fR to use in a file called \fBheaders.txt\fR. This is automatically set up by AXIOME. OTU table must be supplied in tab-delimited format.
 .SH SEE ALSO
 .BR axiome (1), aq-orderotu (1).
