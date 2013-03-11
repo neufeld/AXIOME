@@ -222,6 +222,10 @@ Compute Multi Response Permutation Procedure of within- versus among-group dissi
 .BR aq-mrpp-unifrac (1).
 The library may be rarefied to a particular size by specifying \fIsize\fR or it may be set to \fBauto\fR to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect. Available pipeline: QIIME
 .TP
+\fB<venn/>\fR
+Create Venn diagrams that plots abundance of sequences in all metadata groups where the number of clusters is less than 5 and greater than 1, see
+.BR aq-venn (1).
+.TP
 \fB<withseqs/>\fR
 Produce an OTU table with the representatives sequences in a final column. Available pipeline: QIIME
 .SH ENVIRONMENT VARIABLES
