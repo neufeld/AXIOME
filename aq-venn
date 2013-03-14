@@ -61,7 +61,6 @@ colnames(mapping) <- paste("X", colnames(mapping), sep = "");
 #TODO: Proper argument passing and handling of this
 rowsum <- rowSums(otutable)
 #rowsum <- rep(1,dim(otutable)[1])
-#TODO: Proper argument passing and handling of file output
 pdf(outFile)
 #Put a title page in (needed to have a title on the Vennerable plots
 #because Vennerable doesn't use the high level plot function correctly...)

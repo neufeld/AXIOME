@@ -21,7 +21,11 @@ class AXIOME.Analyses.Venn : RuleProcessor {
 	}
 	public override bool process(Xml.Node *definition, Output output) {
 		output.add_target("venn/abundance_venn.pdf");
-		output.add_rule("venn/abundance_venn.pdf: otu_table.txt mapping.txt\n\t@echo Creating Venn diagram plots...\n\t$(V)test -d venn || mkdir venn\n\taq-venn -i otu_table.txt -o venn/abundance_venn.pdf -m mapping.txt\n\n");
+		if ( is_version_at_least(1,5) || output.pipeline.to_string() == "mothur" ) {
+			output.add_rule("venn/abundance_venn.pdf: otu_table.txt mapping.txt\n\t@echo Creating Venn diagram plots...\n\t$(V)test -d venn || mkdir venn\n\taq-venn -i otu_table.tab -o venn/abundance_venn.pdf -m mapping.txt\n\n");
+		} else {
+			output.add_rule("venn/abundance_venn.pdf: otu_table.tab mapping.txt\n\t@echo Creating Venn diagram plots...\n\t$(V)test -d venn || mkdir venn\n\taq-venn -i otu_table.txt -o venn/abundance_venn.pdf -m mapping.txt\n\n");
+		}
 		return true;
 	}
 }
