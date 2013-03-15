@@ -68,16 +68,6 @@ otu_table.txt: mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).shared mothur
 	$(V)test -d logs || mkdir logs
 	$(V)mv mothur.*.logfile logs
 
-alpha: alpha-chao.pdf
-
-alpha-chao.pdf: mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).groups.r_chao
-	@echo Plotting alpha rarefaction curves...
-	$(V)aq-mothur-alpha -i mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).groups.r_chao -e mapping.extra -o . > /dev/null
-
-mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).groups.r_chao: mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).shared
-	@echo Performing alpha rarefaction using chao...
-	$(V)mothur "#rarefaction.single(shared=mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).shared, label=$(CLUSTER_IDENT), calc=chao)"
-
 otu_table.tab: otu_table.txt
 	@echo Creating legacy OTU table...
 	$(V)$(QIIME_PREFIX)convert_biom.py -b -i $< -o $@ --header_key=taxonomy --output_metadata_id=Consensus\ Lineage
