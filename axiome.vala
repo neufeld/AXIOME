@@ -505,15 +505,6 @@ namespace AXIOME {
 			}
 			makefile.printf("\n\nall: Makefile mapping.txt otu_table.txt %s\n\n", targets.str);
 			makefile.printf("Makefile mapping.txt: %s\n\t@echo Updating analyses to be run...\n\t$(V)axiome $<\n\n", sourcefile);
-			//We need to get the "classic" tab delineated OTU table file if QIIME 1.5 or newer for R scripts
-			if ( is_version_at_least(1,5) ) {
-				makefile.printf("otu_table.tab: otu_table.txt\n\t@echo Creating legacy OTU table...\n\t$(V)$(QIIME_PREFIX)convert_biom.py -b -i otu_table.txt -o otu_table.tab --header_key=taxonomy --output_metadata_id=Consensus\\ Lineage\n\n");
-				makefile.printf("otu_table_auto.txt: otu_table.txt otu_table.tab\n\t@echo Rareifying OTU table to smallest library size...\n\t$(V)$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt -d $$(awk -F '\t' 'NR == 1 { } NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; } } } NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; } } END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest; }' otu_table.tab)\n\n");
-			} else {
-				//If not QIIME version 1.5, read off of the tab delineated OTU table using the awk script
-				//TODO: Rewrite the awk script to pull out the sums from the BIOM format (or write something that does)
-				makefile.printf("otu_table_auto.txt: otu_table.txt\n\t@echo Rareifying OTU table to smallest library size...\n\t$(V)$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt %s -d $$(awk -F '\t' 'NR == 1 { } NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; } } } NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; } } END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest; }' otu_table.txt)\n\n", is_version_at_least(1, 3) ? "" : "--lineages_included");
-			}
 			if (classification_method != null) {
 				makefile.printf("CLASSIFICATION_METHOD = %s\n", classification_method);
 			}

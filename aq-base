@@ -18,6 +18,20 @@ otu_table_summarized_otu%.txt: otu_table%.txt
 	$(V)aq-pretendsummarize $< > $@
 endif
 
+#We need to get the "classic" tab delineated OTU table file if QIIME 1.5 or newer for R scripts
+ifeq ($(QIIME_GREATER_THAN_1_5),TRUE)
+otu_table.tab: otu_table.txt
+	@echo Creating legacy OTU table...
+	$(V)$(QIIME_PREFIX)convert_biom.py -b -i otu_table.txt -o otu_table.tab --header_key=taxonomy --output_metadata_id="Consensus Lineage"
+otu_table_auto.txt: otu_table.txt otu_table.tab
+	@echo Rareifying OTU table to smallest library size...
+	$(V)$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt -d $$(awk -F '\t' 'NR == 1 { } NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; } } } NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; } } END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest; }' otu_table.tab)
+else
+#If not QIIME version 1.5, read off of the tab delineated OTU table using the awk script
+otu_table_auto.txt: otu_table.txt
+	@echo Rareifying OTU table to smallest library size...
+	$(V)$(QIIME_PREFIX)single_rarefaction.py -i otu_table.txt -o otu_table_auto.txt %s -d $$(awk -F '\t' 'NR == 1 { } NR == 2 { for (i = 2; i <= NF; i++) { if ($$i ~ /^[0-9]*$$/) { max = i; } } } NR > 2 { for (i = 2; i <= max; i++) { c[i] += $$i; } } END { smallest = c[2]; for (i = 3; i <= max; i++) { if (c[i] < smallest) { smallest = c[i]; }} print smallest; }' otu_table.txt)
+endif
 
 # Produce a BLAST database
 ifeq ($(BLASTDB_COMMAND),formatdb)
