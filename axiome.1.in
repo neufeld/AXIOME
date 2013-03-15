@@ -205,8 +205,8 @@ Available pipelines: QIIME, mothur
 \fB<rankabundance/>\fR
 Make a rank-abundance plot using QIIME. Available pipeline: QIIME
 .TP
-\fB<rdp [confidence="\fIvalue\fB"] [taxfile="\fIfilepath\fB"] [seqfile="\fIfilepath\fB"]/>\fR
-Modifies the RDP classifier flags. Confidence alters the RDP confidence cutoff value. Requires a value between 0 and 1, and default is 0.8. Taxfile and seqfile arguments require full filepaths to the RDP taxonomy file and its related sequence file. If left blank, it will use the default values specified in the QIIME config file (likely GreenGenes). This could be used to train RDP on 18s reference sequences, for example, and these classifications will be used in all downstream analyses. Available pipeline: QIIME
+\fB<rdp [confidence="\fIvalue\fB"] [taxfile="\fIfilepath\fB"] [seqfile="\fIfilepath\fB"] [max-memory="\fIvalue\fB"]/>\fR
+Modifies the RDP classifier flags. Confidence alters the RDP confidence cutoff value. Requires a value between 0 and 1, and default is 0.8. Taxfile and seqfile arguments require full filepaths to the RDP taxonomy file and its related sequence file. If left blank, it will use the default values specified in the QIIME config file (likely GreenGenes). This could be used to train RDP on 18s reference sequences, for example, and these classifications will be used in all downstream analyses. The "max-memory" option changes the amount of memory given to RDP. Set to a high enough value to prevent RDP from silently thrashing (particularly when retraining). Available pipeline: QIIME
 .TP
 \fB<rtax \fR\fBread-1="\fI/path/to/forward_read.fa\fB"\fR \fR\fBread-2="\fI/path/to/reverse_read.fa\fB"\fR \fBseqfile="\fI/path/to/seqfile\fB"\fR \fBtaxfile="\fI/path/to/taxfile\fB"\fR\fB/>\fR
 Configuration plugin when using Rtax as the classification method through QIIME. Each of the parameters is required. The \fBread-1\fR and \fBread-2\fR parameters are the filepath to the pre-clustering sequences in FASTA format. The \fBtaxfile\fR parameter specifies a tab delineated file which maps the sequences in \fBseqfile\fR to their taxonomy. Available pipelines: QIIME

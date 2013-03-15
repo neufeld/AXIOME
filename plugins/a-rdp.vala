@@ -66,6 +66,12 @@ class AXIOME.Analyses.RDP : RuleProcessor {
 			if (seq_file != null) {
 				rdp_flags += "-r ".concat(seq_file, " ");
 			}
+
+			var max_mem = definition->get_prop("max-memory");
+			if (max_mem != null) {
+				rdp_flags += "--rdp_max_memory ".concat(max_mem, " ");
+			}
+
 			output.add_rulef("RDP_CLASSIFIER_FLAGS = %s\n\n", rdp_flags);
 		}
 		return true;
