@@ -77,9 +77,9 @@ class AXIOME.Analyses.NonnegativeMatrixFactorization : RuleProcessor {
 		}
 		output.add_target("nmf/nmf_%d.pdf".printf(degree));
 		if ( is_version_at_least(1,5) ) {
-			output.add_rulef("nmf/nmf_%d.pdf: otu_table.tab mapping.extra\n\t@echo Computing NMF for degree %d...\n\t$(V)aq-nmf -i otu_table.tab -e mapping.extra -o nmf/ -d %d\n\n", degree, degree, degree);
+			output.add_rulef("nmf/nmf_%d.pdf: otu_table_auto.tab mapping.extra\n\t@echo Computing NMF for degree %d...\n\t$(V)aq-nmf -i otu_table_auto.tab -e mapping.extra -o nmf/ -d %d\n\n", degree, degree, degree);
 		} else  {
-			output.add_rulef("nmf/nmf_%d.pdf: otu_table.txt mapping.extra\n\t@echo Computing NMF for degree %d...\n\t$(V)aq-nmf -i otu_table.txt -e mapping.extra -o nmf/ -d %d\n\n", degree, degree, degree);
+			output.add_rulef("nmf/nmf_%d.pdf: otu_table_auto.txt mapping.extra\n\t@echo Computing NMF for degree %d...\n\t$(V)aq-nmf -i otu_table_auto.txt -e mapping.extra -o nmf/ -d %d\n\n", degree, degree, degree);
 		}
 	return true;
 	}

@@ -44,9 +44,9 @@ class AXIOME.Analyses.PrincipalCoordinateAnalysis : RuleProcessor {
 
 		output.add_target("pcoa/pcoa-%s-biplot.pdf".printf(method));
 		if ( is_version_at_least(1,5) || output.pipeline.to_string() == "mothur" ) {
-			output.add_rulef("pcoa/pcoa-%s-biplot.pdf: mapping.txt otu_table.tab headers.txt\n\t@echo Computing PCoA analysis using method '%s'\n\t$(V)aq-pcoa -i otu_table.tab -o pcoa -m mapping.txt -e mapping.extra -t headers.txt -d %s\n\n", method, method, method);
+			output.add_rulef("pcoa/pcoa-%s-biplot.pdf: mapping.txt otu_table_auto.tab headers.txt\n\t@echo Computing PCoA analysis using method '%s'\n\t$(V)aq-pcoa -i otu_table_auto.tab -o pcoa -m mapping.txt -e mapping.extra -t headers.txt -d %s\n\n", method, method, method);
 		} else {
-				output.add_rulef("pcoa/pcoa-%s-biplot.pdf: mapping.txt otu_table.txt headers.txt\n\t@echo Computing PCoA analysis using method '%s'\n\t$(V)aq-pcoa -i otu_table.txt -o pcoa -m mapping.txt -e mapping.extra -t headers.txt -d %s\n\n", method, method, method);
+				output.add_rulef("pcoa/pcoa-%s-biplot.pdf: mapping.txt otu_table_auto.txt headers.txt\n\t@echo Computing PCoA analysis using method '%s'\n\t$(V)aq-pcoa -i otu_table_auto.txt -o pcoa -m mapping.txt -e mapping.extra -t headers.txt -d %s\n\n", method, method, method);
 		}
 		return true;
 	}
