@@ -3,8 +3,8 @@
 .SH NAME 
 aq-pcoa \- Perform PCoA in R
 .SH SYNOPSIS
-.B aq-pcoa -i otu_table -d distance_method -m mapping.txt -e mapping.extra -t headers.txt -o output_dir
+.B aq-pcoa -i otu_table -d distance_method [-p ellipsoid_confidence] -m mapping.txt -e mapping.extra -t headers.txt -o output_dir
 .SH DESCRIPTION
-Perform a principal coordinate analysis using R. Uses the specified dissimilarity method. If left blank, defaults to Bray-Curtis. Options for distance method are: "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao" or "cao". It is expected that there be an OTU table called \fBotu_table.txt\fR, the colour and label for every point in \fBmapping.extra\fR, and a list of which properties from \fBmapping.txt\fR to use in a file called \fBheaders.txt\fR. This is automatically set up by AXIOME. Supports only tab-delimited OTU tables. Outputs a pdf file with plots, and a text file containing the Eigenvalues.
+Perform a principal coordinate analysis using R. Uses the specified dissimilarity method. If left blank, defaults to Bray-Curtis. Options for distance method are: "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao" or "cao". The ellipsoid_confidence argument is a value from 0 and 1. If specified, it will plot ellipsoids around the a priori groupings from the mapping file. It is expected that there be an OTU table called \fBotu_table.txt\fR, the colour and label for every point in \fBmapping.extra\fR, and a list of which properties from \fBmapping.txt\fR to use in a file called \fBheaders.txt\fR. This is automatically set up by AXIOME. Supports only tab-delimited OTU tables. Outputs a pdf file with plots, and a text file containing the Eigenvalues.
 .SH SEE ALSO
 .BR axiome (1), aq-orderotu (1).

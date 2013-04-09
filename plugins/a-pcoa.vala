@@ -32,10 +32,18 @@ class AXIOME.Analyses.PrincipalCoordinateAnalysis : RuleProcessor {
 			method = "bray";
 		}
 
-		if (!output.vars.has_key("Colour") || output.vars["Colour"] != "s") {
+		var ellipsoid_conf = definition->get_prop("ellipsoid-confidence");
+		double e;
+		if (ellipsoid_conf != null) {
+			if (!double.try_parse(ellipsoid_conf, out e) || e > 1 || e < 0) {
+				definition_error(definition, "The confidence value \"%s\" is not valid. Specify a value between 0 and 1.\n", ellipsoid_conf);
+				return false;
+			}
+		}
+		/*if (!output.vars.has_key("Colour") || output.vars["Colour"] != "s") {
 			definition_error(definition, "PCoA requires there to be a \"Colour\" associated with each sample. Did you forget <def name=\"Colour\" type=\"s\"/>?\n");
 			return false;
-		}
+		}*/
 
 		if (!output.vars.has_key("Description") || output.vars["Description"] != "s") {
 			definition_error(definition, "PCoA requires there to be a \"Description\" associated with each sample. Did you forget <def name=\"Description\" type=\"s\"/>?\n");
@@ -44,10 +52,14 @@ class AXIOME.Analyses.PrincipalCoordinateAnalysis : RuleProcessor {
 
 		output.add_target("pcoa/pcoa-%s-biplot.pdf".printf(method));
 		if ( is_version_at_least(1,5) || output.pipeline.to_string() == "mothur" ) {
-			output.add_rulef("pcoa/pcoa-%s-biplot.pdf: mapping.txt otu_table_auto.tab headers.txt\n\t@echo Computing PCoA analysis using method '%s'\n\t$(V)aq-pcoa -i otu_table_auto.tab -o pcoa -m mapping.txt -e mapping.extra -t headers.txt -d %s\n\n", method, method, method);
+			output.add_rulef("pcoa/pcoa-%s-biplot.pdf: mapping.txt otu_table_auto.tab headers.txt\n\t@echo Computing PCoA analysis using method '%s'\n\t$(V)aq-pcoa -i otu_table_auto.tab -o pcoa -m mapping.txt -e mapping.extra -t headers.txt -d %s", method, method, method);
 		} else {
-				output.add_rulef("pcoa/pcoa-%s-biplot.pdf: mapping.txt otu_table_auto.txt headers.txt\n\t@echo Computing PCoA analysis using method '%s'\n\t$(V)aq-pcoa -i otu_table_auto.txt -o pcoa -m mapping.txt -e mapping.extra -t headers.txt -d %s\n\n", method, method, method);
+				output.add_rulef("pcoa/pcoa-%s-biplot.pdf: mapping.txt otu_table_auto.txt headers.txt\n\t@echo Computing PCoA analysis using method '%s'\n\t$(V)aq-pcoa -i otu_table_auto.txt -o pcoa -m mapping.txt -e mapping.extra -t headers.txt -d %s", method, method, method);
 		}
+		if (ellipsoid_conf != null) {
+				output.add_rulef(" -p %s", ellipsoid_conf);
+		}
+		output.add_rulef("\n\n");
 		return true;
 	}
 }

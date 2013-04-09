@@ -21,8 +21,11 @@ pkgTest('getopt')
 #-e mapping.extra file
 #-t headers.txt file
 #-o output dir
+#-d distance method
+#-p plot ellipsoids
 spec = matrix(c('input', 'i', 1, "character",
 'distance','d',2,'character',
+'plot_ellipsoids','p',2,'character',
 'mapping','m',1,"character",
 'mapping.extra','e',1,"character",
 'headers','t',1,'character',
@@ -66,7 +69,7 @@ mappingFile <- opt$mapping
 mappingExtra <- opt$mapping.extra
 headersFile <- opt$headers
 dmethod <- opt$distance
-
+ellipsoidConf <- opt$plot_ellipsoids
 #Make sure we have a valid distance method
 dlist = c('manhattan','euclidean','canberra','bray','kulczynski','jaccard','gower','altGower','morisita','horn','mountford','raup','binomial','chao','cao')
 
@@ -79,7 +82,9 @@ dir.create(outDir)
 
 pkgTest("vegan")
 pkgTest("ape")
-
+if (!is.null(ellipsoidConf) ) {
+	pkgTest("car")
+}
 #Read in and format otu table
 print("Reading OTU table")
 
@@ -116,15 +121,31 @@ pdf(paste(outDir, "/pcoa-",dmethod,"-biplot.pdf",sep=""),useDingbats=F);
 print("Making MDS Plot");
 
 p <- pcoa(d);
-plot(p$vectors[,1:2], main = paste("PCoA ordination\nMethod: '", dmethod, "'", sep=""), col = as.matrix(extra[ ,"Colour"]));
-text(x = p$vectors[,"Axis.1"], y = p$vectors[,"Axis.2"], adj = c(-0.2,0.5), labels = extra[, "Description"], col = as.matrix(extra[ ,"Colour"]));
+for (x in 1 : ncol(mapping)) {
+  name <- colnames(mapping)[x]
+	metadata <- factor(as.matrix(mapping[,x]))
+  fac.len <- length(levels(metadata))
+  if (fac.len < 2 || fac.len >= nrow(mapping)) {
+    print(paste("Ignoring", name, "because all values are identical/different."))
+    next
+  }
+	metadata_colours <- metadata
+	levels(metadata_colours) <- rainbow(fac.len);
+	metadata_colours<-unlist(lapply(metadata_colours, function(x) { substr(x, 0, 7); }));
+	plot(p$vectors[,1:2], main = paste("PCoA ordination:", name, "\nMethod: '", dmethod, "'", sep=""), col = metadata_colours);
+	text(x = p$vectors[,"Axis.1"], y = p$vectors[,"Axis.2"], adj = c(-0.2,0.5), labels = extra[, "Description"], col = metadata_colours);
+	#If selected, plot the ellipses around the a priori clusters
+	if (!is.null(ellipsoidConf)) {
+		ellipse <- dataEllipse(p$vectors[,1],p$vectors[,2],groups=metadata,levels=as.numeric(ellipsoidConf),add=TRUE,plot.points=FALSE,grid=FALSE,center.pch=FALSE,col=rainbow(fac.len))
+	}
+	legend("bottomleft", legend = unique(metadata), pch = 21, col = unique(metadata_colours));
+}
 
 useful <- colnames(mapping)[interest];
 if ( length(useful) > 1 ) {
 	print("Making biplot");
 	biplot(p, t(newmapping[useful,]), xlabs = extra[, "Description"]);
 }
-
 sink(paste(outDir, "/pcoa-",dmethod,".txt",sep=""))
 print("Eigenvalues:")
 print(as.matrix(p$values$Eigenvalues))

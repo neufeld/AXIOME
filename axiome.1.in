@@ -192,8 +192,8 @@ First, plots a concordance plot for NMF as with nmf-concordance, and using this 
 \fB<pca/>\fR
 Perform principal components in R using the numeric variables supplied in the definitions. While QIIME's biplots use Unifrac distances, this PCA uses the taxa information and any numeric supplemental information. Available pipelines: QIIME, mothur
 .TP
-\fB<pcoa [method="\fImethod\fB"]/>\fR
-Perform principal coordinate analysis in R using one of the following options: "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao" or "cao". If no method supplied, defaults to Bray-Curtis ("bray"). Plots a MDS plot, and if there are 2 or more numerical properties, it will plot a biplot. See
+\fB<pcoa [method="\fImethod\fB"] [ellipsoid-confidence="\fIvalue\fB"/>\fR
+Perform principal coordinate analysis in R using one of the following options: "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao" or "cao". If no method supplied, defaults to Bray-Curtis ("bray"). If a value between 0 and 1 is supplied to ellipsoid-confidence, it will plot ellipsoids around each of the a priori groups supplied in the metadata, using the specified value as a confidence interval. Plots a MDS plot, and if there are 2 or more numerical properties, it will plot a biplot. See
 .BR aq-pcoa (1).
 Available pipelines: QIIME, mothur
 .TP
