@@ -1,3 +1,15 @@
+axiome (1.6ubuntu2) precise; urgency=low
+
+  * Various bug fixes and features added
+  * Ellipsoid plotting added to PCoA plots
+  * rdp-max-memory exposed to AXIOME
+  * PD_whole_tree disabled in QIIME alpha plots due to QIIME bug
+  * Additional information added to MRPP and PCoA text outputs
+  * Sample data added to docs directory (hmmb.ax, hmmb.fasta.gz) 
+  * Venn diagram plotting added
+
+ -- Michael Hall <mwhall@uwaterloo.ca>  Wed, 29 May 2013 16:37:41 -0400
+
 axiome (1.6ubuntu1) precise; urgency=low
 
   * Added BLAST and Rtax classification methods for QIIME 
