@@ -48,9 +48,14 @@ if ( is.null(opt$output) ) {
   q(status=1)
 }
 
+if ( is.null(opt$auto) ){
+	opt$auto <- FALSE
+}
+
 otuTable <- opt$input
 outDir <- opt$output
 autoCalc <- opt$auto
+
 
 dir.create(outDir)
 
