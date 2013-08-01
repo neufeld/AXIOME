@@ -148,12 +148,12 @@ else
 endif
 else
 ifeq ($(CLASSIFICATION_METHOD),blast)
-#ifdef MULTICORE
+ifdef MULTICORE
 #Multicore assign taxonomy appears to be broken (uses wrong relative filepath after a cd command in the jobs command file)
-#	$(V)$(QIIME_PREFIX)parallel_assign_taxonomy_blast.py -i seq.fasta_rep_set.fasta -o assigned_taxonomy -O $(NUM_CORES) $(BLAST_CLASSIFIER_FLAGS)
-#else
+	$(V)$(QIIME_PREFIX)parallel_assign_taxonomy_blast.py -i seq.fasta_rep_set.fasta -o assigned_taxonomy -O $(NUM_CORES) $(BLAST_CLASSIFIER_FLAGS)
+else
 	$(V)$(QIIME_PREFIX)assign_taxonomy.py -m blast -i seq.fasta_rep_set.fasta -o assigned_taxonomy $(BLAST_CLASSIFIER_FLAGS)
-#endif
+endif
 else
 ifeq ($(CLASSIFICATION_METHOD),rtax)
 ifndef RTAX_CLASSIFIER_FLAGS
