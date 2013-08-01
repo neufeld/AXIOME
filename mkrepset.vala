@@ -49,7 +49,7 @@ int main(string[] args) {
 				maxsequence = entry.key;
 			}
 		}
-		stdout.printf(">%s AbundanceTotal %i\n%s\n", members[0], (members.length - 1), maxsequence);
+		stdout.printf(">%s;size=%i\n%s\n", members[0], (members.length - 1), maxsequence);
 		count++;
 		if (count % 100000 == 0) {
 			stderr.printf("Summarized %ld clusters...\n", count);
