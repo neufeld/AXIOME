@@ -91,30 +91,9 @@ endif
 endif
 
 # Do chimera checking with UCHIME
-chimeras/sorted%.fasta: chimeras/seq%.fasta
-	@echo Sorting sequences in library $*...
-	$(V)uclust --quiet --mergesort $< --output $@
-
-chimeras/seq%.fasta: seq.fasta
-	@echo Splitting out library $*...
-	@test -d chimeras || mkdir chimeras
-	$(V)awk '/^>/ { if (name) { print name "\n" seq; } if ($$0 ~ /$*_/) { name = $$0; } else { name = ""; } seq = ""; } $$0 !~ /^>/ { seq = seq $$0; } END { if (name) { print name "\n" seq; } }' $< > $@
-
-chimeras/identities%.uc: chimeras/sorted%.fasta
-	@echo Compacting sequences in library $*...
-	$(V)uclust --quiet --input $< --uc $@ --id 1
-
-chimeras/identities%.awk: chimeras/identities%.uc
-	@echo Preparing chimeric sequence selector for library $*....
-	$(V)awk 'END {print "$$0 !~ /^>/"} $$1 == "C" {print "/^>"$$2"\\|/ { print \">"$$2";size="$$3"\"; }" }' $< > $@
-
-chimeras/identities%.fasta: chimeras/identities%.uc chimeras/sorted%.fasta chimeras/identities%.awk
-	@echo Selection chimeric sequence for library $*....
-	$(V)uclust --uc2fasta $< --input chimeras/sorted$*.fasta --output /dev/stdout --quiet | awk -f chimeras/identities$*.awk > $@
-
-chimeras/chimeras%.uchime chimeras/himeras%.aln chimeras/chimeras%.fasta: chimeras/identities%.fasta
-	@echo Checking for chimeric sequences in library $*...
-	$(V)usearch --uchime $< --uchimeout chimeras/chimeras$*.uchime --uchimealns chimeras/chimeras$*.aln --chimeras chimeras/chimeras$*.fasta --quiet $(UCHIMEFLAGS)
+chimeras.list chimeras.fa: seq.fasta_rep_set.fasta
+	@echo Running denovo chimera detection with uchime
+	$(V)usearch -uchime_denovo seq.fasta_rep_set.fasta -uchimeout chimeras.list -chimeras chimeras.fa -notrunclabels
 
 # PCA with R
 ifndef QIIME_GREATER_THAN_1_5
