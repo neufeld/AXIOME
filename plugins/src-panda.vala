@@ -19,18 +19,6 @@ class AXIOME.Sources.PandaSource : BaseSource {
 	}
 	protected override string? get_sample_id(Xml.Node *sample) {
 		var tag = sample-> get_prop("tag");
-		if (tag == null) {
-			definition_error(sample, "No tag specified.\n");
-			return null;
-		}
-		if (tag.length != 6 && tag.length != 8) {
-			definition_error(sample, "Tag is not 6 or 8 characters.\n");
-			return null;
-		}
-		if (!is_sequence(tag)) {
-			definition_error(sample, "Tag does not look like nucleotides.\n");
-			return null;
-		}
 		return tag;
 	}
 	protected override bool generate_command(Xml.Node *definition, Collection<Sample> samples, StringBuilder command, Output output) {
@@ -50,7 +38,7 @@ class AXIOME.Sources.PandaSource : BaseSource {
 			return false;
 		}
 		if (!is_valid_filename(forward) || !is_valid_filename(reverse)) {
-			definition_error(definition, "Filename will cause Make to cry.\n");
+			definition_error(definition, "Filename will cause Make to cry. Please rename/relocate sequence files, and avoid special characters.\n");
 			return false;
 		}
 		if (!FileUtils.test(reverse, FileTest.EXISTS)) {
@@ -115,9 +103,24 @@ class AXIOME.Sources.PandaSource : BaseSource {
 		if (threshold != null) {
 			command.append_printf(" -t %s", Shell.quote(threshold));
 		}
-		command.append_printf(" -C validtag");
+		var first = true;
 		foreach (var sample in samples) {
-			command.append_printf(":%s", sample.tag);
+			if (first) {
+				if (sample.tag != "*") {
+					command.append_printf(" -C validtag");
+					command.append_printf(":%s", sample.tag);
+				} else {
+					command.append_printf(" -B");
+				}
+			} else {
+				if (sample.tag == "*") {
+					definition_error(definition, "Cannot have more than one wildcard tag in a FASTQ file. Samples cannot be separated.\n");
+					return false;
+				} else {
+					command.append_printf(":%s", sample.tag);
+				}
+			}
+			first = false;
 		}
 		return true;
 	}

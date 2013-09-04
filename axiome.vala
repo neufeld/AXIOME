@@ -668,7 +668,12 @@ namespace AXIOME {
 			var awkprint = new StringBuilder();
 			var awkcheck = new StringBuilder();
 			foreach (var sample in samples) {
-				awkprint.append_printf(" if (name ~ /%s/", sample.tag);
+				if (sample.tag != "*") {
+					awkprint.append_printf(" if (name ~ /%s/", sample.tag);
+				} else {
+					//Hacky approach to not doing a filter when sample tag is *
+					awkprint.append_printf(" if ( 1");
+				}
 				if (sample.limit > 0) {
 					awkprint.append_printf(" && count%d < %d", sample.id, sample.limit);
 				}
