@@ -144,8 +144,10 @@ for (x in 1 : ncol(mapping)) {
 useful <- colnames(mapping)[interest];
 if ( length(useful) > 1 ) {
 	print("Making biplot");
-	biplot(p, t(newmapping[useful,]), xlabs = extra[, "Description"]);
+	biplot(p, apply(log1p(t(newmapping[useful,])), 2, scale, center=TRUE, scale=TRUE), xlabs = extra[, "Description"]);
 }
+
+
 sink(paste(outDir, "/pcoa-",dmethod,".txt",sep=""))
 print("Eigenvalues:")
 print(as.matrix(p$values$Eigenvalues))
