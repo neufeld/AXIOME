@@ -214,8 +214,8 @@ Configuration plugin when using Rtax as the classification method through QIIME.
 \fB<taxaplot/>\fR
 Make bar and area charts of the taxa. Results placed in taxaplot directory of .qiime folder. Available pipelines: QIIME, mothur (requires QIIME to be installed)
 .TP
-\fB<uchime \fR[\fBprofile="\fIprofile\fB"\fR]\fB/>\fR
-Do chimera checking with UCHIME. Since the parameters vary based on the type of DNA, you can specify certain \fIprofile\fR to be one of \fBv3-stringent\fR, or \fBv3-relaxed\fR. Available pipeline: QIIME
+\fB<uchime/>\fR
+Do de novo chimera checking with UCHIME (requires USEARCH v6.1). This will automatically remove any chimeras after clustering has completed. Available pipeline: QIIME
 .TP
 \fB<unifrac-mrpp \fR[\fBsize="\fIsize\fB"\fR]\fB/>\fR
 Compute Multi Response Permutation Procedure of within- versus among-group dissimilarities in R. For more information, see
