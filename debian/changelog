@@ -1,3 +1,14 @@
+axiome (1.6ubuntu3) precise; urgency=low
+
+  * Chimera checking support via usearch 6.1 de novo method
+  * PCoA biplot arrows are now scaled properly
+  * PD_whole_tree metric re-added to alpha diversity plots
+  * Support for missing/wildcard barcode when using PANDAseq as input
+  * Removed 6-8 char nucleotide barcode restriction with PANDAseq inputs
+  * Various bug fixes
+
+ -- Michael Hall <mwhall@uwaterloo.ca>  Thu, 05 Sep 2013 15:17:10 -0400
+
 axiome (1.6ubuntu2) precise; urgency=low
 
   * Various bug fixes and features added
