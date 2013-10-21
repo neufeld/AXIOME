@@ -91,8 +91,8 @@ sink()
 for (x in 1 : nrow(mapping)) {
 	name <- rownames(mapping)[x]
 	fac.len <- length(levels(factor(as.matrix(mapping[x,])))) 
-	if (fac.len < 2 || fac.len >= ncol(mapping)) {
-		print(paste("Ignoring", name, "because all values are identical/different."))
+	if (fac.len < 2 ) {
+		print(paste("Ignoring", name, "because all values are identical."))
 		next
 	}
 	print(paste("Computing for", name))
