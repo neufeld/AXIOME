@@ -59,7 +59,7 @@ class AXIOME.Analyses.ExcludeTaxa : RuleProcessor {
 				}
 			}
 			output.add_rulef("TAXA_EXCLUDE_STR := %s\n", out_str);
-			output.add_rulef("OTU_EXCUDE := -e exclude_otus.list\n");
+			output.add_rulef("OTU_EXCLUDE := -e exclude_otus.list\n");
 			output.add_rulef("OTU_EXCLUDE_FILE := exclude_otus.list\n\n");
 		}
 		return true;
