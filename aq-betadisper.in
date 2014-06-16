@@ -1,0 +1,108 @@
+#!/usr/bin/env Rscript
+options(error = quote(dump.frames("betadisper-debug", TRUE)))
+
+#source("@prefix@/share/@PACKAGE@/biom.R")
+
+pkgTest <- function(x)
+{
+        if (!require(x,character.only = TRUE))
+        {
+                install.packages(x,dep=TRUE)
+                if(!require(x,character.only = TRUE)) stop("Package not found")
+        }
+}
+
+pkgTest('getopt')
+
+#Grab arguments
+#Arguments required:
+#-i input OTU table (tabular format ONLY, JSON libraries much too slow in R)
+#-m mapping file
+#-o output dir
+#-d distance method
+spec = matrix(c('input', 'i', 1, "character",'mapping', 'm', 1, "character",'output' , 'o', 1, "character", 'distance' ,'d', 2, "character",'help', 'h', 2, "character"), byrow=TRUE, ncol=4)
+
+opt = getopt(spec)
+
+# if help was asked for print a friendly message
+# and exit with a non-zero error code
+if ( !is.null(opt$help) ) {
+  cat(getopt(spec, usage=TRUE))
+  q(status=1)
+}
+
+if ( is.null(opt$input) ) {
+  print("Input OTU table required.")
+  q(status=1)
+}
+if ( is.null(opt$mapping) ) {
+  print("Mapping file required.")
+  q(status=1)
+}
+if ( is.null(opt$output) ) {
+  print("Output directory required.")
+  q(status=1)
+}
+
+distancemethod = opt$distance
+
+if ( is.null(distancemethod) ) {
+	distancemethod = "bray"
+}
+
+outDir = opt$output
+otuTable = opt$input
+mappingFile = opt$mapping
+
+dir.create(outDir)
+
+pkgTest("vegan")
+
+#Read in and format otu table
+print("Reading OTU table")
+rawtable <- read.table(otuTable, skip = 1,
+comment.char = "", header = TRUE, row.names = 1, sep = "\t")
+otutable <- t(rawtable[1:(ncol(rawtable) - 1)])
+
+print("Reading mapping");
+mapping <- t(read.table(mappingFile, header = TRUE, comment.char = "", row.names = "X.SampleID", sep = "\t"))
+
+# For non-numeric sample names, comment out the following line
+colnames(mapping) <- paste("X", colnames(mapping), sep = "");
+otutable.d <- vegdist(otutable, method = distancemethod)
+pdf(paste(outDir, "/betadisper-", distancemethod, ".pdf", sep=""))
+def.par <- par(no.readonly = TRUE)
+sink(paste(outDir, "/betadisper-", distancemethod, ".txt", sep=""), append = FALSE)
+sink()
+for (x in 1 : nrow(mapping)) {
+	name <- rownames(mapping)[x]
+	fac.len <- length(levels(factor(as.matrix(mapping[x,])))) 
+	if (fac.len < 2 || fac.len >= ncol(mapping)) {
+		print(paste("Ignoring", name, "because all values are identical/different."))
+		next
+	}
+
+	print(paste("Computing Beta Dispersion (PERMDISP2) for", name))
+	m <- mapping[x, rownames(otutable)]
+	sink(paste(outDir, "/betadisper-", distancemethod, ".txt", sep=""), append = TRUE)
+	print(paste("Beta Dispersion (PERMDISP2) for", name, ", method:", distancemethod))
+	otutable.disper <- betadisper(otutable.d, m)
+	print(paste("Beta disper distances to centroid: ",  scores(otutable.disper)))
+	print(paste("Beta disper PCoA eigenvalues: ", otutable.disper$eig))
+	print(paste("ANOVA results: "))
+	print(anova(otutable.disper))
+	sink()
+
+	plot(otutable.disper)
+	boxplot(otutable.disper)
+	print("Plotting tests for significant differences in variance")
+  otutable.HSD <- TukeyHSD(otutable.disper)
+	plot(otutable.HSD)
+
+	par(def.par)
+	sink(paste(outDir, "/betadisper-", distancemethod, ".txt", sep=""), append = TRUE)
+	sink()
+#	print("Computing mean distances")
+#	otutable.bc <- vegdist(otutable)
+#	tryCatch(plot(meandist(otutable.bc, m), main = paste("Mean distances for", name)), error = function() next)
+}

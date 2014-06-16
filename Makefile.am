@@ -5,6 +5,7 @@ bin_SCRIPTS = \
 	aq-biplot \
 	aq-bubbleplot \
 	aq-cmplibs \
+	aq-betadisper \
 	aq-duleg \
 	aq-dulegplot \
 	aq-fasta-length \
@@ -169,6 +170,7 @@ axiome_VALASOURCES = \
 	axiome.vala \
 	plugins/a-alpha.vala \
 	plugins/a-beta.vala \
+	plugins/a-betadisper.vala \
 	plugins/a-blast.vala \
 	plugins/a-blast-classifier.vala \
 	plugins/a-duleg.vala \

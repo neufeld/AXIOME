@@ -81,6 +81,7 @@ AC_CONFIG_FILES([
 	axiome.deps
 	aq-nmf
 	aq-nmf-concordance
+	aq-betadisper
 	aq-duleg
 	aq-mrpp
 	aq-pca
