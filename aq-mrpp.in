@@ -70,10 +70,11 @@ mapping <- t(read.table(mappingFile, header = TRUE, comment.char = "", row.names
 # For non-numeric sample names, comment out the following line
 colnames(mapping) <- paste("X", colnames(mapping), sep = "");
 
-pdf(paste(outDir, "/mrpp-", distancemethod, ".pdf", sep=""))
+pdf(paste(outDir, "/mrpp-", distancemethod, ".pdf", sep=""),useDingbats=FALSE)
 def.par <- par(no.readonly = TRUE)
 sink(paste(outDir, "/mrpp-", distancemethod, ".txt", sep=""), append = FALSE)
 sink()
+otutable.ord <- metaMDS(otutable, distance = distancemethod)
 for (x in 1 : nrow(mapping)) {
 	name <- rownames(mapping)[x]
 	fac.len <- length(levels(factor(as.matrix(mapping[x,])))) 
@@ -90,11 +91,14 @@ for (x in 1 : nrow(mapping)) {
 	print(otutable.mrpp)
 	print(paste("T statistic : ", (otutable.mrpp$delta - otutable.mrpp$E.delta) / sd(otutable.mrpp$boot.deltas)))
 	sink()
-
+	metadata_colours<-factor(m)
+	levels(metadata_colours)<-rainbow(fac.len)
+	metadata_colours<-unlist(lapply(metadata_colours,function(x) { substr(x, 0, 7); }));
 	print("Computing meta MDS")
-	plot(otutable.ord <- metaMDS(otutable, distance = distancemethod), type = "text", display = "sites", main = paste("MDS for", name, "Method:", distancemethod))
-	ordihull(otutable.ord, m)
-
+	plot(otutable.ord, display = "sites", type="n", main = paste("MDS for", name, "Method:", distancemethod))
+	points(otutable.ord, col=metadata_colours, bg=metadata_colours, pch=21)
+	ordiellipse(otutable.ord, m,conf=0.95)
+	legend("bottomleft", legend = unique(m), pch = 21, col = unique(metadata_colours), pt.bg=unique(metadata_colours));
 	with(otutable.mrpp, {
 		print("Producing histogram")
 		fig.dist <- hist(boot.deltas, xlim = range(c(delta,boot.deltas)), main = paste("Test of Differences Among", name, "Groups"))
