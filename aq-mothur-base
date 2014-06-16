@@ -68,8 +68,15 @@ otu_table.txt: mothur_seqs/seq.unique.filter.$(OTU_PICKING_METHOD).shared mothur
 	$(V)test -d logs || mkdir logs
 	$(V)mv mothur.*.logfile logs
 
+ifeq ($(QIIME_1_8),TRUE)
+otu_table.tab: otu_table.txt
+	@echo Creating legacy OTU table...
+	@if [ -f otu_table.tab ]; then rm otu_table.tab; fi
+	$(V)$(QIIME_PREFIX)biom convert -b -i $< -o $@ --header-key=taxonomy --output-metadata-id=Consensus\ Lineage
+else
 otu_table.tab: otu_table.txt
 	@echo Creating legacy OTU table...
 	$(V)$(QIIME_PREFIX)convert_biom.py -b -i $< -o $@ --header_key=taxonomy --output_metadata_id=Consensus\ Lineage
+endif
 
 endif

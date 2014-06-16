@@ -503,6 +503,9 @@ namespace AXIOME {
 			if ( is_version_at_least(1,6) ) {
 				makefile.printf("\nQIIME_GREATER_THAN_1_6 = TRUE");
 			}
+			if ( is_version_at_least(1,8) ) {
+				makefile.printf("\nQIIME_1_8 = TRUE");
+			}
 			makefile.printf("\n\nall: Makefile mapping.txt otu_table.txt %s\n\n", targets.str);
 			makefile.printf("Makefile mapping.txt: %s\n\t@echo Updating analyses to be run...\n\t$(V)axiome $<\n\n", sourcefile);
 			if (classification_method != null) {
@@ -1112,7 +1115,7 @@ namespace AXIOME {
 			var clust_ident = root->get_prop("cluster-identity");
 			if (clust_ident != null) {
 				double ident_val = double.parse(clust_ident);
-				if (ident_val >= 1 || ident_val <= 0) {
+				if (ident_val > 1 || ident_val <= 0) {
 					stderr.printf("%s: Clustering identity must be between 0 and 1. Identity given: \"%s\".\n", filename, clust_ident);
 					delete doc;
 					return false;

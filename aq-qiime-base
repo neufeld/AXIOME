@@ -124,7 +124,7 @@ aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
 	@test ! -d aligned || rm -r aligned
 	$(V)$(QIIME_PREFIX)align_seqs.py -o aligned -m infernal -t $$INFERNAL_MODEL -i seq.fasta_rep_set.fasta
 else
-ifdef MULTICORE
+ifdef MULTICOREBROKEN
 aligned/seq.fasta_rep_set_aligned.fasta: seq.fasta_rep_set.fasta
 	@echo Aligning representative sequences with multicore pynast using $(NUM_CORES) cores...
 	@test ! -d aligned || rm -r aligned
@@ -208,9 +208,16 @@ endif
 endif
 
 
+ifeq ($(QIIME_1_8),TRUE)
 otu_table%.tab: otu_table%.txt
 	@echo Creating legacy OTU table...
-	$(V)$(QIIME_PREFIX)convert_biom.py -b -i $< -o $@ --header_key=taxonomy --output_metadata_id=Consensus\ Lineage
+	@if [ -f $< ]; then rm -rf $<; fi
+	$(V)$(QIIME_PREFIX)biom convert -b -i $< -o $@ --header-key=taxonomy --output-metadata-id=Consensus\ Lineage
+else
+otu_table%.tab: otu_table%.txt
+	@echo Creating legacy OTU table...
+	$(V)$(QIIME_PREFIX)convert_biom.py -b -i $< -o $@ --header-key=taxonomy --output-metadata-id=Consensus\ Lineage
+endif
 
 # Produce a rank-abundance plot
 ifeq ($(QIIME_GREATER_THAN_1_6),TRUE)
