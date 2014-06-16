@@ -8,6 +8,7 @@ INSTALL
 Makefile
 Makefile.in
 aclocal.m4
+aq-betadisper
 aq-count-n
 aq-demux-illumina
 aq-estimateq
